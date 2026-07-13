@@ -1,0 +1,163 @@
+name: Release Please
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Existing release tag to build/upload assets for, for example v1.0.0'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - name: Release Please
+        id: release
+        uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  build-release-assets:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true' || inputs.release_tag != ''
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            platform: mac
+          - os: windows-latest
+            platform: win
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag || needs.release-please.outputs.tag_name }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Configure PRO license
+        run: npm run configure-license
+        env:
+          YOUR_PROJECT_LICENSE_TARGET: pro
+
+      - name: Build (macOS)
+        if: matrix.platform == 'mac'
+        run: npm run build:mac -- --publish never
+        env:
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: Build legacy macOS DMG
+        if: matrix.platform == 'mac'
+        run: npm run build:mac:legacy -- --publish never
+        env:
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: Build (Windows)
+        if: matrix.platform == 'win'
+        run: npm run build:win -- --publish never
+        env:
+          CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.platform }}
+          path: |
+            dist/**/*.dmg
+            dist/**/*.zip
+            dist/**/*.yml
+            dist/**/*.blockmap
+            dist/**/your-project-portable.exe
+            dist/**/Your Project*.exe
+          if-no-files-found: ignore
+
+  upload-release-assets:
+    needs:
+      - release-please
+      - build-release-assets
+    if: always() && (needs.release-please.outputs.release_created == 'true' || inputs.release_tag != '')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: false
+
+      - name: Format release notes
+        run: |
+          tag="${{ inputs.release_tag || needs.release-please.outputs.tag_name }}"
+          marker="<!-- your-project-release-logo -->"
+          icon_url="https://raw.githubusercontent.com/${{ github.repository }}/${tag}/src/assets/icons/macos/64x64.png"
+          body="$(gh release view "$tag" --json body -q .body --repo "${{ github.repository }}")"
+          body="$(printf '%s' "$body" | perl -pe 's/^(\s*[-*]\s+(?:\*\*[^*]+:\*\*\s*)?)([a-z])/$1\U$2/')"
+
+          if printf '%s' "$body" | grep -q "$marker"; then
+            printf '%s\n' "$body" > /tmp/your-project-release-notes.md
+          else
+            {
+              printf '%s\n' "$marker"
+              printf '![Your Project logo](%s)\n\n' "$icon_url"
+              printf '%s\n' "$body"
+            } > /tmp/your-project-release-notes.md
+          fi
+
+          gh release edit "$tag" --notes-file /tmp/your-project-release-notes.md --repo "${{ github.repository }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Collect binaries
+        run: |
+          mkdir -p release
+          find artifacts -type f \( -name "*.dmg" -o -name "*.zip" -o -name "*.yml" -o -name "*.blockmap" \) -exec cp {} release/ \;
+          find artifacts -type f \( -name "your-project-portable.exe" -o -name "Your Project*.exe" \) -exec cp {} release/ \;
+          ls -lh release/
+          test "$(find release -type f | wc -l)" -gt 0
+
+      - name: Upload binaries and updater metadata to GitHub Release
+        run: gh release upload "${{ inputs.release_tag || needs.release-please.outputs.tag_name }}" release/* --repo "${{ github.repository }}" --clobber
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

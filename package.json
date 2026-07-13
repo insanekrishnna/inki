@@ -1,0 +1,116 @@
+{
+  "name": "your-project",
+  "version": "1.6.0",
+  "description": "Lightweight screen-capture & annotation tool for Windows, Linux, and experimental macOS builds",
+  "main": "src/main.js",
+  "author": "Your Name",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "web": "node scripts/serve-web.js",
+    "test": "node tests/regression.test.js",
+    "test:recording": "node tests/regression.test.js",
+    "configure-license": "node scripts/configure-license.js",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:all": "electron-builder --mac --win --linux",
+    "build:mac:legacy": "electron-builder --mac --config config/electron-builder.legacy-mac.cjs",
+    "build:linux": "electron-builder --linux",
+    "build:desktop": "electron-builder --win --linux"
+  },
+  "devDependencies": {
+    "electron": "^32.3.3",
+    "electron-builder": "^25.1.8",
+    "@electron/notarize": "2.5.0"
+  },
+  "dependencies": {
+    "electron-updater": "6.6.2",
+    "ffmpeg-static": "5.2.0",
+    "gifski": "1.7.1"
+  },
+  "build": {
+    "appId": "com.example.yourproject",
+    "productName": "Your Project",
+    "buildVersion": "0.0.0",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "afterSign": "scripts/sign-mac-ad-hoc.js",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "artifactName": "your-project-${arch}.${ext}",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "your-github-username",
+        "repo": "your-project"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.graphics-design",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.icns"
+    },
+    "dmg": {
+      "icon": "build/icon.icns"
+    },
+    "win": {
+      "publisherName": [
+        "Your Name"
+      ],
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "requestedExecutionLevel": "asInvoker",
+      "artifactName": "your-project-portable.${ext}",
+      "icon": "build/icon.ico"
+    },
+    "linux": {
+      "icon": "build/icon.png",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "extraResources": [
+      {
+        "from": "src/bin",
+        "to": "bin",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/**",
+      "node_modules/gifski/**"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+project_id = "your-pre-supabase-project-ref"
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.activate-license]
+verify_jwt = false
+
+[functions.validate-license]
+verify_jwt = false

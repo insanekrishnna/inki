@@ -1,0 +1,95 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            platform: mac
+          - os: windows-latest
+            platform: win
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Configure PRO license
+        if: github.event_name != 'pull_request' && vars.YOUR_PROJECT_LICENSE_TARGET == 'pro'
+        run: npm run configure-license
+        env:
+          YOUR_PROJECT_LICENSE_TARGET: ${{ vars.YOUR_PROJECT_LICENSE_TARGET }}
+          YOUR_PROJECT_PRO_BUY_LICENSE_URL: ${{ vars.YOUR_PROJECT_PRO_BUY_LICENSE_URL || secrets.YOUR_PROJECT_PRO_BUY_LICENSE_URL }}
+          YOUR_PROJECT_PRO_LICENSE_API_BASE_URL: ${{ vars.YOUR_PROJECT_PRO_LICENSE_API_BASE_URL || secrets.YOUR_PROJECT_PRO_LICENSE_API_BASE_URL }}
+          YOUR_PROJECT_PRO_SUPABASE_PUBLISHABLE_KEY: ${{ vars.YOUR_PROJECT_PRO_SUPABASE_PUBLISHABLE_KEY || secrets.YOUR_PROJECT_PRO_SUPABASE_PUBLISHABLE_KEY }}
+
+      - name: Build (macOS)
+        if: matrix.platform == 'mac'
+        run: npm run build:mac -- --publish never
+        env:
+          DEBUG: electron-builder,electron-osx-sign*
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: Build legacy macOS DMG
+        if: matrix.platform == 'mac'
+        run: npm run build:mac:legacy -- --publish never
+        env:
+          DEBUG: electron-builder,electron-osx-sign*
+          CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: Build (Windows)
+        if: matrix.platform == 'win'
+        run: npm run build:win -- --publish never
+        env:
+          CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: your-project-${{ matrix.platform }}
+          path: |
+            dist/**/*.dmg
+            dist/**/*.zip
+            dist/**/*.exe
+            dist/**/*.yml
+            dist/**/*.blockmap
+          if-no-files-found: ignore

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:;">
+  <title>Select Window</title>
+  <style>
+    body{margin:0;background:rgba(0,0,0,.72);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    .wrap{padding:24px}
+    h1{font-size:18px;margin:0 0 12px}
+    .message{margin:0 0 14px;padding:12px 14px;border:1px solid rgba(255,170,85,.45);border-radius:10px;background:rgba(255,170,85,.12);color:#ffd7b0;font-size:13px;line-height:1.4}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;max-height:calc(100vh - 135px);overflow:auto}
+    .card{border:1px solid rgba(255,255,255,.2);background:#111;border-radius:10px;padding:10px;cursor:pointer;text-align:left}
+    .card:hover{border-color:#ffaa55}
+    .meta{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .title{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:rgba(255,255,255,.9);flex:1}
+    .badge{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#ffaa55;border:1px solid rgba(255,170,85,.45);border-radius:999px;padding:2px 7px;background:rgba(255,170,85,.12)}
+    img{width:100%;height:180px;object-fit:contain;background:#000;border-radius:6px}
+    .actions{margin-top:12px}
+    button{background:#2b2b2b;border:1px solid rgba(255,255,255,.2);color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Select a window to capture</h1>
+    <p class="message" id="message" hidden></p>
+    <div class="grid" id="grid"></div>
+    <div class="actions"><button id="cancel">Cancel</button></div>
+  </div>
+  <script src="window-picker.js"></script>
+</body>
+</html>

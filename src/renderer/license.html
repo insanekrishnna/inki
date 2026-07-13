@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:;">
+  <title>Your Project — License</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="license-body">
+  <div class="license-window">
+    <div class="license-titlebar"></div>
+    <div class="license-head">
+      <img class="license-icon" src="../assets/icons/macos/256x256.png" alt="">
+      <div>
+        <h1 class="license-head-title">Your Project</h1>
+        <!-- Subtitle: reflects trial state; no longer duplicates alert-box copy -->
+        <p class="license-head-sub" id="l-sub">Your 30-day trial has ended.</p>
+      </div>
+    </div>
+
+    <div id="l-main" hidden>
+      <div class="license-notice">
+        <div class="license-notice-text">
+          <strong>Trial ended</strong>
+          <p>Buy once to keep capturing, no subscription.</p>
+        </div>
+      </div>
+
+      <ul class="license-features">
+        <li class="license-feature">
+          <svg class="license-feature-icon" width="14" height="14" viewBox="0 0 14 14">
+            <path d="M2 7l3.5 3.5L12 3" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Screen recording, MP4 and GIF export
+        </li>
+        <li class="license-feature">
+          <svg class="license-feature-icon" width="14" height="14" viewBox="0 0 14 14">
+            <path d="M2 7l3.5 3.5L12 3" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Scrolling captures and annotation tools
+        </li>
+        <li class="license-feature">
+          <svg class="license-feature-icon" width="14" height="14" viewBox="0 0 14 14">
+            <path d="M2 7l3.5 3.5L12 3" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Use on up to 2 devices
+        </li>
+      </ul>
+
+      <button class="license-action-btn" id="l-buy">Buy license — 9€ · one time</button>
+
+      <p class="license-microcopy">No subscription. 2 devices per license.</p>
+
+      <button class="license-link-btn" id="l-activate-link">Already have a license?</button>
+    </div>
+
+    <div id="l-activate" hidden>
+      <input class="license-input" id="l-email" type="email" placeholder="your@email.com" autocomplete="email">
+      <p class="license-msg" id="l-msg"></p>
+      <div class="license-activate-actions">
+        <button class="license-sec-btn" id="l-back">Back</button>
+        <button class="license-pri-btn" id="l-activate-btn">Activate</button>
+      </div>
+    </div>
+
+    <div id="l-success" hidden>
+      <div class="license-success">
+        <div class="license-success-icon">
+          <img class="license-success-img" src="../assets/icons/macos/256x256.png" alt="">
+          <svg class="license-success-badge" width="22" height="22" viewBox="0 0 22 22">
+            <circle cx="11" cy="11" r="11" fill="#22c55e"/>
+            <path d="M6 11.5l3 3 7-7" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h2 class="license-success-title">License activated!</h2>
+        <p class="license-success-sub">Thank you for your support.</p>
+      </div>
+    </div>
+  </div>
+  <script src="license.js"></script>
+</body>
+</html>
