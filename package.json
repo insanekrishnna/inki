@@ -9,7 +9,6 @@
     "start": "electron .",
     "web": "node scripts/serve-web.js",
     "test": "node tests/regression.test.js",
-    "test:recording": "node tests/regression.test.js",
     "configure-license": "node scripts/configure-license.js",
     "build": "electron-builder",
     "build:mac": "electron-builder --mac",

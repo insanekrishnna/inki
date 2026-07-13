@@ -977,7 +977,7 @@ function openLicenseWindow() {
     transparent: process.platform === 'darwin',
     backgroundColor: process.platform === 'darwin' ? '#00000000' : '#252525',
     autoHideMenuBar: true,
-    title: 'Your Project — License',
+    title: 'Your Project � License',
     webPreferences: getAppWebPreferences(),
   });
 
@@ -1066,7 +1066,7 @@ async function explainMacScreenRecordingPermission() {
     cancelId: 1,
     title: 'Screen Recording permission required',
     message: 'Your Project needs macOS Screen Recording permission to capture the screen.',
-    detail: 'Open System Settings → Privacy & Security → Screen & System Audio Recording, enable Your Project, then quit and reopen the app before trying again.',
+    detail: 'Open System Settings ? Privacy & Security ? Screen & System Audio Recording, enable Your Project, then quit and reopen the app before trying again.',
   });
   if (result.response === 0) await openMacScreenRecordingSettings();
 }
@@ -1351,7 +1351,7 @@ function copyCaptureDataToClipboard(captureData) {
   copyDataUrlToClipboard(orderedScreens[0]?.dataUrl);
 }
 
-// ── Window Bounds Enumeration ───────────────────────────────────────────────
+// -- Window Bounds Enumeration -----------------------------------------------
 
 function getVisibleWindowBounds() {
   try {
@@ -1581,7 +1581,7 @@ function attachCapturerSourcesToWindowBounds(windowBounds, capturerSources, opti
   });
 }
 
-// ── Window Creation ─────────────────────────────────────────────────────────
+// -- Window Creation ---------------------------------------------------------
 
 
 function escapeHtml(value) {
@@ -2169,7 +2169,7 @@ function createMainWindow(focusOnReady = false) {
   });
 }
 
-// ── Screen Capture ──────────────────────────────────────────────────────────
+// -- Screen Capture ----------------------------------------------------------
 
 function getNativeImagePixelSize(image) {
   if (!image || image.isEmpty()) return { width: 0, height: 0 };
@@ -2453,7 +2453,7 @@ async function captureRegion(options = {}) {
   }
 }
 
-// ── IPC Handlers ────────────────────────────────────────────────────────────
+// -- IPC Handlers ------------------------------------------------------------
 
 
 ipcMain.handle('preview-toast-data', async () => {
@@ -3151,7 +3151,7 @@ ipcMain.on('app-window-close-cleaned-up', (event, payload = {}) => {
   closeMainWindowAfterRendererCleanup();
 });
 
-// ── App Lifecycle ───────────────────────────────────────────────────────────
+// -- App Lifecycle -----------------------------------------------------------
 
 
 function macTrayMenuIcon(name) {

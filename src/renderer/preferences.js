@@ -1,4 +1,4 @@
-const DISPLAY_LABELS = ['0.5s', '1s', '2s', '5s', '10s', '15s', '30s', '∞'];
+const DISPLAY_LABELS = ['0.5s', '1s', '2s', '5s', '10s', '15s', '30s', '8'];
 
 function sliderValueToLabel(v) {
   const idx = Math.min(Math.max(Math.round(v), 0), 7);
@@ -70,7 +70,7 @@ function renderAutoHideDelay(previousValue = settings.autoHideDelay) {
   settings.autoHideDelay = nextValue;
   autoHideDelaySetting.value = String(nextValue);
   autoHideDelaySettingValue.innerHTML = `<span class="odometer-digit">${sliderValueToLabel(nextValue)}</span>`;
-  autoHideDelaySettingValue.classList.toggle('output-infinity', sliderValueToLabel(nextValue) === '∞');
+  autoHideDelaySettingValue.classList.toggle('output-infinity', sliderValueToLabel(nextValue) === '8');
   autoHideDelaySettingValue.classList.remove('is-increasing', 'is-decreasing');
   if (nextValue !== previous) {
     autoHideDelaySettingValue.classList.add(nextValue > previous ? 'is-increasing' : 'is-decreasing');
@@ -142,7 +142,7 @@ function renderLicenseState(state) {
       const d = state.purchasedAt ? new Date(state.purchasedAt) : null;
       licensePurchasedAt.textContent = d && Number.isFinite(d.getTime())
         ? d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-        : '—';
+        : '�';
     }
     if (licenseKeyDisplay) {
       const key = state.licenseKey || '';

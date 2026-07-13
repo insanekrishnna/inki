@@ -3,9 +3,9 @@
  * Canvas drawing, tools, and UI interaction
  */
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // App State
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 const state = {
   image: null,
@@ -56,7 +56,6 @@ const state = {
   recordingMode: 'region',
   isSavingRecording: false,
   recordingLoop: true,
-  recordingPreview: null,
   recordingSettings: { format: 'mp4', autoZoom: true, autoHideDelay: 0, captureProject: false },
   captureSettings: { hideDesktopIcons: true },
   magicWand: null,
@@ -69,9 +68,9 @@ const state = {
 
 const AUTO_HIDE_DELAYS = [500, 1000, 2000, 5000, 10000, 15000, 30000, Infinity];
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // DOM Elements
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
@@ -79,10 +78,8 @@ const $$ = (sel) => document.querySelectorAll(sel);
 let resetToolbarDismissState = () => {};
 let scheduleAutoHideFn = () => {};
 let isCaptureMode = false;
-let recordingPreviewTimelineFrame = null;
 let timelineGenerationAbort = false;
 let timelineRangeInitialized = false;
-const recordingPreviewSpeeds = [1, 1.5, 2, 0.5];
 const RECORDING_SETTINGS_KEY = 'yourproject-recording-settings';
 // Legacy key retained for one-time migration from builds branded as Project.
 const LEGACY_RECORDING_SETTINGS_KEY = 'project-recording-settings';
@@ -98,12 +95,7 @@ const elements = {
   btnUndo: $('#btn-undo'),
   btnRedo: $('#btn-redo'),
   btnClear: $('#btn-clear'),
-  btnRecordScreen: $('#btn-record-screen'),
-  recordingFormatMenu: $('#recording-format-menu'),
-  recordingSaveProgress: $('#recording-save-progress'),
   preferencesDialog: $('#preferences-dialog'),
-  recordingFormatSetting: $('#recording-format-setting'),
-  recordingAutozoomSetting: $('#recording-autozoom-setting'),
   hideDesktopIconsSetting: $('#hide-desktop-icons-setting'),
   captureProjectSetting: $('#capture-project-setting'),
   btnCaptureRegion: $('#btn-capture-region'),
@@ -118,28 +110,6 @@ const elements = {
   strokeCurrentLine: $('#stroke-current-line'),
   strokeMenu: $('#stroke-menu'),
   strokeBtns: $$('.stroke-option'),
-  recordingPreview: $('#recording-preview'),
-  recordingPreviewVideo: $('#recording-preview-video'),
-  recordingPreviewMeta: $('#recording-preview-meta'),
-  recordingPreviewFormat: $('#recording-preview-format'),
-  recordingPreviewPlay: $('#recording-preview-play'),
-  recordingPreviewTimeline: $('#recording-preview-timeline'),
-  recordingPreviewDuration: $('#recording-preview-duration'),
-  recordingPreviewSave: $('#recording-preview-save'),
-  recordingPreviewToolbarPlay: $('#btn-recording-play'),
-  recordingPreviewJumpBack: $('#btn-recording-jump-back'),
-  recordingPreviewJumpForward: $('#btn-recording-jump-forward'),
-  recordingPreviewSpeed: $('#btn-recording-speed'),
-  recordingPreviewTrimStart: $('#btn-recording-trim-start'),
-  recordingPreviewTrimEnd: $('#btn-recording-trim-end'),
-  recordingPreviewResetTrim: $('#btn-recording-reset-trim'),
-  recordingPreviewMute: $('#btn-recording-mute'),
-  recordingPreviewLoop: $('#btn-recording-loop'),
-  recordingPreviewLoopBottom: $('#recording-preview-loop'),
-  recordingPreviewJumpBackBottom: $('#recording-preview-jump-back'),
-  recordingPreviewJumpForwardBottom: $('#recording-preview-jump-forward'),
-  recordingPreviewDiscard: $('#recording-preview-discard'),
-  recordingPreviewClose: $('#recording-preview-close'),
   statusTool: $('#status-tool'),
   statusZoom: $('#status-zoom'),
   textWrapper: $('#text-input-wrapper'),
@@ -168,9 +138,9 @@ function resetFloatingToolbar() {
   resetToolbarDismissState();
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Initialization
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 function init() {
   document.body.classList.add(`platform-${window.projectApi.platform}`);
@@ -228,9 +198,9 @@ function initThemeToggle() {
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Event Binding
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 function setCaptureModeButton(mode = null) {
   const selected = mode === 'window'
@@ -266,31 +236,6 @@ function bindToolbar() {
   on(elements.btnCaptureRegion, 'click', () => { elements.btnCaptureRegion.blur(); setCaptureModeButton('region'); startCapture(); });
   on(elements.btnCaptureWindow, 'click', () => { elements.btnCaptureWindow.blur(); setCaptureModeButton('window'); startCaptureWindow(); });
   on(elements.btnCaptureFullscreen, 'click', () => { elements.btnCaptureFullscreen.blur(); setCaptureModeButton('fullscreen'); startCaptureFullscreen(); });
-  on(elements.btnRecordScreen, 'click', onRecordButtonClick);
-  on(elements.recordingFormatSetting, 'change', () => {
-    state.recordingSettings.format = elements.recordingFormatSetting.value === 'gif' ? 'gif' : 'mp4';
-    saveRecordingSettings();
-  });
-  on(elements.recordingAutozoomSetting, 'change', () => {
-    state.recordingSettings.autoZoom = Boolean(elements.recordingAutozoomSetting.checked);
-    saveRecordingSettings();
-  });
-  on(elements.hideDesktopIconsSetting, 'change', () => {
-    state.captureSettings.hideDesktopIcons = Boolean(elements.hideDesktopIconsSetting.checked);
-    saveRecordingSettings();
-  });
-  on(elements.captureProjectSetting, 'change', () => {
-    state.recordingSettings.captureProject = Boolean(elements.captureProjectSetting.checked);
-    saveRecordingSettings();
-  });
-  elements.recordingFormatMenu?.querySelectorAll('[data-format]').forEach((button) => {
-    button.addEventListener('click', () => startRecordingWithFormat(button.dataset.format, button.dataset.mode));
-  });
-  document.addEventListener('click', (event) => {
-    if (!elements.recordingFormatMenu?.classList.contains('visible')) return;
-    if (elements.recordingFormatMenu.contains(event.target) || elements.btnRecordScreen?.contains(event.target)) return;
-    hideRecordingFormatMenu();
-  });
   
   on(elements.btnCopy, 'click', copyToClipboard);
   on(elements.btnCrop, 'click', toggleCrop);
@@ -308,31 +253,7 @@ function bindToolbar() {
     swatch.addEventListener('click', () => selectColor(swatch.dataset.color));
   });
   bindStrokePicker();
-  on(elements.recordingPreviewSave, 'click', saveRecordingPreview);
-  on(elements.recordingPreviewDiscard, 'click', () => { clearTimeline(); discardRecordingPreview(); });
-  on(elements.recordingPreviewClose, 'click', () => { clearTimeline(); discardRecordingPreview(); });
-  elements.recordingPreviewFormat?.querySelectorAll('[data-format]').forEach((button) => {
-    button.addEventListener('click', () => setRecordingPreviewFormat(button.dataset.format));
-  });
-  on(elements.recordingPreviewPlay, 'click', toggleRecordingPreviewPlayback);
-  on(elements.recordingPreviewTimeline, 'input', scrubRecordingPreview);
-  on(elements.recordingPreviewToolbarPlay, 'click', toggleRecordingPreviewPlayback);
-  on(elements.recordingPreviewJumpBack, 'click', () => jumpRecordingPreview(-1));
-  on(elements.recordingPreviewJumpForward, 'click', () => jumpRecordingPreview(1));
-  on(elements.recordingPreviewSpeed, 'click', cycleRecordingPreviewSpeed);
-  on(elements.recordingPreviewTrimStart, 'click', setRecordingPreviewTrimStart);
-  on(elements.recordingPreviewTrimEnd, 'click', setRecordingPreviewTrimEnd);
-  on(elements.recordingPreviewResetTrim, 'click', applyRecordingPreviewTrim);
-  on(elements.recordingPreviewMute, 'click', toggleRecordingPreviewMute);
-  on(elements.recordingPreviewLoop, 'click', toggleRecordingPreviewLoop);
-  on(elements.recordingPreviewLoopBottom, 'click', toggleRecordingPreviewLoop);
-  on(elements.recordingPreviewJumpBackBottom, 'click', () => jumpRecordingPreview(-1));
-  on(elements.recordingPreviewJumpForwardBottom, 'click', () => jumpRecordingPreview(1));
-  on(elements.recordingPreviewVideo, 'loadedmetadata', updateRecordingPreviewControls);
-  on(elements.recordingPreviewVideo, 'timeupdate', updateRecordingPreviewControls);
-  on(elements.recordingPreviewVideo, 'play', startRecordingPreviewTimeline);
-  on(elements.recordingPreviewVideo, 'pause', stopRecordingPreviewTimeline);
-  on(elements.recordingPreviewVideo, 'ended', stopRecordingPreviewTimeline);
+
   on(elements.textStyleBold, 'click', () => selectTextBold());
   on(elements.textStyleItalic, 'click', () => selectTextItalic());
 }
@@ -619,9 +540,9 @@ function bindPaste() {
   });
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Crop Tool (Handle-based)
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 function bindCrop() {
   // Handle dragging on crop handles and crop box
@@ -810,114 +731,9 @@ function updateCropUI() {
   )`;
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // File Operations
-// ══════════════════════════════════════════════════════════════════════════════
-
-
-function showRecordingFormatMenu() {
-  elements.recordingFormatMenu?.classList.add('visible');
-}
-
-function hideRecordingFormatMenu() {
-  elements.recordingFormatMenu?.classList.remove('visible');
-}
-
-function setRecordingSaveProgress(visible, options = {}) {
-  if (!options.preserveSaving) state.isSavingRecording = Boolean(visible);
-  const progress = elements.recordingSaveProgress;
-  if (!progress) return;
-  const isVisible = Boolean(visible);
-  progress.classList.toggle('visible', isVisible);
-  progress.classList.toggle('complete', Boolean(options.complete));
-  progress.setAttribute('aria-hidden', isVisible ? 'false' : 'true');
-  const progressbar = progress.querySelector('[role="progressbar"]');
-  if (progressbar) {
-    progressbar.setAttribute('aria-valuemin', '0');
-    progressbar.setAttribute('aria-valuemax', '100');
-    progressbar.setAttribute('aria-valuenow', options.complete ? '100' : (isVisible ? '92' : '0'));
-  }
-}
-
-function onRecordButtonClick(event) {
-  if (state.isRecording) {
-    toggleRecording(event);
-    return;
-  }
-  event?.stopPropagation();
-  startRecordingWithFormat(state.recordingSettings.format, 'region');
-}
-
-async function startRecordingWithFormat(format = 'mp4', mode = 'region') {
-  hideRecordingFormatMenu();
-  loadRecordingSettings();
-  if (_cachedLicenseState?.trial?.expired && !_cachedLicenseState?.licensed) {
-    window.projectApi.openLicenseWindow();
-    return;
-  }
-  const normalizedFormat = format === 'gif' ? 'gif' : 'mp4';
-  try {
-    const started = await window.projectApi.startRecording({
-      format: normalizedFormat,
-      mode,
-      autoZoom: mode === 'region' ? state.recordingSettings.autoZoom : false,
-      hideDesktopIcons: state.captureSettings.hideDesktopIcons,
-      captureProject: state.recordingSettings.captureProject,
-    });
-    state.isRecording = true;
-    state.recordingFormat = normalizedFormat;
-    state.recordingMode = mode;
-    if (started.inlinePreview) {
-      showLiveRecordingPreview(started, normalizedFormat);
-    } else {
-      discardRecordingPreview({ silent: true, keepWindowMode: true });
-    }
-    setRecordingIndicator(true);
-    const targetLabel = mode === 'region' ? 'selected region' : (started.source?.name || 'window');
-    showToast(started.systemAudio ? `Recording ${targetLabel} as ${normalizedFormat.toUpperCase()}` : `Recording ${targetLabel} as ${normalizedFormat.toUpperCase()} without system audio`, started.systemAudio ? 'success' : 'info');
-  } catch (err) {
-    state.isRecording = false;
-    setRecordingSaveProgress(false);
-    setRecordingIndicator(false);
-    if (err.message === 'Recording canceled') {
-      showToast('Recording canceled', 'info');
-      return;
-    }
-    showToast(`Recording failed: ${err.message}`, 'error');
-  }
-}
-
-function loadRecordingSettings() {
-  try {
-    const raw = localStorage.getItem(RECORDING_SETTINGS_KEY) || localStorage.getItem(LEGACY_RECORDING_SETTINGS_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      state.recordingSettings.format = parsed?.format === 'gif' ? 'gif' : 'mp4';
-      state.recordingSettings.autoZoom = parsed?.autoZoom !== false;
-      state.recordingSettings.autoHideDelay = typeof parsed?.autoHideDelay === 'number' ? Math.min(Math.max(Math.round(parsed.autoHideDelay), 0), 7) : 0;
-      state.captureSettings.hideDesktopIcons = parsed?.hideDesktopIcons !== false;
-      state.recordingSettings.captureProject = parsed?.captureProject === true;
-    }
-  } catch (_) {}
-  if (elements.recordingFormatSetting) elements.recordingFormatSetting.value = state.recordingSettings.format;
-  if (elements.recordingAutozoomSetting) elements.recordingAutozoomSetting.checked = state.recordingSettings.autoZoom;
-  if (elements.hideDesktopIconsSetting) elements.hideDesktopIconsSetting.checked = state.captureSettings.hideDesktopIcons;
-  if (elements.captureProjectSetting) elements.captureProjectSetting.checked = state.recordingSettings.captureProject;
-}
-
-function saveRecordingSettings() {
-  localStorage.setItem(RECORDING_SETTINGS_KEY, JSON.stringify({
-    ...state.recordingSettings,
-    hideDesktopIcons: state.captureSettings.hideDesktopIcons,
-  }));
-  localStorage.removeItem(LEGACY_RECORDING_SETTINGS_KEY);
-  try {
-    window.projectApi.saveSettings({
-      hideDesktopIcons: state.captureSettings.hideDesktopIcons,
-      captureProject: state.recordingSettings.captureProject,
-    });
-  } catch (_) {}
-}
+// ------------------------------------------------------------------------------
 
 
 function openPreferences() {
@@ -940,838 +756,6 @@ function openPreferences() {
 
 function showWindow() {
   // window.focus(); // Avoid forcing a macOS space switch when opening capture UI
-}
-
-async function toggleRecording(event) {
-  try {
-    if (!state.isRecording) {
-      showRecordingFormatMenu();
-      return;
-    }
-
-    setRecordingSaveProgress(true);
-    showToast('Finalizing recording…', 'info');
-    const result = await window.projectApi.stopRecording({ format: state.recordingFormat || (event?.shiftKey ? 'gif' : 'mp4') });
-    state.isRecording = false;
-    setRecordingIndicator(false);
-    showRecordingPreview(result);
-    showToast('Recording ready to review', 'success');
-  } catch (err) {
-    state.isRecording = false;
-    setRecordingIndicator(false);
-    showToast(`Recording failed: ${err.message}`, 'error');
-  } finally {
-    setRecordingSaveProgress(false);
-  }
-}
-
-async function stopRecordingForWindowClose() {
-  try {
-    if (state.isRecording) {
-      await window.projectApi.stopRecording({ discard: true });
-    }
-  } catch (error) {
-    console.error('[your-project][recording] failed to stop during window close:', error);
-  } finally {
-    state.isRecording = false;
-    setRecordingIndicator(false);
-    setRecordingSaveProgress(false);
-    discardRecordingPreview({ silent: true, keepWindowMode: true });
-    window.projectApi.confirmRecordingWindowClose?.();
-  }
-}
-
-function prepareForAppWindowClose() {
-  let handled = false;
-  try {
-    if (state.recordingPreview) {
-      clearTimeline();
-      discardRecordingPreview({ silent: true });
-      handled = true;
-    }
-    setRecordingSaveProgress(false);
-    hideRecordingFormatMenu();
-  } catch (error) {
-    console.error('[your-project] failed to clean up before window close:', error);
-  } finally {
-    window.projectApi.confirmAppWindowClose?.({ handled });
-  }
-}
-
-function showRecordingPreview(result = {}) {
-  if (!result?.data || !elements.recordingPreview || !elements.recordingPreviewVideo) return;
-  clearTimeline();
-  discardRecordingPreview({ silent: true, keepWindowMode: true });
-  elements.emptyState.classList.add('hidden');
-  document.body.classList.add('has-content');
-  resetFloatingToolbar();
-  setAppWindowMode('editor', { show: true });
-  const bytes = result.data instanceof Uint8Array ? result.data : new Uint8Array(result.data);
-  const blob = new Blob([bytes], { type: result.mimeType || 'video/webm' });
-  const url = URL.createObjectURL(blob);
-  state.recordingPreview = {
-    data: bytes,
-    url,
-    format: result.format || state.recordingFormat || 'mp4',
-    mimeType: result.mimeType || 'video/webm',
-    trimStart: 0,
-    trimEnd: null,
-  };
-  elements.recordingPreview.classList.remove('is-live');
-  elements.recordingPreviewVideo.muted = false;
-  elements.recordingPreviewVideo.playbackRate = 1;
-  elements.recordingPreviewVideo.controls = false;
-  elements.recordingPreviewVideo.srcObject = null;
-  elements.recordingPreviewVideo.src = url;
-  elements.recordingPreviewVideo.load();
-  updateRecordingPreviewConstraint();
-  const playPromise = elements.recordingPreviewVideo.play();
-  if (playPromise?.catch) playPromise.catch(() => {});
-  updateRecordingPreviewFormatUi();
-  updateRecordingPreviewToolbar();
-  updateRecordingPreviewControls();
-  elements.container?.classList.add('recording-preview-active');
-  elements.recordingPreview.classList.remove('hidden');
-  elements.recordingPreview.setAttribute('aria-hidden', 'false');
-  ensureTimelineElements();
-  initTimelineInteraction();
-  const gen = async () => {
-    const container = document.getElementById('timeline-frames');
-    if (!container || !state.recordingPreview?.url) return;
-
-    timelineGenerationAbort = false;
-    try {
-      await generateOptimizedFilmstrip(state.recordingPreview.url, container, 24);
-    } catch (error) {
-      if (!timelineGenerationAbort) {
-        console.error('[project][timeline] failed to generate filmstrip:', error);
-      }
-    }
-    const strip = document.querySelector('.timeline-filmstrip');
-    if (strip) strip.style.opacity = '1';
-  };
-  gen();
-}
-
-function discardRecordingPreview(options = {}) {
-  if (state.recordingPreview?.url) URL.revokeObjectURL(state.recordingPreview.url);
-  state.recordingPreview = null;
-  if (elements.recordingPreviewVideo) {
-    elements.recordingPreviewVideo.pause();
-    elements.recordingPreviewVideo.srcObject = null;
-    elements.recordingPreviewVideo.muted = true;
-    elements.recordingPreviewVideo.playbackRate = 1;
-    elements.recordingPreviewVideo.removeAttribute('src');
-    elements.recordingPreviewVideo.load();
-  }
-  stopRecordingPreviewTimeline();
-  if (elements.recordingPreviewVideo?._hasConstraintListener) {
-    elements.recordingPreviewVideo.removeEventListener('timeupdate', elements.recordingPreviewVideo._constraintHandler);
-    elements.recordingPreviewVideo.removeEventListener('ended', elements.recordingPreviewVideo._endedHandler);
-    delete elements.recordingPreviewVideo._hasConstraintListener;
-    delete elements.recordingPreviewVideo._constraintHandler;
-    delete elements.recordingPreviewVideo._endedHandler;
-  }
-  elements.recordingPreview?.classList.remove('is-live');
-  elements.recordingPreview?.classList.add('hidden');
-  elements.recordingPreview?.setAttribute('aria-hidden', 'true');
-  elements.container?.classList.remove('recording-preview-active');
-  if (!state.image && !options?.keepWindowMode) {
-    document.body.classList.add('toolbar-transition');
-    Promise.resolve(setAppWindowMode('toolbar')).finally(() => {
-      document.body.classList.remove('has-content');
-      document.body.classList.remove('has-image');
-      requestAnimationFrame(() => {
-        resetFloatingToolbar();
-        document.body.classList.remove('toolbar-transition');
-      });
-    });
-  }
-  if (!options?.silent) showToast('Recording discarded', 'info');
-}
-
-function showLiveRecordingPreview(started = {}, format = state.recordingFormat) {
-  if (!elements.recordingPreview || !elements.recordingPreviewVideo) return;
-  document.body.classList.add('has-content');
-  resetFloatingToolbar();
-  setAppWindowMode('editor');
-  if (state.recordingPreview?.url) URL.revokeObjectURL(state.recordingPreview.url);
-  state.recordingPreview = null;
-  elements.recordingPreviewVideo.removeAttribute('src');
-  elements.recordingPreviewVideo.muted = true;
-  elements.recordingPreviewVideo.playbackRate = 1;
-  elements.recordingPreviewVideo.controls = false;
-  if (elements.recordingPreviewMeta) {
-    elements.recordingPreviewMeta.textContent = `Recording ${format.toUpperCase()} source${started.systemAudio ? '' : ' · no system audio'}`;
-  }
-  elements.recordingPreview.classList.add('is-live');
-  elements.container?.classList.add('recording-preview-active');
-  elements.recordingPreview.classList.remove('hidden');
-  elements.recordingPreview.setAttribute('aria-hidden', 'false');
-}
-
-async function saveRecordingPreview() {
-  if (!state.recordingPreview || state.isSavingRecording) return;
-  state.isSavingRecording = true;
-  setRecordingSaveProgress(false, { preserveSaving: true });
-  try {
-    const result = await window.projectApi.saveRecording({
-      data: state.recordingPreview.data,
-      format: state.recordingPreview.format,
-      trimStart: state.recordingPreview.trimStart || 0,
-      trimEnd: state.recordingPreview.trimEnd,
-      muted: elements.recordingPreviewVideo?.muted === true,
-    });
-    if (result.canceled) {
-      showToast('Save canceled', 'info');
-      return;
-    }
-    const savedPath = result.gif || result.mp4 || result.webm;
-    const warning = result.warning ? ` (${result.warning})` : '';
-    setRecordingSaveProgress(true, { complete: true });
-    if (elements.recordingPreviewMeta) {
-      elements.recordingPreviewMeta.textContent = `Saved ${state.recordingPreview.format.toUpperCase()}: ${savedPath}`;
-    }
-    showToast(`Saved recording: ${savedPath}${warning}`, result.warning ? 'info' : 'success');
-    await new Promise((resolve) => setTimeout(resolve, 220));
-  } catch (err) {
-    showToast(`Recording save failed: ${err.message}`, 'error');
-  } finally {
-    setRecordingSaveProgress(false);
-    state.isSavingRecording = false;
-  }
-}
-
-function setRecordingPreviewFormat(format = 'mp4') {
-  if (!state.recordingPreview) return;
-  state.recordingPreview.format = format === 'gif' ? 'gif' : 'mp4';
-  updateRecordingPreviewFormatUi();
-}
-
-function updateRecordingPreviewFormatUi() {
-  const format = state.recordingPreview?.format === 'gif' ? 'gif' : 'mp4';
-  elements.recordingPreviewFormat?.querySelectorAll('[data-format]').forEach((button) => {
-    const active = button.dataset.format === format;
-    button.classList.toggle('active', active);
-    button.setAttribute('aria-checked', active ? 'true' : 'false');
-  });
-  if (elements.recordingPreviewSave) {
-    elements.recordingPreviewSave.setAttribute('aria-label', `Save ${format.toUpperCase()} recording`);
-    const label = elements.recordingPreviewSave.querySelector('span');
-    if (label) label.textContent = `Save ${format.toUpperCase()}`;
-  }
-}
-
-function toggleRecordingPreviewPlayback() {
-  const video = elements.recordingPreviewVideo;
-  if (!video) return;
-  if (video.paused || video.ended) {
-    const playPromise = video.play();
-    if (playPromise?.catch) playPromise.catch(() => {});
-  } else {
-    video.pause();
-  }
-  updateRecordingPreviewToolbar();
-}
-
-function jumpRecordingPreview(delta = 0) {
-  const video = elements.recordingPreviewVideo;
-  if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
-  video.currentTime = Math.max(0, Math.min(video.duration, video.currentTime + delta));
-  updateRecordingPreviewControls();
-}
-
-function cycleRecordingPreviewSpeed() {
-  const video = elements.recordingPreviewVideo;
-  if (!video) return;
-  const currentIndex = recordingPreviewSpeeds.indexOf(video.playbackRate);
-  const nextSpeed = recordingPreviewSpeeds[(currentIndex + 1) % recordingPreviewSpeeds.length] || 1;
-  video.playbackRate = nextSpeed;
-  updateRecordingPreviewToolbar();
-}
-
-function toggleRecordingPreviewMute() {
-  const video = elements.recordingPreviewVideo;
-  if (!video) return;
-  video.muted = !video.muted;
-  updateRecordingPreviewToolbar();
-}
-
-function toggleRecordingPreviewLoop() {
-  state.recordingLoop = !state.recordingLoop;
-  updateRecordingPreviewConstraint();
-  updateRecordingPreviewToolbar();
-}
-
-function updateRecordingPreviewConstraint() {
-  const video = elements.recordingPreviewVideo;
-  if (!video) return;
-
-  if (state.recordingPreview && Number.isFinite(state.recordingPreview.trimEnd)) {
-    video.loop = false;
-  } else {
-    video.loop = !!state.recordingLoop;
-  }
-
-  if (!video._hasConstraintListener) {
-    video._constraintHandler = () => {
-      if (!state.recordingPreview) return;
-      const start = state.recordingPreview.trimStart || 0;
-      const duration = Number.isFinite(video.duration) ? video.duration : 0;
-      const end = Number.isFinite(state.recordingPreview.trimEnd) ? state.recordingPreview.trimEnd : duration;
-      if (duration === 0 || end <= start) return;
-      if (!video.paused && video.currentTime >= end) {
-        video.currentTime = start;
-        if (!state.recordingLoop) {
-          video.pause();
-        } else if (video.paused) {
-          video.play().catch(() => {});
-        }
-      } else if (video.currentTime < start) {
-        video.currentTime = start;
-      }
-    };
-    video._endedHandler = () => {
-      if (!state.recordingPreview) return;
-      const start = state.recordingPreview.trimStart || 0;
-      if (state.recordingLoop) {
-        video.currentTime = start;
-        video.play().catch(() => {});
-      }
-    };
-    video.addEventListener('timeupdate', video._constraintHandler);
-    video.addEventListener('ended', video._endedHandler);
-    video._hasConstraintListener = true;
-  }
-}
-
-function setRecordingPreviewTrimStart() {
-  const video = elements.recordingPreviewVideo;
-  if (!video || !state.recordingPreview) return;
-  const currentTime = Number.isFinite(video.currentTime) ? video.currentTime : 0;
-  const trimEnd = Number.isFinite(state.recordingPreview.trimEnd) ? state.recordingPreview.trimEnd : video.duration;
-  state.recordingPreview.trimStart = Math.max(0, Math.min(currentTime, Math.max(0, trimEnd - 0.1)));
-  updateRecordingPreviewToolbar();
-  updateRecordingPreviewConstraint();
-}
-
-function setRecordingPreviewTrimEnd() {
-  const video = elements.recordingPreviewVideo;
-  if (!video || !state.recordingPreview || !Number.isFinite(video.duration)) return;
-  const currentTime = Number.isFinite(video.currentTime) ? video.currentTime : video.duration;
-  const trimStart = state.recordingPreview.trimStart || 0;
-  state.recordingPreview.trimEnd = Math.min(video.duration, Math.max(currentTime, trimStart + 0.1));
-  updateRecordingPreviewToolbar();
-  updateRecordingPreviewConstraint();
-}
-
-function resetRecordingPreviewTrim() {
-  if (!state.recordingPreview) return;
-  state.recordingPreview.trimStart = 0;
-  state.recordingPreview.trimEnd = null;
-  updateRecordingPreviewToolbar();
-}
-
-async function applyRecordingPreviewTrim() {
-  if (!state.recordingPreview || state.isSavingRecording) return;
-  const trimStart = state.recordingPreview.trimStart || 0;
-  const trimEnd = state.recordingPreview.trimEnd;
-  if (!trimStart && !Number.isFinite(trimEnd)) {
-    resetRecordingPreviewTrim();
-    return;
-  }
-  state.isSavingRecording = true;
-  setRecordingSaveProgress(true, { preserveSaving: true });
-  try {
-    const trimmed = await window.projectApi.trimRecording({
-      data: state.recordingPreview.data,
-      trimStart,
-      trimEnd,
-      format: state.recordingPreview.format,
-      mimeType: state.recordingPreview.mimeType,
-    });
-    if (!trimmed?.data) return;
-    if (state.recordingPreview?.url) URL.revokeObjectURL(state.recordingPreview.url);
-    const blob = new Blob([trimmed.data], { type: trimmed.mimeType || 'video/mp4' });
-    const url = URL.createObjectURL(blob);
-    state.recordingPreview = {
-      ...state.recordingPreview,
-      data: trimmed.data,
-      url,
-      format: trimmed.format || 'mp4',
-      mimeType: trimmed.mimeType || 'video/mp4',
-      trimStart: 0,
-      trimEnd: null,
-    };
-    const video = elements.recordingPreviewVideo;
-    video.pause();
-    video.src = url;
-    video.load();
-    updateRecordingPreviewConstraint();
-    const playPromise = video.play();
-    if (playPromise?.catch) playPromise.catch(() => {});
-    updateRecordingPreviewFormatUi();
-    updateRecordingPreviewToolbar();
-    updateRecordingPreviewControls();
-    showToast('Video trimmed to selection', 'success');
-    clearTimeline();
-    const container = document.getElementById('timeline-frames');
-    if (container && state.recordingPreview?.url) {
-      timelineGenerationAbort = false;
-      generateOptimizedFilmstrip(state.recordingPreview.url, container).catch(() => {});
-    }
-    updateTimeline();
-  } catch (err) {
-    showToast(`Failed to cut video: ${err.message}`, 'error');
-  } finally {
-    setRecordingSaveProgress(false);
-    state.isSavingRecording = false;
-  }
-}
-
-function scrubRecordingPreview() {
-  const video = elements.recordingPreviewVideo;
-  const timeline = elements.recordingPreviewTimeline;
-  if (!video || !timeline || !Number.isFinite(video.duration) || video.duration <= 0) return;
-
-  const ratio = Number(timeline.value) / Number(timeline.max || 1000);
-
-  video.currentTime = ratio * video.duration;
-
-  updateRecordingPreviewControls();
-}
-
-function updateRecordingPreviewControls() {
-  const video = elements.recordingPreviewVideo;
-  if (!video) return;
-
-  const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 0;
-
-  const progress = duration > 0 ? (video.currentTime / duration) : 0;
-
-  if (elements.recordingPreviewTimeline) {
-    const max = Number(elements.recordingPreviewTimeline.max || 1000);
-    elements.recordingPreviewTimeline.value = String(progress * max);
-    elements.recordingPreviewTimeline.style.setProperty('--progress', `${progress * 100}%`);
-  }
-
-  if (elements.recordingPreviewDuration) {
-    const trimStart = state.recordingPreview?.trimStart || 0;
-    const trimEnd = state.recordingPreview?.trimEnd;
-    const hasSelection = Number.isFinite(trimEnd) && trimEnd > trimStart;
-    const effectiveDuration = hasSelection ? (trimEnd - trimStart) : duration;
-
-    const displayTime = hasSelection
-      ? Math.max(0, video.currentTime - trimStart)
-      : video.currentTime;
-
-    elements.recordingPreviewDuration.textContent = `${formatRecordingTime(displayTime)} / ${formatRecordingTime(hasSelection ? effectiveDuration : duration)}`;
-  }
-
-  if (elements.recordingPreviewPlay) {
-    const isPlaying = !video.paused && !video.ended;
-    const svg = elements.recordingPreviewPlay.querySelector('svg');
-    if (svg) {
-      svg.innerHTML = isPlaying
-        ? '<path d="M8 5v14" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M16 5v14" stroke="currentColor" stroke-width="1.5" fill="none"/>'
-        : '<path class="rpp-play-icon" d="M8 5v14l11-7z" fill="currentColor" stroke="none"/>';
-    }
-    elements.recordingPreviewPlay.setAttribute('aria-label', isPlaying ? 'Pause recording' : 'Play recording');
-  }
-
-  updateRecordingPreviewToolbar();
-}
-
-function updateRecordingPreviewToolbar() {
-  const video = elements.recordingPreviewVideo;
-  if (!video) return;
-  const isPlaying = !video.paused && !video.ended;
-  if (elements.recordingPreviewToolbarPlay) {
-    const icon = isPlaying ? 'pause' : 'play';
-    elements.recordingPreviewToolbarPlay.classList.toggle('active', isPlaying);
-    elements.recordingPreviewToolbarPlay.setAttribute('aria-label', isPlaying ? 'Pause video' : 'Play video');
-    if (elements.recordingPreviewToolbarPlay.dataset.icon !== icon) {
-      elements.recordingPreviewToolbarPlay.dataset.icon = icon;
-      elements.recordingPreviewToolbarPlay.innerHTML = isPlaying
-        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 5v14"/><path d="M16 5v14"/></svg>'
-        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 5v14l11-7z" fill="currentColor" stroke="none"/></svg>';
-    }
-  }
-  if (elements.recordingPreviewSpeed) {
-    const speedLabel = `${Number.isInteger(video.playbackRate) ? video.playbackRate : video.playbackRate.toFixed(1)}×`;
-    const labelEl = elements.recordingPreviewSpeed.querySelector('.video-tool-speed-label');
-    if (labelEl && labelEl.textContent !== speedLabel) labelEl.textContent = speedLabel;
-    elements.recordingPreviewSpeed.classList.toggle('active', video.playbackRate !== 1);
-  }
-  if (elements.recordingPreviewTrimStart) {
-    elements.recordingPreviewTrimStart.classList.toggle('active', Boolean(state.recordingPreview?.trimStart));
-  }
-  if (elements.recordingPreviewTrimEnd) {
-    elements.recordingPreviewTrimEnd.classList.toggle('active', Number.isFinite(state.recordingPreview?.trimEnd));
-  }
-  if (elements.recordingPreviewResetTrim) {
-    const trimActive = Boolean(state.recordingPreview?.trimStart) || Number.isFinite(state.recordingPreview?.trimEnd);
-    elements.recordingPreviewResetTrim.classList.toggle('active', trimActive);
-    elements.recordingPreviewResetTrim.disabled = false;
-  }
-  if (elements.recordingPreviewMute) {
-    elements.recordingPreviewMute.classList.toggle('active', video.muted);
-    elements.recordingPreviewMute.setAttribute('aria-label', video.muted ? 'Unmute preview audio' : 'Mute preview audio');
-  }
-  if (elements.recordingPreviewLoop) {
-    elements.recordingPreviewLoop.classList.toggle('active', state.recordingLoop);
-    elements.recordingPreviewLoop.setAttribute('data-tooltip', state.recordingLoop ? 'Loop on' : 'Loop off');
-  }
-  if (elements.recordingPreviewLoopBottom) {
-    elements.recordingPreviewLoopBottom.classList.toggle('active', state.recordingLoop);
-    elements.recordingPreviewLoopBottom.dataset.loop = String(state.recordingLoop);
-  }
-}
-
-function startRecordingPreviewTimeline() {
-  stopRecordingPreviewTimeline();
-  updateRecordingPreviewControls();
-  const tick = () => {
-    updateRecordingPreviewControls();
-    const video = elements.recordingPreviewVideo;
-    if (video && !video.paused && !video.ended) {
-      recordingPreviewTimelineFrame = requestAnimationFrame(tick);
-    } else {
-      recordingPreviewTimelineFrame = null;
-    }
-  };
-  recordingPreviewTimelineFrame = requestAnimationFrame(tick);
-}
-
-function stopRecordingPreviewTimeline() {
-  if (recordingPreviewTimelineFrame) {
-    cancelAnimationFrame(recordingPreviewTimelineFrame);
-    recordingPreviewTimelineFrame = null;
-  }
-  updateRecordingPreviewControls();
-}
-
-function formatRecordingTime(seconds = 0) {
-  const safeSeconds = Number.isFinite(seconds) && seconds > 0 ? Math.round(seconds) : 0;
-  const minutes = Math.floor(safeSeconds / 60);
-  const remainder = safeSeconds % 60;
-  return `${minutes}:${String(remainder).padStart(2, '0')}`;
-}
-
-function ensureTimelineElements() {
-  if (document.querySelector('.timeline-filmstrip')) return;
-  const media = elements.recordingPreviewVideo?.closest('.recording-preview__media');
-  if (!media) return;
-
-  const filmstrip = document.createElement('div');
-  filmstrip.className = 'timeline-filmstrip';
-  filmstrip.style.position = 'absolute';
-  filmstrip.style.left = '14px';
-  filmstrip.style.right = '14px';
-  filmstrip.style.bottom = '64px';
-  filmstrip.style.height = '56px';
-  filmstrip.style.overflow = 'hidden';
-  filmstrip.style.borderRadius = '6px';
-  filmstrip.style.background = 'rgba(8,8,10,0.78)';
-  filmstrip.style.border = '1px solid rgba(255,255,255,0.16)';
-  filmstrip.style.boxShadow = '0 12px 30px rgba(0,0,0,0.34)';
-  filmstrip.style.cursor = 'pointer';
-  filmstrip.style.touchAction = 'none';
-  filmstrip.style.zIndex = '4';
-  filmstrip.style.opacity = '0';
-  filmstrip.style.transition = 'opacity 0.15s ease';
-  filmstrip.setAttribute('aria-label', 'Video trim timeline');
-
-  const frames = document.createElement('div');
-  frames.id = 'timeline-frames';
-  frames.style.height = '56px';
-  frames.style.width = '100%';
-
-  const selection = document.createElement('div');
-  selection.id = 'timeline-selection';
-  selection.style.position = 'absolute';
-  selection.style.top = '0';
-  selection.style.bottom = '0';
-  selection.style.left = '0';
-  selection.style.right = '0';
-  selection.style.border = '1px solid rgba(255,255,255,0.85)';
-  selection.style.boxShadow = '0 0 0 999px rgba(0,0,0,0.28)';
-  selection.style.pointerEvents = 'none';
-
-  const makeHandle = (id) => {
-    const handle = document.createElement('div');
-    handle.id = id;
-    handle.style.position = 'absolute';
-    handle.style.top = '0';
-    handle.style.bottom = '0';
-    handle.style.width = '10px';
-    handle.style.marginLeft = '-5px';
-    handle.style.borderRadius = '5px';
-    handle.style.background = '#fff';
-    handle.style.boxShadow = '0 0 0 1px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.35)';
-    handle.style.cursor = 'ew-resize';
-    handle.style.touchAction = 'none';
-    handle.style.zIndex = '2';
-    handle.setAttribute('role', 'slider');
-    handle.setAttribute('aria-label', id === 'timeline-handle-in' ? 'Trim start' : 'Trim end');
-    return handle;
-  };
-
-  filmstrip.append(frames, selection, makeHandle('timeline-handle-in'), makeHandle('timeline-handle-out'));
-  const controls = media.querySelector('.recording-preview__video-controls');
-  media.insertBefore(filmstrip, controls || null);
-  updateTimeline();
-}
-
-function clearTimeline() {
-  timelineGenerationAbort = true;
-  const frames = document.getElementById('timeline-frames');
-  if (frames) frames.replaceChildren();
-  const strip = document.querySelector('.timeline-filmstrip');
-  if (strip) strip.style.opacity = '0';
-}
-
-function updateTimeline() {
-  const video = elements.recordingPreviewVideo;
-  const filmstrip = document.querySelector('.timeline-filmstrip');
-  const handleIn = document.getElementById('timeline-handle-in');
-  const handleOut = document.getElementById('timeline-handle-out');
-  const selection = document.getElementById('timeline-selection');
-  if (!video || !filmstrip || !handleIn || !handleOut) return;
-
-  const duration = Number.isFinite(video.duration) && video.duration > 0 ? video.duration : 0;
-  const trimStart = duration && Number.isFinite(state.recordingPreview?.trimStart)
-    ? Math.max(0, Math.min(state.recordingPreview.trimStart, duration))
-    : 0;
-  const trimEnd = duration && Number.isFinite(state.recordingPreview?.trimEnd)
-    ? Math.max(trimStart, Math.min(state.recordingPreview.trimEnd, duration))
-    : duration;
-  const startPercent = duration ? (trimStart / duration) * 100 : 0;
-  const endPercent = duration ? (trimEnd / duration) * 100 : 100;
-
-  handleIn.style.left = `${startPercent}%`;
-  handleOut.style.left = `${endPercent}%`;
-  handleIn.setAttribute('aria-valuemin', '0');
-  handleOut.setAttribute('aria-valuemin', '0');
-  handleIn.setAttribute('aria-valuemax', String(duration || 0));
-  handleOut.setAttribute('aria-valuemax', String(duration || 0));
-  handleIn.setAttribute('aria-valuenow', String(trimStart));
-  handleOut.setAttribute('aria-valuenow', String(trimEnd));
-  if (selection) {
-    selection.style.left = `${startPercent}%`;
-    selection.style.right = `${Math.max(0, 100 - endPercent)}%`;
-  }
-}
-
-async function generateOptimizedFilmstrip(sourceUrl, container, frameCount = 24) {
-  if (!sourceUrl || !container || timelineGenerationAbort) return;
-
-  const bgVideo = document.createElement('video');
-  bgVideo.muted = true;
-  bgVideo.playsInline = true;
-  bgVideo.preload = 'auto';
-
-  await new Promise((resolve, reject) => {
-    const onReady = () => resolve();
-    const onError = () => reject(new Error('Background video load failed'));
-
-    bgVideo.addEventListener('loadeddata', onReady, { once: true });
-    bgVideo.addEventListener('error', onError, { once: true });
-    bgVideo.src = sourceUrl;
-    bgVideo.load();
-  }).catch(() => {});
-
-  if (!Number.isFinite(bgVideo.duration) && bgVideo.readyState > 0) {
-    await new Promise((resolve) => {
-      const done = () => {
-        window.clearTimeout(fallback);
-        bgVideo.removeEventListener('durationchange', done);
-        bgVideo.removeEventListener('seeked', done);
-        resolve();
-      };
-      const fallback = window.setTimeout(done, 1000);
-      bgVideo.addEventListener('durationchange', done, { once: true });
-      bgVideo.addEventListener('seeked', done, { once: true });
-      try {
-        bgVideo.currentTime = 1e10;
-      } catch (_) {
-        done();
-      }
-    });
-  }
-
-  if (timelineGenerationAbort || !Number.isFinite(bgVideo.duration) || bgVideo.duration <= 0) {
-     bgVideo.removeAttribute('src');
-     bgVideo.load();
-     return;
-  }
-
-  const duration = bgVideo.duration;
-  const safeFrameCount = Math.max(1, Math.floor(frameCount));
-  const videoWidth = bgVideo.videoWidth || 320;
-  const videoHeight = bgVideo.videoHeight || 180;
-  const frameHeight = 56;
-  const pixelRatio = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
-  const displayWidth = Math.max(container.clientWidth || container.getBoundingClientRect().width || 0, safeFrameCount * 24);
-  const canvasWidth = Math.round(displayWidth * pixelRatio);
-  const canvasHeight = Math.round(frameHeight * pixelRatio);
-  const frameWidth = canvasWidth / safeFrameCount;
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = canvasWidth;
-  canvas.height = canvasHeight;
-
-  for (let index = 0; index < safeFrameCount; index += 1) {
-    if (timelineGenerationAbort) break;
-
-    const ratio = safeFrameCount === 1 ? 0 : index / (safeFrameCount - 1);
-    const targetTime = Math.min(Math.max(0, duration * ratio), duration - 0.001);
-
-    await new Promise((resolve) => {
-      const fallback = setTimeout(resolve, 600);
-      bgVideo.addEventListener('seeked', () => {
-        clearTimeout(fallback);
-        resolve();
-      }, { once: true });
-      bgVideo.currentTime = targetTime;
-    });
-
-    if (timelineGenerationAbort) break;
-
-    const targetX = Math.round(index * frameWidth);
-    const targetWidth = Math.round((index + 1) * frameWidth) - targetX;
-
-    const sourceRatio = videoWidth / Math.max(videoHeight, 1);
-    const targetRatio = targetWidth / Math.max(canvasHeight, 1);
-    let sourceX = 0;
-    let sourceY = 0;
-    let sourceWidth = videoWidth;
-    let sourceHeight = videoHeight;
-
-    if (sourceRatio > targetRatio) {
-      sourceWidth = Math.round(videoHeight * targetRatio);
-      sourceX = Math.round((videoWidth - sourceWidth) / 2);
-    } else {
-      sourceHeight = Math.round(videoWidth / targetRatio);
-      sourceY = Math.round((videoHeight - sourceHeight) / 2);
-    }
-
-    ctx.drawImage(bgVideo, sourceX, sourceY, sourceWidth, sourceHeight, targetX, 0, targetWidth, canvasHeight);
-
-    ctx.fillStyle = 'rgba(255,255,255,0.18)';
-    ctx.fillRect(Math.max(0, targetX - 1), 0, 1, canvasHeight);
-  }
-
-  bgVideo.removeAttribute('src');
-  bgVideo.load();
-
-  if (timelineGenerationAbort) return;
-
-  const image = new Image();
-  image.alt = '';
-  image.draggable = false;
-  image.style.display = 'block';
-  image.style.width = '100%';
-  image.style.height = '56px';
-  image.style.objectFit = 'cover';
-  image.style.opacity = '1';
-  image.src = canvas.toDataURL('image/jpeg', 0.65);
-
-  container.replaceChildren(image);
-}
-
-function initTimelineInteraction() {
-  if (timelineRangeInitialized) return;
-  timelineRangeInitialized = true;
-
-  const filmstrip = document.querySelector('.timeline-filmstrip');
-  const frames = document.getElementById('timeline-frames');
-  const handleIn = document.getElementById('timeline-handle-in');
-  const handleOut = document.getElementById('timeline-handle-out');
-  if (!filmstrip || !frames || !handleIn || !handleOut) return;
-
-  let activeHandle = null;
-  let suppressNextClick = false;
-  const minTrimDuration = 0.1;
-  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-  const video = () => elements.recordingPreviewVideo;
-  const duration = () => {
-    const currentVideo = video();
-    return currentVideo && Number.isFinite(currentVideo.duration) && currentVideo.duration > 0 ? currentVideo.duration : 0;
-  };
-  const timeFromEvent = (event) => {
-    const rect = filmstrip.getBoundingClientRect();
-    const width = rect.width || 1;
-    return clamp(((event.clientX - rect.left) / width) * duration(), 0, duration());
-  };
-  const seekPreview = (time) => {
-    const currentVideo = video();
-    if (currentVideo && Number.isFinite(time)) currentVideo.currentTime = clamp(time, 0, duration());
-  };
-  const updateUi = () => {
-    updateTimeline();
-    updateRecordingPreviewToolbar();
-    updateRecordingPreviewControls();
-  };
-  const updateTrim = (event) => {
-    const total = duration();
-    if (!state.recordingPreview || !total || !activeHandle) return;
-    const time = timeFromEvent(event);
-    const trimStart = Number.isFinite(state.recordingPreview.trimStart) ? state.recordingPreview.trimStart : 0;
-    const trimEnd = Number.isFinite(state.recordingPreview.trimEnd) ? state.recordingPreview.trimEnd : total;
-
-    if (activeHandle === 'in') {
-      state.recordingPreview.trimStart = clamp(time, 0, Math.max(0, trimEnd - minTrimDuration));
-      seekPreview(state.recordingPreview.trimStart);
-    } else {
-      state.recordingPreview.trimEnd = clamp(time, trimStart + minTrimDuration, total);
-      seekPreview(state.recordingPreview.trimEnd);
-    }
-    updateUi();
-  };
-
-  handleIn.addEventListener('pointerdown', (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    activeHandle = 'in';
-    try { filmstrip.setPointerCapture?.(event.pointerId); } catch (_) {}
-    updateTrim(event);
-  });
-
-  handleOut.addEventListener('pointerdown', (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    activeHandle = 'out';
-    try { filmstrip.setPointerCapture?.(event.pointerId); } catch (_) {}
-    updateTrim(event);
-  });
-
-  filmstrip.addEventListener('pointermove', (event) => {
-    if (!activeHandle) return;
-    event.preventDefault();
-    updateTrim(event);
-  });
-
-  const finishDrag = (event) => {
-    if (!activeHandle) return;
-    try { filmstrip.releasePointerCapture?.(event.pointerId); } catch (_) {}
-    activeHandle = null;
-    suppressNextClick = true;
-  };
-  filmstrip.addEventListener('pointerup', finishDrag);
-  filmstrip.addEventListener('pointercancel', finishDrag);
-
-  filmstrip.addEventListener('click', (event) => {
-    if (suppressNextClick) {
-      suppressNextClick = false;
-      return;
-    }
-    if (event.target === handleIn || event.target === handleOut) return;
-    const time = timeFromEvent(event);
-    seekPreview(time);
-    updateRecordingPreviewControls();
-    updateRecordingPreviewConstraint();
-  });
 }
 
 async function startCapture(options = {}) {
@@ -1875,7 +859,6 @@ async function pasteFromClipboard() {
 }
 
 function clearCanvas() {
-  if (!state.image && !state.recordingPreview) return;
   if (state.cropActive) cancelCrop();
   discardRecordingPreview({ silent: true });
   state.image = null;
@@ -1910,9 +893,9 @@ function clearCanvas() {
   updateToolbarState();
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Image Loading
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 async function loadCaptureData(captureData, options = {}) {
   if (captureData.type === 'single') {
@@ -1977,9 +960,9 @@ function loadImage(dataUrl, options = {}) {
   img.src = dataUrl;
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Zoom & Pan
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 function setZoom(newZoom) {
   state.zoom = Math.max(0.1, Math.min(10, newZoom));
@@ -2019,9 +1002,9 @@ function onWheel(e) {
   setZoom(state.zoom * (e.deltaY > 0 ? 0.9 : 1.1));
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Tool Selection
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 const DRAWING_TOOLS = ['rect', 'ellipse', 'arrow', 'line', 'text', 'pixelate'];
 
@@ -2247,9 +1230,9 @@ function toggleTextStyleControls() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Canvas Drawing Events
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 function getCanvasCoords(e) {
   const rect = elements.canvas.getBoundingClientRect();
@@ -2462,9 +1445,9 @@ function onCanvasMouseUp(e) {
   addAnnotation(createAnnotation(state.startX, state.startY, coords.x, coords.y));
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Inline Text Editing
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 function openInlineText(coords) {
   state.isEditingText = true;
@@ -2528,9 +1511,9 @@ function autoResizeTextInput() {
   input.style.width = Math.max(120, input.scrollWidth + 20) + 'px';
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Annotation Creation & History
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 function createAnnotation(x1, y1, x2, y2) {
   const base = { type: state.currentTool, color: state.currentColor, strokeWidth: state.strokeWidth };
@@ -2615,9 +1598,9 @@ function redo() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Rendering
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 function render() {
   if (!state.image) return;
@@ -2857,9 +1840,9 @@ function drawSelectionHandles() {
   }
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Composite & UI
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 function getCompositeImage() {
   const tempCanvas = document.createElement('canvas');
@@ -2880,21 +1863,12 @@ function updateStatus() {
   elements.statusZoom.textContent = `${Math.round(state.zoom * 100)}%`;
 }
 
-function setRecordingIndicator(isRecording) {
-  elements.btnRecordScreen?.classList.toggle('recording', isRecording);
-  if (elements.btnRecordScreen) {
-    elements.btnRecordScreen.title = isRecording ? 'Stop recording and preview video' : 'Record screen video';
-    elements.btnRecordScreen.setAttribute('aria-pressed', String(isRecording));
-  }
-}
-
 function updateToolbarState() {
   elements.btnCopy.disabled = !state.image;
   elements.btnCrop.disabled = !state.image;
   elements.btnUndo.disabled = state.historyIndex < 0;
   elements.btnRedo.disabled = state.historyIndex >= state.history.length - 1;
   elements.btnClear.disabled = !state.image;
-  setRecordingIndicator(state.isRecording);
 }
 
 
@@ -2928,9 +1902,9 @@ function replaceImage(dataUrl, cb) {
   img.src = dataUrl;
 }
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 // Magic Wand (remove background)
-// ══════════════════════════════════════════════════════════════════════════════
+// ------------------------------------------------------------------------------
 
 function floodFill(imageData, sx, sy, tolerance) {
   const w = imageData.width, h = imageData.height;

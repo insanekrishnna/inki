@@ -247,7 +247,7 @@
     const LOUPE_OFFSET_X = 20;  // offset from cursor
     const LOUPE_OFFSET_Y = 20;
 
-    // ── Selector tuning constants ────────────────────────────────────────────
+    // -- Selector tuning constants --------------------------------------------
     // Generous padding around detected bounds ensures the window is always
     // well-centered within the highlight, even with coordinate misalignment
     // between the screenshot and the window enumeration (DWM frame, DPI, etc.)
@@ -332,8 +332,8 @@
       } else {
         instructions.classList.remove('hidden');
         instructions.innerHTML = windowBounds.length
-          ? 'Click on a window to capture · Press <kbd>Esc</kbd> to cancel'
-          : 'No window detected. Click anywhere to cancel · Press <kbd>Esc</kbd> to cancel';
+          ? 'Click on a window to capture � Press <kbd>Esc</kbd> to cancel'
+          : 'No window detected. Click anywhere to cancel � Press <kbd>Esc</kbd> to cancel';
       }
     });
 
@@ -500,7 +500,7 @@
       loupeCanvas.style.display = 'block';
 
       // --- Coords label ---
-      // Convert viewport px → logical screen coordinates
+      // Convert viewport px ? logical screen coordinates
       // Use captureData.bounds to map back to real screen coords
       let labelX = mouseX;
       let labelY = mouseY;
@@ -508,7 +508,7 @@
         labelX = Math.round(mouseX / window.innerWidth  * captureData.bounds.width  + (captureData.bounds.x || 0));
         labelY = Math.round(mouseY / window.innerHeight * captureData.bounds.height + (captureData.bounds.y || 0));
       }
-      // If selecting, show width×height of current rect
+      // If selecting, show width�height of current rect
       let label = `${labelX}, ${labelY}`;
       if (isSelecting) {
         const rw = Math.abs(currentX - startX);
@@ -516,9 +516,9 @@
         if (captureData?.bounds) {
           const lw = Math.round(rw / window.innerWidth  * captureData.bounds.width);
           const lh = Math.round(rh / window.innerHeight * captureData.bounds.height);
-          label = `${lw} × ${lh}`;
+          label = `${lw} � ${lh}`;
         } else {
-          label = `${Math.round(rw)} × ${Math.round(rh)}`;
+          label = `${Math.round(rw)} � ${Math.round(rh)}`;
         }
       }
       loupeCoords.textContent = label;

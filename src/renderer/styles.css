@@ -178,18 +178,45 @@ body.platform-darwin.has-content .editor-drag-region {
   object-fit: contain;
 }
 
-.theme-toggle {
+.theme-toggle-group {
   display: none;
   align-items: center;
-  gap: 10px;
-  border: none;
+  gap: 8px;
+  background: #fff;
   border-radius: 12px;
-  padding: 10px 16px;
-  background: #08090d;
-  color: #fff;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 700;
+  padding: 8px 12px;
+}
+
+.theme-toggle-icon {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+  color: rgba(5, 7, 10, 0.4);
+}
+
+body.theme-dark .theme-toggle-icon {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+body:not(.theme-dark) .theme-toggle-icon-light {
+  color: rgba(5, 7, 10, 0.88);
+}
+body.theme-dark .theme-toggle-icon-dark {
+  color: rgba(255, 255, 255, 0.96);
+}
+
+.theme-toggle-icon .size-4 {
+  width: 16px;
+  height: 16px;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  border: none;
+  background: transparent !important;
+  padding: 0;
   cursor: pointer;
   box-shadow: none;
 }
@@ -220,7 +247,7 @@ body.theme-dark .theme-toggle-thumb {
 }
 
 .theme-toggle:hover {
-  background: #15161b;
+  background: transparent !important;
 }
 
 .theme-toggle-label {
@@ -468,10 +495,10 @@ body:not(.has-image) .toolbar {
   gap: 24px;
   justify-content: space-between;
   border-radius: 12px;
-  border-color: rgba(8, 9, 13, 0.08);
-  background: rgba(255, 255, 255, 0.96);
-  color: #05070a;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08), 0 1px 0 rgba(255,255,255,0.9) inset;
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(18, 19, 24, 0.96);
+  color: #fff;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22), 0 1px 0 rgba(255,255,255,0.08) inset;
   backdrop-filter: blur(18px) saturate(145%);
   -webkit-backdrop-filter: blur(18px) saturate(145%);
 }
@@ -481,7 +508,7 @@ body:not(.has-image) .toolbar .liquidGlass-shine {
 }
 
 body:not(.has-image) .toolbar .toolbar-brand,
-body:not(.has-image) .toolbar .theme-toggle {
+body:not(.has-image) .toolbar .theme-toggle-group {
   display: inline-flex;
 }
 
@@ -494,7 +521,7 @@ body:not(.has-image) .toolbar .capture-modes {
 body:not(.has-image) .toolbar .toolbar-btn {
   width: 42px;
   height: 42px;
-  color: rgba(5, 7, 10, 0.82);
+  color: rgba(255, 255, 255, 0.78);
   cursor: pointer;
   border-radius: 10px;
 }
@@ -506,30 +533,31 @@ body:not(.has-image) .toolbar .toolbar-btn svg {
 
 body:not(.has-image) .toolbar .toolbar-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: rgba(5, 7, 10, 0.06);
-  color: rgba(5, 7, 10, 0.96);
+  background: rgba(255, 255, 255, 0.10);
+  color: rgba(255, 255, 255, 0.96);
   animation: pillIconBounce 0.34s ease;
 }
 
 body.theme-dark:not(.has-image) .toolbar {
-  border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(18, 19, 24, 0.96);
-  color: #fff;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22), 0 1px 0 rgba(255,255,255,0.08) inset;
+  border-color: rgba(8, 9, 13, 0.08);
+  background: rgba(255, 255, 255, 0.96);
+  color: #05070a;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08), 0 1px 0 rgba(255,255,255,0.9) inset;
 }
 
 body.theme-dark:not(.has-image) .toolbar .toolbar-btn {
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(5, 7, 10, 0.82);
 }
 
 body.theme-dark:not(.has-image) .toolbar .toolbar-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.10);
-  color: rgba(255, 255, 255, 0.96);
+  background: rgba(5, 7, 10, 0.06);
+  color: rgba(5, 7, 10, 0.96);
 }
 
-body.theme-dark:not(.has-image) .theme-toggle {
+body.theme-dark:not(.has-image) .theme-toggle-group {
   background: #fff;
-  color: #05070a;
+  border: 1px solid rgba(5,7,10,0.06);
+  box-shadow: 0 4px 14px rgba(15,23,42,0.04);
 }
 
 body.theme-dark:not(.has-image) .theme-toggle-track {
