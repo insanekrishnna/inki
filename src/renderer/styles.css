@@ -105,7 +105,7 @@ body.platform-darwin.has-content .editor-drag-region {
 .toolbar {
   --toolbar-offset: 0px;
   position: fixed;
-  top: 12px;
+  top: 0px;
   left: 50%;
   transform: translateX(-50%) translateY(var(--toolbar-offset));
   display: inline-flex;
@@ -115,7 +115,7 @@ body.platform-darwin.has-content .editor-drag-region {
   padding: 8px 10px;
   gap: 6px;
   border: 1px solid rgba(255,255,255,0.44);
-  border-radius: 999px;
+  border-radius: 0 0 18px 18px;
   color: var(--toolbar-icon-color, rgba(17, 23, 35, 0.88));
   isolation: isolate;
   overflow: visible;
@@ -503,17 +503,15 @@ body:not(.has-image) .toolbar {
   padding: 4px 10px;
   gap: 24px;
   justify-content: space-between;
-  border-radius: 12px;
-  border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(18, 19, 24, 0.96);
-  color: #fff;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
-  backdrop-filter: blur(18px) saturate(145%);
-  -webkit-backdrop-filter: blur(18px) saturate(145%);
+  border-radius: 0 0 18px 18px;
+  border: none;
+  background: rgb(0, 0, 0);
+  color: #ffffff;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255,255,255,0.1) inset;
 }
 
 body:not(.has-image) .toolbar .liquidGlass-shine {
-  border-radius: 12px;
+  display: none;
 }
 
 body:not(.has-image) .toolbar .toolbar-brand,
@@ -525,7 +523,7 @@ body:not(.has-image) .toolbar .capture-modes {
   flex: 1;
   display: flex;
   justify-content: center;
-  gap: 22px;
+  gap: 10px;
 }
 
 body:not(.has-image) .toolbar .toolbar-btn {
@@ -533,7 +531,8 @@ body:not(.has-image) .toolbar .toolbar-btn {
   height: 38px;
   color: #ffffff;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 99px;
+  transition: all 0.2s ease;
 }
 
 body:not(.has-image) .toolbar .toolbar-btn svg {
@@ -543,25 +542,28 @@ body:not(.has-image) .toolbar .toolbar-btn svg {
 
 body:not(.has-image) .toolbar .toolbar-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  background: rgba(0, 0, 0, 0.1);
-  color: rgba(255, 255, 255, 096);
+  background: #ffffff;
+  color: #000000;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15), 0 -2px 0 rgba(0, 0, 0, 0.1) inset;
   animation: pillIconBounce 0.34s ease;
 }
 
 body.theme-dark:not(.has-image) .toolbar {
-  border-color: rgba(8, 9, 13, 0.08);
-  background: rgba(255, 255, 255, 0.96);
-  color: #05070a;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+  border-radius: 0 0 18px 18px;
+  border: none;
+  background: rgb(255, 255, 255);
+  color: #000000;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 1px 0 rgba(255,255,255,1) inset;
 }
 
 body.theme-dark:not(.has-image) .toolbar .toolbar-btn {
-  color: rgba(5, 7, 10, 0.82);
+  color: #000000;
 }
 
 body.theme-dark:not(.has-image) .toolbar .toolbar-btn:hover:not(:disabled) {
-  background: rgba(5, 7, 10, 0.06);
-  color: rgba(5, 7, 10, 0.96);
+  background: #000000;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), 0 -2px 0 rgba(255, 255, 255, 0.2) inset;
 }
 
 body.theme-dark:not(.has-image) .theme-toggle-group {
@@ -1814,22 +1816,4 @@ body .canvas-container.recording-preview-active .toolbar.auto-hidden {
   transform: translateX(-50%) translateY(var(--toolbar-offset));
 }
 
-body:not(.has-image):not(.theme-dark) .toolbar {
-  border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(18, 19, 24, 0.96);
-  color: #fff;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22), 0 1px 0 rgba(255,255,255,0.08) inset;
-}
 
-body:not(.has-image):not(.theme-dark) .toolbar .toolbar-btn {
-  color: rgba(255, 255, 255, 0.78);
-}
-
-body:not(.has-image):not(.theme-dark) .toolbar .toolbar-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.10);
-  color: rgba(255, 255, 255, 0.96);
-}
-
-body:not(.has-image):not(.theme-dark) .theme-toggle-group {
-  background: #08090d;
-}
