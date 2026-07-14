@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import path from 'path';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -9,19 +10,11 @@ export default defineConfig({
   },
   build: {
     target: 'esnext',
-    minify: 'terser',
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-ui': ['framer-motion', 'lucide-react', 'next-themes']
-        }
-      }
-    }
+    minify: 'terser'
   },
   resolve: {
-    alias: {
-      '@': '/src'
-    }
+    alias: [
+      { find: '@', replacement: path.resolve(__dirname, './src') }
+    ]
   }
 });

@@ -1,5 +1,5 @@
 import React from 'react'
-import { Sidebar, SidebarContent, SidebarSeparator } from '../ui/sidebar'
+import { Sidebar, SidebarContent, SidebarSeparator, SidebarRail } from '../ui/sidebar'
 import { EditorSidebarHeader } from './EditorSidebarHeader'
 import { EditorSidebarTools } from './EditorSidebarTools'
 import { EditorSidebarAppearance } from './EditorSidebarAppearance'
@@ -9,7 +9,7 @@ import { EditorSidebarFooter } from './EditorSidebarFooter'
 
 export function EditorSidebar() {
   return (
-    <Sidebar>
+    <Sidebar variant="sidebar" collapsible="icon">
       <EditorSidebarHeader />
       <SidebarContent>
         <EditorSidebarTools />
@@ -21,6 +21,7 @@ export function EditorSidebar() {
         <EditorSidebarExport />
       </SidebarContent>
       <EditorSidebarFooter />
+      <SidebarRail />
     </Sidebar>
   )
 }

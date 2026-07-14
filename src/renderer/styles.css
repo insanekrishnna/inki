@@ -177,16 +177,16 @@ body.platform-darwin.has-content .editor-drag-region {
 .toolbar-brand {
   display: none;
   align-items: center;
-  width: 110px;
   justify-content: flex-start;
+  width: 80px;
 }
 
 .toolbar-logo {
   display: block;
-  width: 110px;
-  max-height: 45px;
+  width: 80px;
+  max-height: 32px;
   object-fit: contain;
-  margin-left: -42px;
+  margin-left: -20px;
 }
 
 .theme-toggle-group {
@@ -200,7 +200,7 @@ body.platform-darwin.has-content .editor-drag-region {
 
 #react-theme-toggle-root {
   display: flex;
-  width: 100px;
+  width: 80px;
   justify-content: flex-end;
   align-items: center;
 }
