@@ -1,13 +1,14 @@
 import React from 'react'
-import { ThemeProvider } from '@/components/ui/theme-provider'
-import { Navbar } from '@/components/ui/navbar'
+import { ThemeProvider } from '../components/ui/theme-provider'
+import { SidebarProvider } from '../components/ui/sidebar'
+import { EditorSidebar } from '../components/editor/EditorSidebar'
 
 export default function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-      <div className="min-h-screen w-full relative transition-colors duration-300">
-        <Navbar />
-      </div>
+      <SidebarProvider>
+        <EditorSidebar />
+      </SidebarProvider>
     </ThemeProvider>
   )
 }

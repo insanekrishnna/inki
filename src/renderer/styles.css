@@ -17,7 +17,7 @@ html, body { height: 100%; overflow: hidden; }
 
 body {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   background: transparent;
   transition: none;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
@@ -57,6 +57,15 @@ body.has-content {
 body.platform-darwin.has-image,
 body.platform-darwin.has-content {
   background: lab(90.952 0 -0.0000119209);
+}
+
+/* ── Editor Main ── */
+.editor-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100vh;
 }
 
 /* ── Canvas Container ── */
@@ -594,13 +603,13 @@ body:not(.has-image) .toolbar .toolbar-separator {
   display: none;
 }
 
-body.has-image .toolbar-group.capture-modes,
-body.has-content .toolbar-group.capture-modes {
+body.has-image .toolbar.editor-sidebar .toolbar-group.capture-modes,
+body.has-content .toolbar.editor-sidebar .toolbar-group.capture-modes {
   display: none;
 }
 
-body.has-image .toolbar-group.capture-modes + .toolbar-separator,
-body.has-content .toolbar-group.capture-modes + .toolbar-separator {
+body.has-image .toolbar.editor-sidebar .toolbar-group.capture-modes + .toolbar-separator,
+body.has-content .toolbar.editor-sidebar .toolbar-group.capture-modes + .toolbar-separator {
   display: none;
 }
 

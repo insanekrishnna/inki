@@ -7,6 +7,21 @@
 // App State
 // ------------------------------------------------------------------------------
 
+// Expose functions for React sidebar
+window.editorUndo = () => undo();
+window.editorRedo = () => redo();
+window.editorClear = () => clearCanvas();
+window.editorCopy = () => copyToClipboard();
+window.editorSave = () => saveFile();
+window.editorCrop = () => toggleCrop();
+window.editorSelectColor = (c) => selectColor(c);
+window.editorSelectStrokeWidth = (w) => selectStrokeWidth(w);
+window.editorSelectTextBold = () => selectTextBold();
+window.editorSelectTextItalic = () => selectTextItalic();
+window.editorSelectFontFamily = (f) => selectTextFontFamily(f);
+window.editorSelectFontSize = (s) => selectTextFontSize(s);
+
+
 const state = {
   image: null,
   imageWidth: 0,
@@ -1841,11 +1856,20 @@ function updateStatus() {
 }
 
 function updateToolbarState() {
-  elements.btnCopy.disabled = !state.image;
-  elements.btnCrop.disabled = !state.image;
-  elements.btnUndo.disabled = state.historyIndex < 0;
-  elements.btnRedo.disabled = state.historyIndex >= state.history.length - 1;
-  elements.btnClear.disabled = !state.image;
+  if (elements.btnCopy) elements.btnCopy.disabled = !state.image;
+  if (elements.btnCrop) elements.btnCrop.disabled = !state.image;
+  if (elements.btnUndo) elements.btnUndo.disabled = state.historyIndex < 0;
+  if (elements.btnRedo) elements.btnRedo.disabled = state.historyIndex >= state.history.length - 1;
+  if (elements.btnClear) elements.btnClear.disabled = !state.image;
+
+  window.dispatchEvent(new CustomEvent('editor-state-change', {
+    detail: {
+      currentTool: state.currentTool,
+      currentColor: state.currentColor,
+      strokeWidth: state.strokeWidth,
+      hasImage: !!state.image
+    }
+  }));
 }
 
 
