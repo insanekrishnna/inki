@@ -14,9 +14,7 @@
     "@tailwindcss/vite": "^4.3.2",
     "@vitejs/plugin-react": "^6.0.3",
     "clsx": "^2.1.1",
-    "ffmpeg-static": "5.2.0",
     "framer-motion": "^12.42.2",
-    "gifski": "1.7.1",
     "lucide-react": "^1.24.0",
     "next-themes": "^0.4.6",
     "react": "^19.2.7",
@@ -25,88 +23,7 @@
     "tailwindcss": "^4.3.2",
     "vite": "^8.1.4"
   },
-  "build": {
-    "appId": "com.example.yourproject",
-    "productName": "Your Project",
-    "buildVersion": "0.0.0",
-    "directories": {
-      "output": "dist",
-      "buildResources": "build"
-    },
-    "afterSign": "scripts/sign-mac-ad-hoc.js",
-    "files": [
-      "src/**/*",
-      "package.json"
-    ],
-    "artifactName": "your-project-${arch}.${ext}",
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "your-github-username",
-        "repo": "your-project"
-      }
-    ],
-    "mac": {
-      "category": "public.app-category.graphics-design",
-      "target": [
-        {
-          "target": "dmg",
-          "arch": [
-            "universal"
-          ]
-        },
-        {
-          "target": "zip",
-          "arch": [
-            "arm64",
-            "x64"
-          ]
-        }
-      ],
-      "icon": "build/icon.icns"
-    },
-    "dmg": {
-      "icon": "build/icon.icns"
-    },
-    "win": {
-      "publisherName": [
-        "Your Name"
-      ],
-      "target": [
-        {
-          "target": "portable",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "requestedExecutionLevel": "asInvoker",
-      "artifactName": "your-project-portable.${ext}",
-      "icon": "build/icon.ico"
-    },
-    "linux": {
-      "icon": "build/icon.png",
-      "target": [
-        {
-          "target": "AppImage",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
-    },
-    "extraResources": [
-      {
-        "from": "src/bin",
-        "to": "bin",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ],
-    "asarUnpack": [
-      "node_modules/ffmpeg-static/**",
-      "node_modules/gifski/**"
-    ]
+  "devDependencies": {
+    "terser": "^5.49.0"
   }
 }

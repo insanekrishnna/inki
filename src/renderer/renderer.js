@@ -746,35 +746,12 @@ function updateCropUI() {
 // ------------------------------------------------------------------------------
 
 
-function openPreferences() {
-  if (!elements.preferencesDialog) return;
-  const statusEl = document.getElementById('preferences-license-status');
-  if (statusEl) {
-    window.projectApi.getLicenseState().then((state) => {
-      if (!state || state.licensed) {
-        statusEl.textContent = '';
-      } else if (state.trial?.expired) {
-        statusEl.textContent = 'Trial ended. Activate a license to continue.';
-      } else {
-        const d = state.trial.daysRemaining;
-        statusEl.textContent = `${d} day${d === 1 ? '' : 's'} left in your trial.`;
-      }
-    }).catch(() => { statusEl.textContent = ''; });
-  }
-  elements.preferencesDialog.showModal();
-}
-
 function showWindow() {
   // window.focus(); // Avoid forcing a macOS space switch when opening capture UI
 }
 
 async function startCapture(options = {}) {
   if (state.cropActive) cancelCrop();
-  if (_cachedLicenseState?.trial?.expired && !_cachedLicenseState?.licensed) {
-    window.projectApi.openLicenseWindow();
-    setCaptureModeButton();
-    return;
-  }
   try {
     const result = await window.projectApi.startCapture({
       hideDesktopIcons: options?.hideDesktopIcons ?? state.captureSettings.hideDesktopIcons,
@@ -791,11 +768,6 @@ async function startCapture(options = {}) {
 
 async function startCaptureWindow() {
   if (state.cropActive) cancelCrop();
-  if (_cachedLicenseState?.trial?.expired && !_cachedLicenseState?.licensed) {
-    window.projectApi.openLicenseWindow();
-    setCaptureModeButton();
-    return;
-  }
   try {
     const result = await window.projectApi.startCaptureWindow({
       hideDesktopIcons: state.captureSettings.hideDesktopIcons,
@@ -811,11 +783,6 @@ async function startCaptureWindow() {
 
 async function startCaptureFullscreen() {
   if (state.cropActive) cancelCrop();
-  if (_cachedLicenseState?.trial?.expired && !_cachedLicenseState?.licensed) {
-    window.projectApi.openLicenseWindow();
-    setCaptureModeButton();
-    return;
-  }
   try {
     const result = await window.projectApi.startCaptureFullscreen({
       hideDesktopIcons: state.captureSettings.hideDesktopIcons,
