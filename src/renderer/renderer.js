@@ -218,6 +218,16 @@ function setCaptureModeButton(mode = null) {
 
 let _cachedLicenseState = null;
 
+// Expose capture methods to React
+window.startCaptureRegion = () => { setCaptureModeButton('region'); startCapture({ mode: 'region' }); };
+window.startCaptureWindow = () => { setCaptureModeButton('window'); startCapture({ mode: 'window' }); };
+window.startCaptureFullscreen = () => { setCaptureModeButton('fullscreen'); startCapture({ mode: 'fullscreen' }); };
+
+// Listen to React custom tool selection
+window.addEventListener('react-tool-select', (e) => {
+  selectTool(e.detail.tool);
+});
+
 function updateLicenseDialog(licenseState) {
   if (!licenseState) return;
   _cachedLicenseState = licenseState;

@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Your Project — Lightweight screen-capture & annotation tool for macOS, Windows, and Linux." />
+  <title>Your Project · Capture, annotate, share.</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif;
+      background:lab(90.952 0 -0.0000119209);
+      color:#2e1c11;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+    }
+    ::selection{background:#c9894a;color:#fff}
+    .container{max-width:920px;margin:0 auto;padding:0 28px}
+    .section-label{
+      font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+      color:rgba(46,28,17,.48);margin-bottom:14px;
+    }
+    h2{font-size:clamp(1.5rem,2.4vw,2rem);font-weight:650;letter-spacing:-.02em;line-height:1.25}
+    h2+p{color:rgba(46,28,17,.62);font-size:.95rem;margin-top:8px;max-width:520px}
+
+    /* ── Top nav ── */
+    .top-nav{position:absolute;top:24px;left:0;right:0;z-index:2}
+    .top-nav .inner{max-width:920px;margin:0 auto;padding:0 28px;display:flex;justify-content:flex-end}
+    .top-nav a{display:inline-flex;align-items:center;gap:7px;color:rgba(46,28,17,.62);text-decoration:none;font-size:.84rem;font-weight:600;padding:8px 12px;border:1px solid rgba(255,255,255,.5);border-radius:10px;background:rgba(255,255,255,.22);transition:all .18s ease}
+    .dl-badge{font-size:.68rem;font-weight:500;background:rgba(201,137,74,.18);color:rgba(46,28,17,.6);padding:1px 7px;border-radius:6px;margin-left:1px;opacity:0;transition:opacity .5s ease;white-space:nowrap}
+    .dl-badge.show{opacity:1}
+    .top-nav a:hover{color:#2e1c11;background:rgba(255,255,255,.38);border-color:rgba(255,255,255,.72);transform:translateY(-1px)}
+    .top-nav svg{width:15px;height:15px}
+
+    /* ── Hero ── */
+    #hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 28px 60px}
+    #hero img{width:clamp(100px,16vw,170px);margin-bottom:24px}
+    #hero h1{font-size:clamp(2.6rem,5vw,4rem);font-weight:720;letter-spacing:-.03em;line-height:1.08;color:#2e1c11}
+    #hero h1 .version{font-size:.8rem;font-weight:500;color:rgba(46,28,17,.45);letter-spacing:0;vertical-align:super;margin-left:6px}
+    #hero .tagline{color:rgba(46,28,17,.6);font-size:clamp(.95rem,1.3vw,1.1rem);margin-top:12px;max-width:440px}
+    #hero .pill{display:inline-flex;align-items:center;gap:6px;margin-top:18px;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.32);border:1px solid rgba(255,255,255,.55);font-size:.82rem;color:rgba(46,28,17,.6)}
+    #hero .price-line{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:16px;font-size:.86rem;color:rgba(46,28,17,.62)}
+    #hero .price-line strong{font-size:1rem;color:#2e1c11}
+    #hero .price-line span{display:inline-flex;align-items:center;gap:10px}
+    #hero .price-line span+span::before{content:"";width:4px;height:4px;border-radius:50%;background:rgba(46,28,17,.34)}
+    #hero .actions{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap;justify-content:center}
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;padding:11px 26px;border-radius:11px;
+      font-size:.92rem;font-weight:600;text-decoration:none;transition:all .18s ease;border:1px solid;
+    }
+    .btn-primary{background:rgba(255,255,255,.58);color:#2e1c11;border-color:rgba(255,255,255,.84)}
+    .btn-primary:hover{background:rgba(255,255,255,.74);transform:translateY(-1px)}
+    .btn-secondary{background:transparent;color:rgba(46,28,17,.7);border-color:rgba(255,255,255,.5)}
+    .btn-secondary:hover{background:rgba(255,255,255,.24);border-color:rgba(255,255,255,.7);transform:translateY(-1px)}
+
+    /* ── Section spacing ── */
+    .section{padding:90px 0}
+
+    /* ── Principles ── */
+    .principle-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:32px}
+    .principle-card{
+      background:rgba(255,255,255,.26);border:1px solid rgba(255,255,255,.5);border-radius:14px;
+      padding:24px;transition:all .2s;
+    }
+    .principle-card:hover{background:rgba(255,255,255,.38);border-color:rgba(255,255,255,.7)}
+    .principle-card .num{font-size:1.6rem;font-weight:650;color:rgba(201,137,74,.5);margin-bottom:4px;line-height:1}
+    .principle-card h3{font-size:.95rem;font-weight:600;margin-bottom:4px}
+    .principle-card p{font-size:.86rem;color:rgba(46,28,17,.58);line-height:1.5}
+
+    /* ── Features ── */
+    .feat-list{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:32px}
+    .feat-item{
+      display:flex;gap:16px;align-items:flex-start;
+      background:rgba(255,255,255,.26);border:1px solid rgba(255,255,255,.5);border-radius:14px;
+      padding:22px;transition:all .2s;
+    }
+    .feat-item:hover{background:rgba(255,255,255,.38);border-color:rgba(255,255,255,.7)}
+    .feat-item .icon{flex-shrink:0;width:36px;height:36px;border-radius:9px;background:rgba(201,137,74,.15);display:flex;align-items:center;justify-content:center}
+    .feat-item .icon svg{width:18px;height:18px;color:#c9894a}
+    .feat-item h3{font-size:.92rem;font-weight:600;margin-bottom:3px}
+    .feat-item p{font-size:.84rem;color:rgba(46,28,17,.55);line-height:1.5}
+
+    /* ── Platforms ── */
+    .plat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:32px}
+    .plat-card{
+      background:rgba(255,255,255,.26);border:1px solid rgba(255,255,255,.5);border-radius:14px;
+      padding:28px;text-align:center;transition:all .2s;
+    }
+    .plat-card:hover{background:rgba(255,255,255,.38);border-color:rgba(255,255,255,.7)}
+    .plat-card .icon{margin-bottom:10px}
+    .plat-card h3{font-size:.95rem;font-weight:600}
+    .plat-card p{font-size:.84rem;color:rgba(46,28,17,.55);margin-top:3px}
+
+    /* ── Pricing ── */
+    .pricing-card{
+      margin-top:32px;background:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.58);
+      border-radius:14px;padding:28px;display:grid;grid-template-columns:.8fr 1.2fr;gap:24px;align-items:center;
+    }
+    .pricing-card .price{font-size:2.8rem;font-weight:760;letter-spacing:-.03em;line-height:1}
+    .pricing-card .price small{font-size:1rem;font-weight:620;color:rgba(46,28,17,.56);letter-spacing:0}
+    .pricing-card .note{font-size:.84rem;color:rgba(46,28,17,.56);margin-top:8px}
+    .pricing-card .btn{margin-top:18px}
+    .pricing-card h3{font-size:1rem;font-weight:650;margin-bottom:6px}
+    .pricing-card p{font-size:.88rem;color:rgba(46,28,17,.58);line-height:1.55}
+    .license-list{display:grid;gap:10px;margin-top:16px}
+    .license-list li{list-style:none;font-size:.86rem;color:rgba(46,28,17,.64);display:flex;gap:9px;align-items:flex-start}
+    .license-list li::before{content:"";width:6px;height:6px;border-radius:50%;background:#c9894a;margin-top:8px;flex:0 0 auto}
+
+    /* ── FAQ ── */
+    .faq-list{display:grid;gap:0;margin-top:32px}
+    .faq-item{
+      border-bottom:1px solid rgba(255,255,255,.4);padding:20px 0;
+    }
+    .faq-item:first-child{border-top:1px solid rgba(255,255,255,.4)}
+    .faq-item h3{font-size:.92rem;font-weight:600;margin-bottom:4px}
+    .faq-item p{font-size:.86rem;color:rgba(46,28,17,.55);line-height:1.55}
+
+    /* ── Footer ── */
+    footer{border-top:1px solid rgba(255,255,255,.45);padding:36px 0;margin-top:40px}
+    footer .inner{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px}
+    footer .copy{color:rgba(46,28,17,.5);font-size:.82rem}
+    footer .links{display:flex;gap:18px}
+    footer .links a{color:rgba(46,28,17,.5);text-decoration:none;font-size:.82rem;transition:color .2s}
+    footer .links a:hover{color:#2e1c11}
+
+    /* ── Slideshow ── */
+    .slideshow-section{padding:90px 0;text-align:center}
+    .slideshow-wrapper{position:relative;max-width:800px;margin:32px auto 0;border-radius:24px;overflow:hidden;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.5)}
+    .slideshow{position:relative;width:100%;overflow:hidden;transition:height .6s ease;min-height:200px}
+    .slide{position:absolute;inset:0;opacity:0;transition:opacity .8s ease}
+    .slide.active{opacity:1}
+    .slide img{width:100%;height:100%;object-fit:cover;display:block}
+    .slide::after{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.35) 50%,transparent 70%);transform:translateX(-100%);pointer-events:none}
+    .slide.active::after{animation:shimmer 2.2s ease-in-out infinite}
+    @keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(400%)}}
+    .slideshow-dots{display:flex;justify-content:center;gap:10px;padding:16px}
+    .slideshow-dots button{width:10px;height:10px;border-radius:50%;border:1px solid rgba(46,28,17,.3);background:transparent;cursor:pointer;padding:0;transition:all .3s}
+    .slideshow-dots button.active{background:#c9894a;border-color:#c9894a}
+
+    @media(max-width:600px){
+      .principle-grid,.feat-list,.plat-grid,.pricing-card{grid-template-columns:1fr}
+      .top-nav{top:14px}
+      .section{padding:60px 0}
+      footer .inner{flex-direction:column;text-align:center}
+    }
+  </style>
+</head>
+<body>
+
+<nav class="top-nav" aria-label="Primary">
+  <div class="inner">
+    <a href="https://github.com/your-github-username/your-project" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.79 23.39c.6.11.82-.26.82-.58v-2.02c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.09 1.85 1.24 1.85 1.24 1.07 1.84 2.82 1.31 3.51 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.49 5.93.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.57A12 12 0 0 0 12 .5Z"/></svg>
+      GitHub<span class="dl-badge" id="dl-count"></span>
+    </a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <img src="256x256.png" alt="Your Project icon" />
+  <h1>Your Project<span class="version" id="latest-version">v1.1.0</span></h1>
+  <p class="tagline">Fast captures. Clean marks. Zero friction.</p>
+  <div class="pill">macOS · Windows · Linux</div>
+  <div class="price-line">
+    <span><strong>9€</strong> one-time</span>
+    <span>30-day trial</span>
+    <span>2 devices</span>
+  </div>
+  <div class="actions">
+    <a class="btn btn-primary js-download" href="https://github.com/your-github-username/your-project/releases/latest">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span>Download</span>
+    </a>
+    <a class="btn btn-secondary" href="#pricing">Pricing</a>
+  </div>
+</section>
+
+<div class="container">
+
+  <!-- Screenshots -->
+  <div class="slideshow-section" id="screenshots">
+    <div class="section-label">Screenshots</div>
+    <h2>See it in action.</h2>
+    <p>Clean captures, quick annotations — all in one tool.</p>
+    <div class="slideshow-wrapper">
+      <div class="slideshow" id="slideshow">
+        <div class="slide active"><img src="screenshots/your-project-screenshot-1781854636643.png" alt="Your Project screenshot 1" /></div>
+        <div class="slide"><img src="screenshots/your-project-screenshot-1781855589978.png" alt="Your Project screenshot 2" /></div>
+        <div class="slide"><img src="screenshots/your-project-screenshot-1781855705326.png" alt="Your Project screenshot 3" /></div>
+      </div>
+      <div class="slideshow-dots" id="slideshow-dots"></div>
+    </div>
+  </div>
+
+  <!-- 00 · Why -->
+  <div class="section" id="why">
+    <div class="section-label">00 · Why Your Project</div>
+    <h2>Lightweight, private, yours.</h2>
+    <p>One binary. No telemetry. Instant startup. Capture, annotate, and share.</p>
+    <div class="principle-grid">
+      <div class="principle-card">
+        <div class="num">01</div>
+        <h3>Fast &amp; lightweight</h3>
+        <p>Built with Electron but optimized for low memory and instant startup. Runs on any modern machine.</p>
+      </div>
+      <div class="principle-card">
+        <div class="num">02</div>
+        <h3>Private by default</h3>
+        <p>Captures stay on your machine. No account is required during the trial.</p>
+      </div>
+      <div class="principle-card">
+        <div class="num">03</div>
+        <h3>One binary</h3>
+        <p>Capture, window, fullscreen, annotation — all in one file. No extras needed.</p>
+      </div>
+      <div class="principle-card">
+        <div class="num">04</div>
+        <h3>Keyboard-first</h3>
+        <p>Global shortcuts for everything. Capture, switch modes, save — without touching the mouse.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 01 · Features -->
+  <div class="section" id="features">
+    <div class="section-label">01 · Features</div>
+    <h2>Capture anything, annotate fast.</h2>
+    <p>Region, window, or fullscreen — then mark it up and share.</p>
+    <div class="feat-list">
+      <div class="feat-item">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <div><h3>Region capture</h3><p>Click and drag any area. Precision guides and zoomed loupe included.</p></div>
+      </div>
+      <div class="feat-item">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M6 21h12"/><path d="M12 17v4"/></svg></div>
+        <div><h3>Window capture</h3><p>Capture any open window with one click, or scroll-enabled full-page shots.</p></div>
+      </div>
+      <div class="feat-item">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+        <div><h3>Annotation</h3><p>Arrows, boxes, circles, text, freehand, highlights, and blur. Clean marks, no clutter.</p></div>
+      </div>
+      <div class="feat-item">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor"/></svg></div>
+      </div>
+      <div class="feat-item">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="13" height="14" rx="2"/><path d="M16 10l5-3v10l-5-3z"/></svg></div>
+        <div><h3>Copy &amp; share</h3><p>Auto-copies to clipboard. Paste anywhere. Drag to save. Share in seconds.</p></div>
+      </div>
+      <div class="feat-item">
+        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg></div>
+        <div><h3>Global shortcuts</h3><p>Cmd+Shift+S to capture. Switch modes, save, or copy — all from the keyboard.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 02 · Platforms -->
+  <div class="section" id="platform">
+    <div class="section-label">02 · Platforms</div>
+    <h2>Your OS, your rules.</h2>
+    <p>Same features, same shortcuts, same workflow — on every platform.</p>
+    <div class="plat-grid">
+      <div class="plat-card">
+        <div class="icon"><svg width="30" height="30" viewBox="0 0 814 1000" fill="rgba(46,28,17,.5)"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-36.8-155.5-127.4C46 790.7 0 663 0 541.8c0-207.8 135.4-317.7 269-317.7 69.3 0 126.6 44.5 170.4 44.5 42.8 0 109.3-47.5 188.9-47.5 30.5 0 130.9 2.6 198.3 99.2zm-234-181.5c31.1-36.9 53.1-88.1 53.1-139.3 0-7.1-.6-14.3-1.9-20.1-50.6 1.9-110.8 33.7-147.1 75.8-28.5 32.4-55.1 83.6-55.1 135.5 0 7.8 1.3 15.6 1.9 18.1 3.2.6 8.4 1.3 13.6 1.3 45.4 0 102.5-30.4 135.5-71.3z"/></svg></div>
+        <h3>macOS</h3>
+        <p>Native menu bar, global shortcuts, Apple Silicon native.</p>
+      </div>
+      <div class="plat-card">
+        <div class="icon"><svg width="30" height="30" viewBox="0 0 88 88"><rect x="0" y="0" width="40" height="40" rx="2" fill="#F25022"/><rect x="48" y="0" width="40" height="40" rx="2" fill="#7FBA00"/><rect x="0" y="48" width="40" height="40" rx="2" fill="#00A4EF"/><rect x="48" y="48" width="40" height="40" rx="2" fill="#FFB900"/></svg></div>
+        <h3>Windows</h3>
+        <p>Portable executable. No install required. Tray integration.</p>
+      </div>
+      <div class="plat-card">
+        <div class="icon"><svg width="30" height="30" viewBox="0 0 256 300" fill="rgba(46,28,17,.5)"><path d="M127.8 5.2c-18.4 0-34 7-44.2 19.8-9 11.3-13.7 26.7-13.7 44.1 0 10.4 1.6 19.4 4.4 27.2-10.7 5.8-19.5 14-26.2 23.8C39.4 133.7 34 151 34 170c0 22.4 6.1 40.8 17.1 54 10.2 12.2 24.4 19.6 40.3 21.6l-3.2 9.7c-2.2 6.7 1.5 13.8 8.2 16l22.4 7.3c6.7 2.2 13.8-1.5 16-8.2l2.6-8h-.5 1.4l2.6 8c2.2 6.7 9.3 10.4 16 8.2l22.4-7.3c6.7-2.2 10.4-9.3 8.2-16l-3.2-9.7c15.9-2 30.1-9.4 40.3-21.6 11-13.2 17.1-31.6 17.1-54 0-19-5.4-36.3-14.2-49.8-6.7-9.8-15.5-18-26.2-23.8 2.8-7.8 4.4-16.8 4.4-27.2 0-17.4-4.7-32.8-13.7-44.1C161.8 12.2 146.2 5.2 127.8 5.2zm.2 17.6c23.6 0 39.6 18.6 39.6 46.3 0 27.6-16 49.8-39.6 49.8s-39.6-22.2-39.6-49.8c0-27.7 16-46.3 39.6-46.3zm-12 22c-5.2 0-9.4 4.2-9.4 9.4s4.2 9.4 9.4 9.4 9.4-4.2 9.4-9.4-4.2-9.4-9.4-9.4zm23.8 0c-5.2 0-9.4 4.2-9.4 9.4s4.2 9.4 9.4 9.4 9.4-4.2 9.4-9.4-4.2-9.4-9.4-9.4zm-11.8 14.2c4.4 0 8.2 1.8 10 4.4.8 1.2.4 2.8-.8 3.6-1.2.8-2.8.4-3.6-.8-.8-1.2-3-2-5.6-2s-4.8.8-5.6 2c-.8 1.2-2.4 1.6-3.6.8-1.2-.8-1.6-2.4-.8-3.6 1.8-2.6 5.6-4.4 10-4.4zM128 133.2c33.4 0 59.8 21.6 59.8 56.2 0 20.6-7.6 34-18.6 42.8-9.4 7.4-21.4 11.4-34.4 12.4H121c-13-.8-25-4.8-34.4-12.4C75.6 223.2 68 210 68 189.4c0-34.6 26.4-56.2 59.8-56.2h.2z"/></svg></div>
+        <h3>Linux</h3>
+        <p>AppImage support. X11 and Wayland with PipeWire.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 03 · Pricing -->
+  <div class="section" id="pricing">
+    <div class="section-label">03 · Pricing</div>
+    <h2>Download first. Pay after the trial.</h2>
+    <p>Start with the 30-day trial from the latest release. If Your Project fits your workflow, keep using it with a 9€ one-time license.</p>
+    <div class="pricing-card">
+      <div>
+        <div class="price">9€ <small>one-time</small></div>
+        <div class="note">Full app · 2 devices · no subscription</div>
+        <a class="btn btn-primary js-download" href="https://github.com/your-github-username/your-project/releases/latest">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Download</span>
+        </a>
+      </div>
+      <div>
+        <h3>Personal license</h3>
+        <p>Unlock the full app after the trial, including scrolling captures, annotation, export, and clipboard workflows.</p>
+        <ul class="license-list">
+          <li>Download and try it before paying.</li>
+          <li>Activate by email after checkout.</li>
+          <li>Use one license on up to 2 active devices.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04 · FAQ -->
+  <div class="section" id="faq">
+    <div class="section-label">04 · Questions</div>
+    <h2>Questions.</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <h3>Is Your Project free?</h3>
+        <p>Your Project has a 30-day trial. After the trial, buy a license and activate it with your checkout email.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How does the license work?</h3>
+        <p>Each license allows 2 active device activations. Active licenses are revalidated online periodically, while captures remain local.</p>
+      </div>
+      <div class="faq-item">
+        <h3>What platforms does Your Project support?</h3>
+        <p>macOS (Intel &amp; Apple Silicon), Windows (portable), and Linux (AppImage). Same feature set on all three.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Does Your Project upload my data?</h3>
+        <p>No. Everything runs locally. No analytics, no telemetry, no accounts. Your screen stays yours.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How do I get started?</h3>
+        <p>Download the binary for your platform, launch it, and press Cmd+Shift+S (macOS) or Ctrl+Shift+S. No install wizard needed.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="container">
+    <div class="inner">
+      <div class="copy">Your Project</div>
+      <div class="links">
+        <a href="https://github.com/your-github-username/your-project" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/your-github-username/your-project/releases" target="_blank" rel="noopener">Releases</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const releasesApiUrl = 'https://api.github.com/repos/your-github-username/your-project/releases';
+  const releaseApiUrl = 'https://api.github.com/repos/your-github-username/your-project/releases/latest';
+  const releasePageUrl = 'https://github.com/your-github-username/your-project/releases/latest';
+
+  function currentPlatform() {
+    const platform = `${navigator.platform || ''} ${navigator.userAgent || ''}`.toLowerCase();
+    if (platform.includes('win')) return 'windows';
+    if (platform.includes('mac')) return 'macos';
+    if (platform.includes('linux')) return 'linux';
+    return 'unknown';
+  }
+
+  function currentMacOSVersion() {
+    const match = (navigator.userAgent || '').match(/Mac OS X (\d+)[._](\d+)(?:[._](\d+))?/i);
+    if (!match) return null;
+    return {
+      major: Number(match[1]),
+      minor: Number(match[2]),
+      patch: Number(match[3] || 0),
+    };
+  }
+
+  function isLegacyMacOS(version = currentMacOSVersion()) {
+    return Boolean(version && version.major === 10 && version.minor < 15);
+  }
+
+  function preferredMacAsset(assets = []) {
+    const dmgAssets = assets.filter((candidate) => /\.dmg$/i.test(candidate.name || ''));
+    const legacy = dmgAssets.find((candidate) => /legacy/i.test(candidate.name || ''));
+    const modern = dmgAssets.find((candidate) => /universal|arm64|mac/i.test(candidate.name || '') && !/legacy/i.test(candidate.name || ''));
+    const fallback = dmgAssets.find((candidate) => !/legacy/i.test(candidate.name || '')) || dmgAssets[0] || null;
+    return isLegacyMacOS() ? (legacy || fallback) : (modern || fallback || legacy || null);
+  }
+
+  function preferredAsset(assets = [], platform = currentPlatform()) {
+    if (platform === 'macos') return preferredMacAsset(assets);
+
+    const matchers = {
+      windows: [/your-project.*portable.*\.exe$/i, /your-project.*\.exe$/i],
+      linux: [/your-project.*\.appimage$/i],
+    }[platform] || [];
+
+    for (const matcher of matchers) {
+      const asset = assets.find((candidate) => matcher.test(candidate.name));
+      if (asset) return asset;
+    }
+
+    return null;
+  }
+
+  function downloadLabel(platform = currentPlatform(), hasAsset = true) {
+    if (!hasAsset) return 'View downloads';
+    if (platform === 'windows') return 'Download for Windows';
+    if (platform === 'macos') return isLegacyMacOS() ? 'Download for older macOS' : 'Download for macOS';
+    if (platform === 'linux') return 'Download for Linux';
+    return 'Download';
+  }
+
+  /* ── Slideshow ── */
+  (function(){
+    var slideshow = document.getElementById('slideshow');
+    var slides = slideshow.querySelectorAll('.slide');
+    var dotsContainer = document.getElementById('slideshow-dots');
+    if (!slides.length) return;
+    var current = 0;
+
+    function fit(i){
+      var img = slides[i].querySelector('img');
+      if (img && img.naturalWidth && img.naturalHeight){
+        var aspect = img.naturalWidth / img.naturalHeight;
+        slideshow.style.height = (slideshow.offsetWidth / aspect) + 'px';
+      } else {
+        slideshow.style.height = '';
+      }
+    }
+
+    function show(i){
+      slides.forEach(function(s){ s.classList.remove('active'); });
+      slides[i].classList.add('active');
+      fit(i);
+      if (dotsContainer){
+        var btns = dotsContainer.querySelectorAll('button');
+        btns.forEach(function(b){ b.classList.remove('active'); });
+        if (btns[i]) btns[i].classList.add('active');
+      }
+      current = i;
+    }
+
+    slides.forEach(function(s, i){
+      var btn = document.createElement('button');
+      btn.setAttribute('aria-label', 'Go to slide ' + (i+1));
+      if (i === 0) btn.classList.add('active');
+      btn.addEventListener('click', function(){ show(i); });
+      dotsContainer.appendChild(btn);
+      var img = s.querySelector('img');
+      if (img.complete) fit(i);
+      else img.addEventListener('load', function(){ fit(i); });
+    });
+
+    window.addEventListener('resize', function(){ fit(current); });
+    var autoplay = setInterval(function(){ show((current + 1) % slides.length); }, 4000);
+    slideshow.addEventListener('click', function(){ clearInterval(autoplay); });
+  })();
+
+  fetch(releasesApiUrl)
+    .then((response) => (response.ok ? response.json() : null))
+    .then((releases) => {
+      if (!releases || !releases.length) return;
+      var latest = releases[0];
+      var version = document.getElementById('latest-version');
+      var downloadLinks = document.querySelectorAll('.js-download');
+      var platform = currentPlatform();
+      var asset = preferredAsset(latest.assets || [], platform);
+      if (version && latest.tag_name) version.textContent = latest.tag_name;
+      var dlEl = document.getElementById('dl-count');
+      if (dlEl){
+        var total = 0;
+        releases.forEach(function(r){ (r.assets || []).forEach(function(a){ total += a.download_count || 0; }); });
+        dlEl.textContent = total >= 1000 ? (total / 1000).toFixed(total >= 10000 ? 0 : 1) + 'k' : total;
+        dlEl.classList.add('show');
+      }
+      downloadLinks.forEach((link) => {
+        link.href = asset?.browser_download_url || releasePageUrl;
+        var label = link.querySelector('span');
+        if (label) label.textContent = downloadLabel(platform, Boolean(asset));
+      });
+    })
+    .catch(function(){ fetch(releaseApiUrl).then(function(r){ return r.ok ? r.json() : null; }).then(function(release){
+      if (!release) return;
+      var version = document.getElementById('latest-version');
+      var downloadLinks = document.querySelectorAll('.js-download');
+      var platform = currentPlatform();
+      var asset = preferredAsset(release.assets || [], platform);
+      if (version && release.tag_name) version.textContent = release.tag_name;
+      downloadLinks.forEach(function(link){
+        link.href = asset?.browser_download_url || releasePageUrl;
+        var label = link.querySelector('span');
+        if (label) label.textContent = downloadLabel(platform, Boolean(asset));
+      });
+    }).catch(function(){}); });
+</script>
+
+</body>
+</html>
