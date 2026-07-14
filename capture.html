@@ -24,19 +24,7 @@
         <button class="toolbar-btn" id="btn-capture-window" data-tooltip="Capture window"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 8h18"/><circle cx="5.5" cy="6" r=".5" fill="currentColor"/><circle cx="7.5" cy="6" r=".5" fill="currentColor"/><circle cx="9.5" cy="6" r=".5" fill="currentColor"/></svg></button>
         <button class="toolbar-btn" id="btn-capture-fullscreen" data-tooltip="Capture fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M6 21h12"/><path d="M12 17v4"/></svg></button>
       </div>
-      <div class="theme-toggle-group inline-flex items-center gap-2" id="theme-toggle-group">
-        <span id="theme-light" class="theme-toggle-icon theme-toggle-icon-light cursor-pointer text-left text-sm font-medium" aria-controls="btn-toggle-theme" onclick="if(document.body.classList.contains('theme-dark')) document.getElementById('btn-toggle-theme').click()">
-          <svg class="size-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-        </span>
-        <button class="theme-toggle" id="btn-toggle-theme" type="button" role="switch" aria-checked="false" aria-labelledby="theme-dark theme-light" aria-label="Toggle between dark and light mode">
-          <span class="theme-toggle-track" aria-hidden="true">
-            <span class="theme-toggle-thumb"></span>
-          </span>
-        </button>
-        <span id="theme-dark" class="theme-toggle-icon theme-toggle-icon-dark cursor-pointer text-right text-sm font-medium" aria-controls="btn-toggle-theme" onclick="if(!document.body.classList.contains('theme-dark')) document.getElementById('btn-toggle-theme').click()">
-          <svg class="size-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-        </span>
-      </div>
+      <div id="react-theme-toggle-root"></div>
       <div class="toolbar-group tools">
         <button class="toolbar-btn tool-btn" data-tool="select" data-tooltip="Select / Move"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4l6 15 2-6 6-2z"/></svg></button>
         <button class="toolbar-btn tool-btn" data-tool="rect" data-tooltip="Rectangle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="5" width="16" height="14" rx="2"/></svg></button>
@@ -204,20 +192,10 @@
 
 
 
-  <dialog id="preferences-dialog" class="preferences-dialog">
-    <form method="dialog" class="preferences-panel">
-      <h3>Preferences</h3>
-      
-      <label><span>Hide desktop icons while capturing</span><input type="checkbox" id="hide-desktop-icons-setting" checked/></label>
-      <label><span>Capture Your&nbsp;Project elements</span><input type="checkbox" id="capture-project-setting"/></label>
-      <p class="preferences-license-status" id="preferences-license-status"></p>
-      <div class="preferences-actions"><button value="close">Done</button></div>
-    </form>
-  </dialog>
-
   <div class="app-tooltip" id="app-tooltip" aria-hidden="true"></div>
 
   <script src="/src/renderer/web-preview.js"></script>
   <script src="/src/renderer/renderer.js"></script>
+  <script type="module" src="/src/react/theme-toggle-mount.tsx"></script>
 </body>
 </html>
