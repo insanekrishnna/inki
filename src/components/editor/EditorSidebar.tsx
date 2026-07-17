@@ -36,7 +36,7 @@ import {
   useSidebar,
 } from '../ui/sidebar'
 import { cn } from '../../lib/utils'
-import { Logo } from '../sidebar-02/logo'
+// import { Logo } from '../sidebar-02/logo'
 
 const TOOLS = [
   { id: 'select', label: 'Select / Move', icon: MousePointer2, shortcut: 'V' },
@@ -65,10 +65,10 @@ const STROKES = [
 ]
 
 const sidebarButtonClass =
-  'h-9 rounded-xl text-neutral-600 transition-all hover:bg-white/90 hover:text-neutral-950 hover:shadow-sm'
+  'h-7.5 rounded-lg py-1 text-neutral-600 transition-all hover:bg-white/90 hover:text-neutral-950 hover:shadow-sm'
 const sidebarButtonInsetClass = 'pl-3 pr-3'
-const sidebarIconClass = 'size-4 shrink-0 text-neutral-700'
-const sidebarMenuClass = 'gap-1 pl-4 pr-1'
+const sidebarIconClass = 'size-7 shrink-0 text-neutral-700'
+const sidebarMenuClass = ' pl-4 pr-1'
 const sidebarGroupLabelClass = 'pl-4 pr-2'
 
 function getSidebarButtonStyle(isCollapsed: boolean): React.CSSProperties | undefined {
@@ -97,7 +97,7 @@ function SidebarBrand() {
   return (
     <SidebarHeader
       className={cn(
-        'flex md:pt-3.5',
+        'flex py-8 min-h-[52px]',
         isCollapsed
           ? 'flex-row items-center justify-between gap-y-4 px-4 md:flex-col md:items-start md:justify-start'
           : 'flex-row items-center justify-between px-3'
@@ -105,9 +105,8 @@ function SidebarBrand() {
     >
       <a className="flex min-w-0 items-center gap-2" href="#">
         <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-neutral-950 shadow-sm ring-1 ring-neutral-200">
-          <Logo className="size-5" />
+          <img src="/inki.png" alt="Inki" className="size-5 object-contain" style={{ transform: 'scale(3)' }} />
         </span>
-        {!isCollapsed && <span className="truncate text-[15px] font-semibold text-black">Inki</span>}
       </a>
 
       <motion.div
@@ -150,7 +149,7 @@ function EditorSidebarTools() {
   }
 
   return (
-    <SidebarGroup>
+    <SidebarGroup className="mt-2 ml-1">
       <SidebarGroupLabel className={sidebarGroupLabelClass}>Tools</SidebarGroupLabel>
       <SidebarMenu className={sidebarMenuClass}>
         {TOOLS.map((tool) => (
@@ -425,7 +424,7 @@ export function EditorSidebar() {
       className="translate-x-1 shadow-[12px_0_32px_rgba(15,23,42,0.06)] [&_[data-sidebar=sidebar]]:border-r-neutral-200/80 [&_[data-sidebar=sidebar]]:bg-[linear-gradient(180deg,#ffffff_0%,#f8f8f8_48%,#f2f2f2_100%)] [&_[data-sidebar=sidebar]]:shadow-[inset_-1px_0_0_rgba(255,255,255,0.75)]"
     >
       <SidebarBrand />
-      <SidebarContent className="gap-4 px-3 py-4">
+      <SidebarContent className="gap-4 px-3 pb-4 pt-8">
         <EditorSidebarTools />
         <SidebarSeparator className="mx-2" />
         <EditorSidebarAppearance />
