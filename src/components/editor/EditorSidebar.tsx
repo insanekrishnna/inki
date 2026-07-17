@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 import {
   ArrowUpRight,
   Bell,
@@ -11,10 +12,9 @@ import {
   Info,
   Minus,
   MousePointer2,
-  PanelLeft,
+  Plus,
   Redo2,
   Square,
-  Sun,
   Trash2,
   Type,
   Undo2,
@@ -31,10 +31,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarSeparator,
   SidebarTrigger,
   useSidebar,
 } from '../ui/sidebar'
 import { cn } from '../../lib/utils'
+import { Logo } from '../sidebar-02/logo'
 
 const TOOLS = [
   { id: 'select', label: 'Select / Move', icon: MousePointer2, shortcut: 'V' },
@@ -62,24 +64,60 @@ const STROKES = [
   { value: 8, height: '5.5px', label: 'Bold' },
 ]
 
+// Small reusable "keyboard key" chip. Sits close to the label instead of
+// being pinned to the far edge of the sidebar, and has its own border/bg
+// so it doesn't visually collide with the sidebar's outer border.
+function ShortcutKey({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="ml-auto shrink-0 rounded-md border border-neutral-200 bg-white px-1.5 py-0.5 text-[10px] font-medium leading-none text-neutral-400 shadow-sm">
+      {children}
+    </kbd>
+  )
+}
+
 function SidebarBrand() {
-  const { open } = useSidebar()
+  const { state } = useSidebar()
+  const isCollapsed = state === 'collapsed'
 
   return (
-    <SidebarHeader className="p-2">
-      <div className={cn("flex w-full", open ? "flex-row items-center gap-2" : "flex-col items-center gap-4")}>
-        <div className="flex size-7 shrink-0 items-center justify-center text-neutral-950">
-          <Sun className="size-[26px] fill-neutral-950 stroke-[2.5]" />
-        </div>
-        {open && <div className="min-w-0 flex-1 truncate text-[14px] font-semibold text-black">Acme</div>}
+    <SidebarHeader
+      className={cn(
+        'flex md:pt-3.5',
+        isCollapsed
+          ? 'flex-row items-center justify-between gap-y-4 px-2 md:flex-col md:items-start md:justify-start'
+          : 'flex-row items-center justify-between px-3'
+      )}
+    >
+      <a className="flex min-w-0 items-center gap-2" href="#">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-neutral-950 shadow-sm ring-1 ring-neutral-200">
+          <Logo className="size-5" />
+        </span>
+        {!isCollapsed && <span className="truncate text-[15px] font-semibold text-black">Inki</span>}
+      </a>
+
+      <motion.div
+        animate={{ opacity: 1 }}
+        className={cn('flex items-center gap-1.5', isCollapsed ? 'flex-row md:flex-col-reverse' : 'flex-row')}
+        initial={{ opacity: 0 }}
+        key={isCollapsed ? 'editor-header-collapsed' : 'editor-header-expanded'}
+        transition={{ duration: 0.35 }}
+      >
+        <button
+          aria-label="Notifications"
+          className="inline-flex size-8 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-950"
+          type="button"
+        >
+          <Bell className="size-4" />
+        </button>
         <SidebarTrigger className="shrink-0" />
-      </div>
+      </motion.div>
     </SidebarHeader>
   )
 }
 
 function EditorSidebarTools() {
-  const { open } = useSidebar()
+  const { state } = useSidebar()
+  const isCollapsed = state === 'collapsed'
   const [activeTool, setActiveTool] = useState<string | null>(null)
 
   useEffect(() => {
@@ -98,14 +136,23 @@ function EditorSidebarTools() {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Tools</SidebarGroupLabel>
-      <SidebarMenu>
+      <SidebarGroupLabel className="px-2">Tools</SidebarGroupLabel>
+      <SidebarMenu className="gap-1">
         {TOOLS.map((tool) => (
           <SidebarMenuItem key={tool.id}>
-            <SidebarMenuButton isActive={activeTool === tool.id} onClick={() => selectTool(tool.id)} tooltip={tool.label}>
-              <tool.icon />
-              {open && <span>{tool.label}</span>}
-              {open && tool.shortcut && <kbd className="ml-auto text-[10px] font-medium text-neutral-400">{tool.shortcut}</kbd>}
+            <SidebarMenuButton
+              className={cn(
+                'h-9 rounded-lg px-3 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-950',
+                activeTool === tool.id && 'bg-neutral-100 text-neutral-950',
+                isCollapsed && 'justify-center'
+              )}
+              isActive={activeTool === tool.id}
+              onClick={() => selectTool(tool.id)}
+              tooltip={tool.label}
+            >
+              <tool.icon className="ml-1.5 size-4 shrink-0" />
+              {!isCollapsed && <span className="ml-2 flex-1 truncate text-sm font-medium">{tool.label}</span>}
+              {!isCollapsed && tool.shortcut && <ShortcutKey>{tool.shortcut}</ShortcutKey>}
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}
@@ -115,9 +162,12 @@ function EditorSidebarTools() {
 }
 
 function EditorSidebarAppearance() {
-  const { open } = useSidebar()
+  const { state } = useSidebar()
+  const isCollapsed = state === 'collapsed'
   const [activeColor, setActiveColor] = useState('#f97316')
   const [activeStroke, setActiveStroke] = useState(4)
+  const customColorInputRef = useRef<HTMLInputElement>(null)
+  const [customColor, setCustomColor] = useState<string | null>(null)
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -141,36 +191,68 @@ function EditorSidebarAppearance() {
     if (typeof w.editorSelectStrokeWidth === 'function') w.editorSelectStrokeWidth(width)
   }
 
+  const handleCustomColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomColor(e.target.value)
+    selectColor(e.target.value)
+  }
+
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Appearance</SidebarGroupLabel>
-      <div className={cn('flex flex-wrap gap-1.5 px-0 py-1.5', !open && 'justify-center')}>
+      <SidebarGroupLabel className="px-2">Appearance</SidebarGroupLabel>
+
+      <div className={cn('flex flex-wrap items-center gap-2 px-2 py-2', isCollapsed && 'justify-center px-0')}>
         {COLORS.map((color) => (
           <button
             key={color.value}
             onClick={() => selectColor(color.value)}
             title={color.label}
             className={cn(
-              'size-5 shrink-0 rounded-full border-2 transition-all',
-              activeColor === color.value ? 'border-neutral-950 shadow-sm ring-2 ring-white' : 'border-transparent hover:scale-105'
+              'size-6 shrink-0 rounded-full border-2 transition-all',
+              activeColor === color.value
+                ? 'border-neutral-950 shadow-sm ring-2 ring-white'
+                : 'border-transparent hover:scale-105 hover:ring-2 hover:ring-neutral-200'
             )}
             style={{ backgroundColor: color.value }}
           />
         ))}
+
+        {/* Custom color swatch opens the native color picker. */}
+        <button
+          onClick={() => customColorInputRef.current?.click()}
+          title="Custom color"
+          className={cn(
+            'relative flex size-6 shrink-0 items-center justify-center rounded-full border-2 transition-all',
+            customColor && activeColor === customColor
+              ? 'border-neutral-950 shadow-sm ring-2 ring-white'
+              : 'border-dashed border-neutral-300 hover:scale-105 hover:border-neutral-400'
+          )}
+          style={customColor ? { backgroundColor: customColor, borderStyle: 'solid' } : undefined}
+        >
+          {!customColor && <Plus className="size-3 text-neutral-400" />}
+          <input
+            ref={customColorInputRef}
+            type="color"
+            value={customColor ?? activeColor}
+            onChange={handleCustomColorChange}
+            className="sr-only"
+            aria-label="Pick a custom color"
+          />
+        </button>
       </div>
-      {open && <div className="px-0 pb-1 pt-2 text-[10px] font-medium uppercase text-neutral-400">Stroke</div>}
-      <div className={cn('flex flex-col gap-1 px-0', !open && 'items-center pt-2')}>
+
+      {!isCollapsed && <div className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-normal text-neutral-400">Stroke</div>}
+      <div className={cn('flex flex-col gap-1 px-1', isCollapsed && 'items-center px-0 pt-2')}>
         {STROKES.map((stroke) => (
           <button
             key={stroke.value}
             onClick={() => selectStroke(stroke.value)}
             title={stroke.label}
             className={cn(
-              'flex h-7 w-full items-center justify-center rounded-md transition-colors',
+              'flex h-8 w-full items-center justify-center rounded-lg transition-colors',
               activeStroke === stroke.value ? 'bg-neutral-100 text-neutral-950' : 'text-neutral-400 hover:bg-neutral-100 hover:text-neutral-950'
             )}
           >
-            <span className="rounded-full bg-current" style={{ width: open ? '24px' : '14px', height: stroke.height }} />
+            <span className="rounded-full bg-current" style={{ width: !isCollapsed ? '28px' : '14px', height: stroke.height }} />
           </button>
         ))}
       </div>
@@ -179,31 +261,32 @@ function EditorSidebarAppearance() {
 }
 
 function EditorSidebarHistory() {
-  const { open } = useSidebar()
+  const { state } = useSidebar()
+  const isCollapsed = state === 'collapsed'
   const w = window as any
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>History</SidebarGroupLabel>
-      <SidebarMenu>
+      <SidebarGroupLabel className="px-2">History</SidebarGroupLabel>
+      <SidebarMenu className="gap-1">
         <SidebarMenuItem>
-          <SidebarMenuButton onClick={() => w.editorUndo?.()} tooltip="Undo">
-            <Undo2 />
-            {open && <span>Undo</span>}
-            {open && <kbd className="ml-auto text-[10px] font-medium text-neutral-400">Ctrl Z</kbd>}
+          <SidebarMenuButton className={cn('h-9 rounded-lg px-3', isCollapsed && 'justify-center')} onClick={() => w.editorUndo?.()} tooltip="Undo">
+            <Undo2 className="ml-1.5 size-4 shrink-0" />
+            {!isCollapsed && <span className="ml-2 flex-1 truncate text-sm font-medium">Undo</span>}
+            {!isCollapsed && <ShortcutKey>Ctrl Z</ShortcutKey>}
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <SidebarMenuButton onClick={() => w.editorRedo?.()} tooltip="Redo">
-            <Redo2 />
-            {open && <span>Redo</span>}
-            {open && <kbd className="ml-auto text-[10px] font-medium text-neutral-400">Ctrl Shift Z</kbd>}
+          <SidebarMenuButton className={cn('h-9 rounded-lg px-3', isCollapsed && 'justify-center')} onClick={() => w.editorRedo?.()} tooltip="Redo">
+            <Redo2 className="ml-1.5 size-4 shrink-0" />
+            {!isCollapsed && <span className="ml-2 flex-1 truncate text-sm font-medium">Redo</span>}
+            {!isCollapsed && <ShortcutKey>Ctrl Shift Z</ShortcutKey>}
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <SidebarMenuButton onClick={() => w.editorClear?.()} tooltip="Clear canvas">
-            <Trash2 />
-            {open && <span>Clear Canvas</span>}
+          <SidebarMenuButton className={cn('h-9 rounded-lg px-3', isCollapsed && 'justify-center')} onClick={() => w.editorClear?.()} tooltip="Clear canvas">
+            <Trash2 className="ml-1.5 size-4 shrink-0" />
+            {!isCollapsed && <span className="ml-2 flex-1 truncate text-sm font-medium">Clear Canvas</span>}
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
@@ -212,31 +295,32 @@ function EditorSidebarHistory() {
 }
 
 function EditorSidebarExport() {
-  const { open } = useSidebar()
+  const { state } = useSidebar()
+  const isCollapsed = state === 'collapsed'
   const w = window as any
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Export</SidebarGroupLabel>
-      <SidebarMenu>
+      <SidebarGroupLabel className="px-2">Export</SidebarGroupLabel>
+      <SidebarMenu className="gap-1">
         <SidebarMenuItem>
-          <SidebarMenuButton onClick={() => w.editorCrop?.()} tooltip="Crop image">
-            <Crop />
-            {open && <span>Crop</span>}
+          <SidebarMenuButton className={cn('h-9 rounded-lg px-3', isCollapsed && 'justify-center')} onClick={() => w.editorCrop?.()} tooltip="Crop image">
+            <Crop className="ml-1.5 size-4 shrink-0" />
+            {!isCollapsed && <span className="ml-2 flex-1 truncate text-sm font-medium">Crop</span>}
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <SidebarMenuButton onClick={() => w.editorCopy?.()} tooltip="Copy to clipboard">
-            <Copy />
-            {open && <span>Copy</span>}
-            {open && <kbd className="ml-auto text-[10px] font-medium text-neutral-400">Ctrl C</kbd>}
+          <SidebarMenuButton className={cn('h-9 rounded-lg px-3', isCollapsed && 'justify-center')} onClick={() => w.editorCopy?.()} tooltip="Copy to clipboard">
+            <Copy className="ml-1.5 size-4 shrink-0" />
+            {!isCollapsed && <span className="ml-2 flex-1 truncate text-sm font-medium">Copy</span>}
+            {!isCollapsed && <ShortcutKey>Ctrl C</ShortcutKey>}
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <SidebarMenuButton onClick={() => w.editorSave?.()} tooltip="Save as PNG">
-            <Download />
-            {open && <span>Save PNG</span>}
-            {open && <kbd className="ml-auto text-[10px] font-medium text-neutral-400">Ctrl E</kbd>}
+          <SidebarMenuButton className={cn('h-9 rounded-lg px-3', isCollapsed && 'justify-center')} onClick={() => w.editorSave?.()} tooltip="Save as PNG">
+            <Download className="ml-1.5 size-4 shrink-0" />
+            {!isCollapsed && <span className="ml-2 flex-1 truncate text-sm font-medium">Save PNG</span>}
+            {!isCollapsed && <ShortcutKey>Ctrl E</ShortcutKey>}
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
@@ -245,26 +329,28 @@ function EditorSidebarExport() {
 }
 
 function EditorSidebarFooter() {
-  const { open } = useSidebar()
+  const { state } = useSidebar()
+  const isCollapsed = state === 'collapsed'
 
   return (
-    <SidebarFooter>
+    <SidebarFooter className="px-2">
       <button
         onClick={() => window.open('https://github.com/prathm-k/inki', '_blank')}
         className={cn(
-          'flex h-[44px] w-full items-center gap-[10px] rounded-lg px-0 text-left text-neutral-950 hover:bg-neutral-100',
-          !open && 'justify-center'
+          'flex h-12 w-full items-center gap-3 rounded-lg px-2 text-left text-neutral-950 transition-colors hover:bg-neutral-100',
+          isCollapsed && 'justify-center px-0'
         )}
         title="Shortcuts & Info"
+        type="button"
       >
-        <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-white text-neutral-950 shadow-sm ring-1 ring-neutral-100">
-          <Info className="size-[13px]" />
+        <span className="ml-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-neutral-950 shadow-sm ring-1 ring-neutral-200">
+          <Info className="size-4" />
         </span>
-        {open && (
+        {!isCollapsed && (
           <>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[11px] font-semibold leading-3 text-black">Alpha Inc.</span>
-              <span className="block truncate text-[10px] font-medium leading-3 text-neutral-500">Free</span>
+              <span className="block truncate text-xs font-semibold leading-4 text-black">Alpha Inc.</span>
+              <span className="block truncate text-[11px] font-medium leading-3 text-neutral-500">Free</span>
             </span>
             <ChevronsUpDown className="size-[13px] shrink-0 text-neutral-950" />
           </>
@@ -276,12 +362,15 @@ function EditorSidebarFooter() {
 
 export function EditorSidebar() {
   return (
-    <Sidebar variant="sidebar" collapsible="icon">
+    <Sidebar variant="inset" collapsible="icon">
       <SidebarBrand />
-      <SidebarContent>
+      <SidebarContent className="gap-4 px-2 py-4">
         <EditorSidebarTools />
+        <SidebarSeparator className="mx-2" />
         <EditorSidebarAppearance />
+        <SidebarSeparator className="mx-2" />
         <EditorSidebarHistory />
+        <SidebarSeparator className="mx-2" />
         <EditorSidebarExport />
       </SidebarContent>
       <EditorSidebarFooter />
