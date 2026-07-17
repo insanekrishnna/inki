@@ -68,15 +68,14 @@ export function EditorSidebarAppearance() {
 
       {/* Stroke width */}
       {open && <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 px-2 mt-3 mb-1">Stroke</div>}
-      <div className={cn("flex gap-1 px-2 mt-2", !open && "flex-col items-center mt-3")}>
+      <div className={cn("flex flex-col gap-1 px-2 mt-2", !open && "items-center mt-3")}>
         {STROKES.map((stroke) => (
           <button
             key={stroke.value}
             onClick={() => selectStroke(stroke.value)}
             title={stroke.label}
             className={cn(
-              "flex items-center justify-center rounded-md transition-colors",
-              open ? "flex-1 h-8" : "w-8 h-8",
+              "flex items-center justify-center rounded-md transition-colors h-8 w-full",
               activeStroke === stroke.value
                 ? "bg-black/5 dark:bg-white/10 text-black dark:text-white"
                 : "text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900"
