@@ -66,15 +66,15 @@ const STROKES = [
 
 const sidebarButtonClass =
   'h-7.5 rounded-lg py-1 text-neutral-600 transition-all hover:bg-white/90 hover:text-neutral-950 hover:shadow-sm'
-const sidebarButtonInsetClass = 'pl-3 pr-3'
+const sidebarButtonInsetClass = 'pl-1 pr-3'
 const sidebarIconClass = 'size-7 shrink-0 text-neutral-700'
-const sidebarMenuClass = ' pl-4 pr-1'
-const sidebarGroupLabelClass = 'pl-4 pr-2'
+const sidebarMenuClass = 'pl-0 pr-1 group-data-[collapsible=icon]:pl-0'
+const sidebarGroupLabelClass = 'pl-0 pr-2'
 
 function getSidebarButtonStyle(isCollapsed: boolean): React.CSSProperties | undefined {
   if (isCollapsed) return undefined
   return {
-    paddingLeft: 10,
+    paddingLeft: 2,
     paddingRight: 12,
   }
 }
@@ -97,10 +97,10 @@ function SidebarBrand() {
   return (
     <SidebarHeader
       className={cn(
-        'flex py-8 min-h-[52px]',
+        'flex py-6 min-h-[52px] pl-6',
         isCollapsed
-          ? 'flex-row items-center justify-between gap-y-4 px-4 md:flex-col md:items-start md:justify-start'
-          : 'flex-row items-center justify-between px-3'
+          ? 'flex-row items-center justify-between gap-y-4 md:flex-col md:items-start md:justify-start'
+          : 'flex-row items-center justify-between pr-3'
       )}
     >
       <a className="flex min-w-0 items-center gap-2" href="#">
@@ -116,13 +116,6 @@ function SidebarBrand() {
         key={isCollapsed ? 'editor-header-collapsed' : 'editor-header-expanded'}
         transition={{ duration: 0.35 }}
       >
-        <button
-          aria-label="Notifications"
-          className="inline-flex size-8 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-950"
-          type="button"
-        >
-          <Bell className="size-4" />
-        </button>
         <SidebarTrigger className="shrink-0" />
       </motion.div>
     </SidebarHeader>
@@ -213,9 +206,9 @@ function EditorSidebarAppearance() {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="px-2">Appearance</SidebarGroupLabel>
+      <SidebarGroupLabel className={sidebarGroupLabelClass}>Appearance</SidebarGroupLabel>
 
-      <div className={cn('flex flex-wrap items-center gap-2 px-2 py-2', isCollapsed ? 'flex-col justify-center px-0 gap-3' : '')}>
+      <div className={cn('flex flex-wrap items-center gap-2 pl-6 pr-2 py-2', isCollapsed ? 'flex-col justify-center px-0 gap-3' : '')}>
         {COLORS.filter(color => !isCollapsed || color.value === '#111111' || color.value === '#ef4444')
           .sort((a, b) => {
             if (isCollapsed) {
@@ -263,8 +256,8 @@ function EditorSidebarAppearance() {
         </button>
       </div>
 
-      {!isCollapsed && <div className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-normal text-neutral-400">Stroke</div>}
-      <div className={cn('flex px-1', isCollapsed ? 'flex-col items-center px-0 pt-2 gap-3' : 'flex-col gap-1')}>
+      {!isCollapsed && <div className="pl-6 pr-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-normal text-neutral-400">Stroke</div>}
+      <div className={cn('flex pl-6 pr-1', isCollapsed ? 'flex-col items-center px-0 pt-2 gap-3' : 'flex-col gap-1')}>
         {STROKES.map((stroke) => (
           <button
             key={stroke.value}
@@ -424,7 +417,7 @@ export function EditorSidebar() {
       className="translate-x-1 shadow-[12px_0_32px_rgba(15,23,42,0.06)] [&_[data-sidebar=sidebar]]:border-r-neutral-200/80 [&_[data-sidebar=sidebar]]:bg-[linear-gradient(180deg,#ffffff_0%,#f8f8f8_48%,#f2f2f2_100%)] [&_[data-sidebar=sidebar]]:shadow-[inset_-1px_0_0_rgba(255,255,255,0.75)]"
     >
       <SidebarBrand />
-      <SidebarContent className="gap-4 px-3 pb-4 pt-8">
+      <SidebarContent className="gap-4 pl-6 pr-3 pb-4 pt-8">
         <EditorSidebarTools />
         <SidebarSeparator className="mx-2" />
         <EditorSidebarAppearance />

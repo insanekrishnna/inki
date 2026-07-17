@@ -366,7 +366,8 @@ const SidebarHeader = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="header"
-      className={cn("flex flex-col gap-2 px-4 pb-5 pt-4", className)}
+      className={cn("flex flex-col gap-2 pr-4 pb-5 pt-4", className)}
+      style={{ paddingLeft: 16, ...props.style }}
       {...props}
     />
   )
@@ -412,9 +413,10 @@ const SidebarContent = React.forwardRef<
       ref={ref}
       data-sidebar="content"
       className={cn(
-        "flex min-h-0 flex-1 flex-col gap-3 overflow-auto px-4 group-data-[collapsible=icon]:overflow-hidden group-data-[collapsible=icon]:px-3",
+        "flex min-h-0 flex-1 flex-col gap-3 overflow-auto pr-4 group-data-[collapsible=icon]:overflow-hidden group-data-[collapsible=icon]:px-3",
         className
       )}
+      style={{ paddingLeft: 16, ...props.style }}
       {...props}
     />
   )
@@ -447,10 +449,11 @@ const SidebarGroupLabel = React.forwardRef<
       ref={ref}
       data-sidebar="group-label"
       className={cn(
-        "flex h-5 shrink-0 items-center rounded-md px-1 text-[10px] font-semibold uppercase tracking-normal text-neutral-400 outline-none ring-sidebar-ring transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-        "group-data-[collapsible=icon]:-mt-5 group-data-[collapsible=icon]:opacity-0",
+        "flex h-5 shrink-0 items-center rounded-md pr-1 text-[10px] font-semibold uppercase tracking-normal text-neutral-400 outline-none ring-sidebar-ring transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+        "group-data-[collapsible=icon]:-mt-5 group-data-[collapsible=icon]:opacity-0 ",
         className
       )}
+      style={{ paddingLeft: 0, ...props.style }}
       {...props}
     />
   )
