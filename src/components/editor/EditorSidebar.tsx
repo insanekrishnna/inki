@@ -216,8 +216,16 @@ function EditorSidebarAppearance() {
     <SidebarGroup>
       <SidebarGroupLabel className="px-2">Appearance</SidebarGroupLabel>
 
-      <div className={cn('flex flex-wrap items-center gap-2 px-2 py-2', isCollapsed && 'justify-center px-0')}>
-        {COLORS.map((color) => (
+      <div className={cn('flex flex-wrap items-center gap-2 px-2 py-2', isCollapsed ? 'flex-col justify-center px-0 gap-3' : '')}>
+        {COLORS.filter(color => !isCollapsed || color.value === '#111111' || color.value === '#ef4444')
+          .sort((a, b) => {
+            if (isCollapsed) {
+              if (a.value === '#111111') return -1
+              if (a.value === '#ef4444') return 1
+            }
+            return 0
+          })
+          .map((color) => (
           <button
             key={color.value}
             onClick={() => selectColor(color.value)}
@@ -257,7 +265,7 @@ function EditorSidebarAppearance() {
       </div>
 
       {!isCollapsed && <div className="px-2 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-normal text-neutral-400">Stroke</div>}
-      <div className={cn('flex flex-col gap-1 px-1', isCollapsed && 'items-center px-0 pt-2')}>
+      <div className={cn('flex px-1', isCollapsed ? 'flex-col items-center px-0 pt-2 gap-3' : 'flex-col gap-1')}>
         {STROKES.map((stroke) => (
           <button
             key={stroke.value}
