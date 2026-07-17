@@ -64,12 +64,27 @@ const STROKES = [
   { value: 8, height: '5.5px', label: 'Bold' },
 ]
 
+const sidebarButtonClass =
+  'h-9 rounded-xl text-neutral-600 transition-all hover:bg-white/90 hover:text-neutral-950 hover:shadow-sm'
+const sidebarButtonInsetClass = 'pl-3 pr-3'
+const sidebarIconClass = 'size-4 shrink-0 text-neutral-700'
+const sidebarMenuClass = 'gap-1 pl-4 pr-1'
+const sidebarGroupLabelClass = 'pl-4 pr-2'
+
+function getSidebarButtonStyle(isCollapsed: boolean): React.CSSProperties | undefined {
+  if (isCollapsed) return undefined
+  return {
+    paddingLeft: 10,
+    paddingRight: 12,
+  }
+}
+
 // Small reusable "keyboard key" chip. Sits close to the label instead of
 // being pinned to the far edge of the sidebar, and has its own border/bg
 // so it doesn't visually collide with the sidebar's outer border.
 function ShortcutKey({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="ml-auto shrink-0 rounded-md border border-neutral-200 bg-white px-1.5 py-0.5 text-[10px] font-medium leading-none text-neutral-400 shadow-sm">
+    <kbd className=" px-1.5 py-0.5 text-[10px] font-medium ">
       {children}
     </kbd>
   )
@@ -84,7 +99,7 @@ function SidebarBrand() {
       className={cn(
         'flex md:pt-3.5',
         isCollapsed
-          ? 'flex-row items-center justify-between gap-y-4 px-2 md:flex-col md:items-start md:justify-start'
+          ? 'flex-row items-center justify-between gap-y-4 px-4 md:flex-col md:items-start md:justify-start'
           : 'flex-row items-center justify-between px-3'
       )}
     >
@@ -136,21 +151,22 @@ function EditorSidebarTools() {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="px-2">Tools</SidebarGroupLabel>
-      <SidebarMenu className="gap-1">
+      <SidebarGroupLabel className={sidebarGroupLabelClass}>Tools</SidebarGroupLabel>
+      <SidebarMenu className={sidebarMenuClass}>
         {TOOLS.map((tool) => (
           <SidebarMenuItem key={tool.id}>
             <SidebarMenuButton
               className={cn(
-                'h-9 rounded-lg px-3 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-950',
-                activeTool === tool.id && 'bg-neutral-100 text-neutral-950',
-                isCollapsed && 'justify-center'
+                sidebarButtonClass,
+                activeTool === tool.id && 'bg-white text-neutral-950 shadow-sm ring-1 ring-neutral-200/70',
+                isCollapsed ? 'justify-center px-0' : sidebarButtonInsetClass
               )}
               isActive={activeTool === tool.id}
               onClick={() => selectTool(tool.id)}
+              style={getSidebarButtonStyle(isCollapsed)}
               tooltip={tool.label}
             >
-              <tool.icon className="ml-1.5 size-4 shrink-0" />
+              <tool.icon className={sidebarIconClass} />
               {!isCollapsed && <span className="ml-2 flex-1 truncate text-sm font-medium">{tool.label}</span>}
               {!isCollapsed && tool.shortcut && <ShortcutKey>{tool.shortcut}</ShortcutKey>}
             </SidebarMenuButton>
@@ -267,25 +283,40 @@ function EditorSidebarHistory() {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="px-2">History</SidebarGroupLabel>
-      <SidebarMenu className="gap-1">
+      <SidebarGroupLabel className={sidebarGroupLabelClass}>History</SidebarGroupLabel>
+      <SidebarMenu className={sidebarMenuClass}>
         <SidebarMenuItem>
-          <SidebarMenuButton className={cn('h-9 rounded-lg px-3', isCollapsed && 'justify-center')} onClick={() => w.editorUndo?.()} tooltip="Undo">
-            <Undo2 className="ml-1.5 size-4 shrink-0" />
+          <SidebarMenuButton
+            className={cn(sidebarButtonClass, isCollapsed ? 'justify-center px-0' : sidebarButtonInsetClass)}
+            onClick={() => w.editorUndo?.()}
+            style={getSidebarButtonStyle(isCollapsed)}
+            tooltip="Undo"
+          >
+            <Undo2 className={sidebarIconClass} />
             {!isCollapsed && <span className="ml-2 flex-1 truncate text-sm font-medium">Undo</span>}
             {!isCollapsed && <ShortcutKey>Ctrl Z</ShortcutKey>}
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <SidebarMenuButton className={cn('h-9 rounded-lg px-3', isCollapsed && 'justify-center')} onClick={() => w.editorRedo?.()} tooltip="Redo">
-            <Redo2 className="ml-1.5 size-4 shrink-0" />
+          <SidebarMenuButton
+            className={cn(sidebarButtonClass, isCollapsed ? 'justify-center px-0' : sidebarButtonInsetClass)}
+            onClick={() => w.editorRedo?.()}
+            style={getSidebarButtonStyle(isCollapsed)}
+            tooltip="Redo"
+          >
+            <Redo2 className={sidebarIconClass} />
             {!isCollapsed && <span className="ml-2 flex-1 truncate text-sm font-medium">Redo</span>}
             {!isCollapsed && <ShortcutKey>Ctrl Shift Z</ShortcutKey>}
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <SidebarMenuButton className={cn('h-9 rounded-lg px-3', isCollapsed && 'justify-center')} onClick={() => w.editorClear?.()} tooltip="Clear canvas">
-            <Trash2 className="ml-1.5 size-4 shrink-0" />
+          <SidebarMenuButton
+            className={cn(sidebarButtonClass, isCollapsed ? 'justify-center px-0' : sidebarButtonInsetClass)}
+            onClick={() => w.editorClear?.()}
+            style={getSidebarButtonStyle(isCollapsed)}
+            tooltip="Clear canvas"
+          >
+            <Trash2 className={sidebarIconClass} />
             {!isCollapsed && <span className="ml-2 flex-1 truncate text-sm font-medium">Clear Canvas</span>}
           </SidebarMenuButton>
         </SidebarMenuItem>
@@ -301,24 +332,39 @@ function EditorSidebarExport() {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="px-2">Export</SidebarGroupLabel>
-      <SidebarMenu className="gap-1">
+      <SidebarGroupLabel className={sidebarGroupLabelClass}>Export</SidebarGroupLabel>
+      <SidebarMenu className={sidebarMenuClass}>
         <SidebarMenuItem>
-          <SidebarMenuButton className={cn('h-9 rounded-lg px-3', isCollapsed && 'justify-center')} onClick={() => w.editorCrop?.()} tooltip="Crop image">
-            <Crop className="ml-1.5 size-4 shrink-0" />
+          <SidebarMenuButton
+            className={cn(sidebarButtonClass, isCollapsed ? 'justify-center px-0' : sidebarButtonInsetClass)}
+            onClick={() => w.editorCrop?.()}
+            style={getSidebarButtonStyle(isCollapsed)}
+            tooltip="Crop image"
+          >
+            <Crop className={sidebarIconClass} />
             {!isCollapsed && <span className="ml-2 flex-1 truncate text-sm font-medium">Crop</span>}
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <SidebarMenuButton className={cn('h-9 rounded-lg px-3', isCollapsed && 'justify-center')} onClick={() => w.editorCopy?.()} tooltip="Copy to clipboard">
-            <Copy className="ml-1.5 size-4 shrink-0" />
+          <SidebarMenuButton
+            className={cn(sidebarButtonClass, isCollapsed ? 'justify-center px-0' : sidebarButtonInsetClass)}
+            onClick={() => w.editorCopy?.()}
+            style={getSidebarButtonStyle(isCollapsed)}
+            tooltip="Copy to clipboard"
+          >
+            <Copy className={sidebarIconClass} />
             {!isCollapsed && <span className="ml-2 flex-1 truncate text-sm font-medium">Copy</span>}
             {!isCollapsed && <ShortcutKey>Ctrl C</ShortcutKey>}
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
-          <SidebarMenuButton className={cn('h-9 rounded-lg px-3', isCollapsed && 'justify-center')} onClick={() => w.editorSave?.()} tooltip="Save as PNG">
-            <Download className="ml-1.5 size-4 shrink-0" />
+          <SidebarMenuButton
+            className={cn(sidebarButtonClass, isCollapsed ? 'justify-center px-0' : sidebarButtonInsetClass)}
+            onClick={() => w.editorSave?.()}
+            style={getSidebarButtonStyle(isCollapsed)}
+            tooltip="Save as PNG"
+          >
+            <Download className={sidebarIconClass} />
             {!isCollapsed && <span className="ml-2 flex-1 truncate text-sm font-medium">Save PNG</span>}
             {!isCollapsed && <ShortcutKey>Ctrl E</ShortcutKey>}
           </SidebarMenuButton>
@@ -349,10 +395,13 @@ function EditorSidebarFooter() {
         {!isCollapsed && (
           <>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-xs font-semibold leading-4 text-black">Alpha Inc.</span>
+              <span className="block truncate text-xs font-semibold leading-4 text-black">Inki</span>
               <span className="block truncate text-[11px] font-medium leading-3 text-neutral-500">Free</span>
             </span>
-            <ChevronsUpDown className="size-[13px] shrink-0 text-neutral-950" />
+            <span className="flex items-center gap-1 text-[11px] font-medium text-neutral-500">
+              <span>v0.1.0</span>
+              <ChevronsUpDown className="size-3" />
+            </span>
           </>
         )}
       </button>
@@ -362,9 +411,13 @@ function EditorSidebarFooter() {
 
 export function EditorSidebar() {
   return (
-    <Sidebar variant="inset" collapsible="icon">
+    <Sidebar
+      variant="inset"
+      collapsible="icon"
+      className="translate-x-1 shadow-[12px_0_32px_rgba(15,23,42,0.06)] [&_[data-sidebar=sidebar]]:border-r-neutral-200/80 [&_[data-sidebar=sidebar]]:bg-[linear-gradient(180deg,#ffffff_0%,#f8f8f8_48%,#f2f2f2_100%)] [&_[data-sidebar=sidebar]]:shadow-[inset_-1px_0_0_rgba(255,255,255,0.75)]"
+    >
       <SidebarBrand />
-      <SidebarContent className="gap-4 px-2 py-4">
+      <SidebarContent className="gap-4 px-3 py-4">
         <EditorSidebarTools />
         <SidebarSeparator className="mx-2" />
         <EditorSidebarAppearance />
