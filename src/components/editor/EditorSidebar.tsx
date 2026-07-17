@@ -93,10 +93,10 @@ function SidebarBrand() {
   return (
     <SidebarHeader
       className={cn(
-        'flex py-6 min-h-[52px]',
+        'flex min-h-[52px]',
         isCollapsed
-          ? 'flex-row items-center justify-center gap-y-4 md:flex-col md:items-center md:justify-center'
-          : 'flex-row items-center justify-between pl-8 pr-5'
+          ? 'flex-col items-center justify-start gap-y-3 pt-6 pb-2'
+          : 'flex-row items-center justify-between py-6 pl-8 pr-5'
       )}
     >
       <a className="group flex min-w-0 items-center gap-2 outline-none" href="#">
@@ -381,15 +381,13 @@ function EditorSidebarFooter() {
       <button
         onClick={() => window.open('https://github.com/prathm-k/inki', '_blank')}
         className={cn(
-          'group flex h-12 w-full items-center gap-3 rounded-md px-2 text-left text-neutral-950 transition-all duration-200 hover:scale-[1.02]',
-          isCollapsed && 'justify-center px-0'
+          'group flex h-12 w-full items-center justify-between rounded-md text-left text-neutral-950 transition-all duration-200 hover:scale-[1.02]',
+          isCollapsed ? 'justify-center px-0' : 'pl-8 pr-5'
         )}
         title="Shortcuts & Info"
         type="button"
       >
-        <span className="ml-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-white text-neutral-950 shadow-sm ring-1 ring-neutral-200 transition-transform duration-300 group-hover:scale-105 group-hover:shadow-md">
-          <Info className="size-4" />
-        </span>
+
         {!isCollapsed && (
           <>
             <span className="min-w-0 flex-1">
@@ -415,7 +413,7 @@ export function EditorSidebar() {
       className="translate-x-1 shadow-[20px_0_40px_rgba(15,23,42,0.06),_1px_0_4px_rgba(15,23,42,0.02)] [&_[data-sidebar=sidebar]]:border-r-neutral-200/50 [&_[data-sidebar=sidebar]]:bg-white/90 [&_[data-sidebar=sidebar]]:backdrop-blur-xl [&_[data-sidebar=sidebar]]:shadow-[inset_-1px_0_0_rgba(255,255,255,1)]"
     >
       <SidebarBrand />
-      <SidebarContent className="gap-6 pl-8 pr-5 pb-6 pt-10">
+      <SidebarContent className="gap-6 pl-8 pr-5 pb-6 pt-10 group-data-[collapsible=icon]:pt-4 group-data-[collapsible=icon]:gap-4">
         <EditorSidebarTools />
         <SidebarSeparator className="mx-2" />
         <EditorSidebarAppearance />
