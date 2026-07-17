@@ -66,23 +66,13 @@ function SidebarBrand() {
   const { open } = useSidebar()
 
   return (
-    <SidebarHeader>
-      <div className="flex items-center gap-[10px]">
+    <SidebarHeader className="p-2">
+      <div className={cn("flex w-full", open ? "flex-row items-center gap-2" : "flex-col items-center gap-4")}>
         <div className="flex size-7 shrink-0 items-center justify-center text-neutral-950">
           <Sun className="size-[26px] fill-neutral-950 stroke-[2.5]" />
         </div>
-        {open && <div className="min-w-0 flex-1 truncate text-[12px] font-semibold text-black">Acme</div>}
-        {open && (
-          <div className="flex items-center gap-[12px] text-neutral-950">
-            <button className="inline-flex size-5 items-center justify-center rounded-md hover:bg-neutral-100" title="Notifications">
-              <Bell className="size-[13px]" />
-            </button>
-            <SidebarTrigger>
-              <PanelLeft className="size-[13px]" />
-            </SidebarTrigger>
-          </div>
-        )}
-        {!open && <SidebarTrigger className="ml-auto" />}
+        {open && <div className="min-w-0 flex-1 truncate text-[14px] font-semibold text-black">Acme</div>}
+        <SidebarTrigger className="shrink-0" />
       </div>
     </SidebarHeader>
   )
