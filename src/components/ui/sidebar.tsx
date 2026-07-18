@@ -419,7 +419,7 @@ const SidebarContent = React.forwardRef<
         "flex min-h-0 flex-1 flex-col gap-1 overflow-auto group-data-[collapsible=icon]:overflow-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]",
         className
       )}
-      style={isCollapsed ? { paddingLeft: 4, paddingRight: 4, ...props.style } : { paddingLeft: 20, paddingRight: 16, ...props.style }}
+      style={isCollapsed ? { paddingLeft: 4, paddingRight: 4, ...props.style } : { ...props.style }}
       {...props}
     />
   )
@@ -456,7 +456,7 @@ const SidebarGroupLabel = React.forwardRef<
         "group-data-[collapsible=icon]:-mt-5 group-data-[collapsible=icon]:opacity-0 ",
         className
       )}
-      style={{ paddingLeft: 4, ...props.style }}
+      style={{ paddingLeft: 20, ...props.style }}
       {...props}
     />
   )

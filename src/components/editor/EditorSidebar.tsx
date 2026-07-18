@@ -72,7 +72,8 @@ const sidebarMenuClass = 'gap-0.5'
 const sidebarGroupLabelClass = 'px-0'
 
 function getSidebarButtonStyle(isCollapsed: boolean): React.CSSProperties | undefined {
-  return undefined
+  if (isCollapsed) return undefined
+  return { paddingLeft: 20, paddingRight: 16 }
 }
 
 // Small reusable "keyboard key" chip. Sits close to the label instead of
@@ -164,7 +165,7 @@ function EditorSidebarTools() {
               className={cn(
                 sidebarButtonClass,
                 activeTool === tool.id && 'bg-neutral-100/80 text-neutral-900 font-semibold',
-                isCollapsed ? 'justify-center px-0' : sidebarButtonInsetClass
+                isCollapsed && 'justify-center px-0'
               )}
               isActive={activeTool === tool.id}
               onClick={() => selectTool(tool.id)}
@@ -222,8 +223,8 @@ function EditorSidebarAppearance() {
       <SidebarGroupLabel className={sidebarGroupLabelClass}>Appearance</SidebarGroupLabel>
 
       <div
-        className={cn(isCollapsed ? 'flex flex-col items-center gap-1.5' : 'flex flex-wrap gap-2 px-3')}
-        style={{ paddingTop: 10, paddingBottom: 16 }}
+        className={cn(isCollapsed ? 'flex flex-col items-center gap-1.5' : 'flex flex-wrap gap-2')}
+        style={{ paddingTop: 10, paddingBottom: 16, paddingLeft: 20, paddingRight: 16 }}
       >
         {COLORS.filter(color => !isCollapsed || color.value === '#111111' || color.value === '#ef4444')
           .sort((a, b) => {
@@ -274,13 +275,16 @@ function EditorSidebarAppearance() {
 
       {!isCollapsed && (
         <div
-          className="px-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400/80"
-          style={{ paddingTop: 18, paddingBottom: 8 }}
+          className="text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400/80"
+          style={{ paddingTop: 18, paddingBottom: 8, paddingLeft: 20 }}
         >
           Stroke
         </div>
       )}
-      <div className={cn('flex', isCollapsed ? 'flex-col items-center pt-1 gap-0.5 px-0' : 'flex-col gap-0.5 px-3')}>
+      <div
+        className={cn('flex', isCollapsed ? 'flex-col items-center pt-1 gap-0.5 px-0' : 'flex-col gap-0.5')}
+        style={isCollapsed ? undefined : { paddingLeft: 20, paddingRight: 16 }}
+      >
         {STROKES.map((stroke) => (
           <button
             key={stroke.value}
@@ -311,7 +315,7 @@ function EditorSidebarHistory() {
       <SidebarMenu className={sidebarMenuClass}>
         <SidebarMenuItem>
           <SidebarMenuButton
-            className={cn(sidebarButtonClass, isCollapsed ? 'justify-center px-0' : sidebarButtonInsetClass)}
+            className={cn(sidebarButtonClass, isCollapsed && 'justify-center px-0')}
             onClick={() => w.editorUndo?.()}
             style={getSidebarButtonStyle(isCollapsed)}
             tooltip="Undo"
@@ -323,7 +327,7 @@ function EditorSidebarHistory() {
         </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton
-            className={cn(sidebarButtonClass, isCollapsed ? 'justify-center px-0' : sidebarButtonInsetClass)}
+            className={cn(sidebarButtonClass, isCollapsed && 'justify-center px-0')}
             onClick={() => w.editorRedo?.()}
             style={getSidebarButtonStyle(isCollapsed)}
             tooltip="Redo"
@@ -335,7 +339,7 @@ function EditorSidebarHistory() {
         </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton
-            className={cn(sidebarButtonClass, isCollapsed ? 'justify-center px-0' : sidebarButtonInsetClass)}
+            className={cn(sidebarButtonClass, isCollapsed && 'justify-center px-0')}
             onClick={() => w.editorClear?.()}
             style={getSidebarButtonStyle(isCollapsed)}
             tooltip="Clear canvas"
@@ -360,7 +364,7 @@ function EditorSidebarExport() {
       <SidebarMenu className={sidebarMenuClass}>
         <SidebarMenuItem>
           <SidebarMenuButton
-            className={cn(sidebarButtonClass, isCollapsed ? 'justify-center px-0' : sidebarButtonInsetClass)}
+            className={cn(sidebarButtonClass, isCollapsed && 'justify-center px-0')}
             onClick={() => w.editorCrop?.()}
             style={getSidebarButtonStyle(isCollapsed)}
             tooltip="Crop image"
@@ -371,7 +375,7 @@ function EditorSidebarExport() {
         </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton
-            className={cn(sidebarButtonClass, isCollapsed ? 'justify-center px-0' : sidebarButtonInsetClass)}
+            className={cn(sidebarButtonClass, isCollapsed && 'justify-center px-0')}
             onClick={() => w.editorCopy?.()}
             style={getSidebarButtonStyle(isCollapsed)}
             tooltip="Copy to clipboard"
@@ -383,7 +387,7 @@ function EditorSidebarExport() {
         </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton
-            className={cn(sidebarButtonClass, isCollapsed ? 'justify-center px-0' : sidebarButtonInsetClass)}
+            className={cn(sidebarButtonClass, isCollapsed && 'justify-center px-0')}
             onClick={() => w.editorSave?.()}
             style={getSidebarButtonStyle(isCollapsed)}
             tooltip="Save as PNG"
@@ -408,8 +412,9 @@ function EditorSidebarFooter() {
         onClick={() => window.open('https://github.com/prathm-k/inki', '_blank')}
         className={cn(
           'group flex h-11 w-full items-center gap-2.5 rounded-lg text-left transition-all duration-150 hover:bg-neutral-50',
-          isCollapsed ? 'justify-center px-0' : 'px-3'
+          isCollapsed ? 'justify-center px-0' : ''
         )}
+        style={isCollapsed ? undefined : { paddingLeft: 20, paddingRight: 16 }}
         title="Shortcuts & Info"
         type="button"
       >
