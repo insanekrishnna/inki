@@ -80,7 +80,21 @@ function getSidebarButtonStyle(isCollapsed: boolean): React.CSSProperties | unde
 // so it doesn't visually collide with the sidebar's outer border.
 function ShortcutKey({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="mr-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center gap-0.5 rounded-[4px] border border-neutral-200/70 bg-neutral-50/80 px-1 font-mono text-[10px] font-normal text-neutral-400 shadow-[0_0.5px_0_rgba(0,0,0,0.04)]">
+    <kbd
+      className="inline-flex items-center justify-center font-mono text-neutral-400/70 shrink-0"
+      style={{
+        height: 18,
+        minWidth: 18,
+        paddingLeft: 5,
+        paddingRight: 5,
+        marginRight: 2,
+        fontSize: 10,
+        lineHeight: 1,
+        borderRadius: 4,
+        border: '1px solid rgba(0,0,0,0.06)',
+        background: 'transparent',
+      }}
+    >
       {children}
     </kbd>
   )
