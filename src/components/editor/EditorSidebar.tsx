@@ -110,17 +110,13 @@ function SidebarBrand() {
       className={cn(
         'flex min-h-[56px] border-b border-neutral-100/80',
         isCollapsed
-          ? 'flex-col items-center justify-start gap-y-3 pt-5 pb-3'
-          : 'flex-row items-center justify-between py-5'
+          ? 'flex-col items-center justify-start gap-y-3 py-3'
+          : 'flex-row items-center justify-between py-3'
       )}
+      style={{ paddingLeft: 4, paddingRight: 16 }}
     >
       <a className="group flex min-w-0 items-center gap-2.5 outline-none" href="#">
-        <div className="relative flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-neutral-900 shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)] transition-all duration-200 group-hover:shadow-[0_2px_8px_rgba(0,0,0,0.16)] group-focus-visible:ring-2 group-focus-visible:ring-neutral-400 overflow-hidden">
-          <img src="/inki.png" alt="Inki" className="relative z-10 size-5 object-contain brightness-[10] transition-transform duration-200" style={{ transform: 'scale(2.5)' }} />
-        </div>
-        {!isCollapsed && (
-          <span className="text-[15px] font-semibold tracking-[-0.01em] text-neutral-900">Inki</span>
-        )}
+        <img src="/inki.png" alt="Inki" className="size-16 shrink-0 object-contain object-left drop-shadow-sm transition-transform duration-200 group-hover:scale-105" />
       </a>
 
       <motion.div
