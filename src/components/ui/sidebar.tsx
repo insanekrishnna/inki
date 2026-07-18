@@ -256,7 +256,7 @@ const Sidebar = React.forwardRef<
         >
           <div
             data-sidebar="sidebar"
-            className="flex h-full w-full flex-col overflow-hidden border-r border-neutral-200 bg-[#fafafa] text-neutral-700"
+            className="flex h-full w-full flex-col overflow-hidden border-r border-neutral-200/40 bg-white text-neutral-800"
           >
             {children}
           </div>
@@ -366,8 +366,8 @@ const SidebarHeader = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="header"
-      className={cn("flex flex-col gap-2 pr-4 pb-5 pt-4", className)}
-      style={{ paddingLeft: 16, ...props.style }}
+      className={cn("flex flex-col gap-2 pb-5 pt-4", className)}
+      style={{ paddingLeft: 20, paddingRight: 16, ...props.style }}
       {...props}
     />
   )
@@ -382,7 +382,8 @@ const SidebarFooter = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="footer"
-      className={cn("flex flex-col gap-2 px-4 pb-4 pt-3", className)}
+      className={cn("flex flex-col gap-2 pb-4 pt-3", className)}
+      style={{ paddingLeft: 20, paddingRight: 16, ...props.style }}
       {...props}
     />
   )
@@ -397,7 +398,7 @@ const SidebarSeparator = React.forwardRef<
     <Separator
       ref={ref}
       data-sidebar="separator"
-      className={cn("mx-2 w-auto bg-sidebar-border", className)}
+      className={cn("mx-0 w-auto bg-neutral-100", className)}
       {...props}
     />
   )
@@ -409,15 +410,16 @@ const SidebarContent = React.forwardRef<
   React.ComponentProps<"div">
 >(({ className, ...props }, ref) => {
   const { state } = useSidebar()
+  const isCollapsed = state === 'collapsed'
   return (
     <div
       ref={ref}
       data-sidebar="content"
       className={cn(
-        "flex min-h-0 flex-1 flex-col gap-3 overflow-auto pr-4 group-data-[collapsible=icon]:overflow-hidden group-data-[collapsible=icon]:px-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]",
+        "flex min-h-0 flex-1 flex-col gap-1 overflow-auto group-data-[collapsible=icon]:overflow-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]",
         className
       )}
-      style={state === "collapsed" ? props.style : { paddingLeft: 16, ...props.style }}
+      style={isCollapsed ? { paddingLeft: 4, paddingRight: 4, ...props.style } : { paddingLeft: 20, paddingRight: 16, ...props.style }}
       {...props}
     />
   )
@@ -432,7 +434,7 @@ const SidebarGroup = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="group"
-      className={cn("relative flex w-full min-w-0 flex-col py-0", className)}
+      className={cn("relative flex w-full min-w-0 flex-col py-1", className)}
       {...props}
     />
   )
@@ -450,11 +452,11 @@ const SidebarGroupLabel = React.forwardRef<
       ref={ref}
       data-sidebar="group-label"
       className={cn(
-        "flex h-5 shrink-0 items-center rounded-md pr-1 text-[10px] font-semibold uppercase tracking-normal text-neutral-400 outline-none ring-sidebar-ring transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+        "flex h-6 shrink-0 items-center rounded-md mb-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400/80 outline-none ring-sidebar-ring transition-[margin,opacity] duration-200 ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
         "group-data-[collapsible=icon]:-mt-5 group-data-[collapsible=icon]:opacity-0 ",
         className
       )}
-      style={{ paddingLeft: 0, ...props.style }}
+      style={{ paddingLeft: 4, ...props.style }}
       {...props}
     />
   )
@@ -504,7 +506,7 @@ const SidebarMenu = React.forwardRef<
   <ul
     ref={ref}
     data-sidebar="menu"
-    className={cn("flex w-full min-w-0 flex-col gap-1 group-data-[collapsible=icon]:gap-0.5 group-data-[collapsible=icon]:items-center", className)}
+    className={cn("flex w-full min-w-0 flex-col gap-0.5 group-data-[collapsible=icon]:gap-0.5 group-data-[collapsible=icon]:items-center", className)}
     {...props}
   />
 ))
@@ -524,7 +526,7 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-3 overflow-hidden rounded-lg px-3 py-2 text-left text-sm font-medium text-neutral-600 outline-none ring-sidebar-ring transition-all duration-200 hover:text-neutral-950 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-semibold data-[active=true]:text-neutral-950 data-[state=open]:text-neutral-950 group-data-[collapsible=icon]:!size-7 group-data-[collapsible=icon]:!p-1 group-data-[collapsible=icon]:justify-center [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-neutral-500",
+  "peer/menu-button flex w-full items-center gap-2.5 overflow-hidden rounded-lg px-2.5 py-1.5 text-left text-[13px] font-medium text-neutral-500 outline-none ring-sidebar-ring transition-all duration-150 hover:bg-neutral-50 hover:text-neutral-900 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-neutral-100/80 data-[active=true]:font-semibold data-[active=true]:text-neutral-900 data-[state=open]:text-neutral-900 group-data-[collapsible=icon]:!size-7 group-data-[collapsible=icon]:!p-1 group-data-[collapsible=icon]:justify-center [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-neutral-400",
   {
     variants: {
       variant: {
