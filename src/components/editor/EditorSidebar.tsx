@@ -110,7 +110,7 @@ function SidebarBrand() {
       className={cn(
         'flex min-h-[56px] border-b border-neutral-100/80',
         isCollapsed
-          ? 'flex-col items-center justify-start gap-y-3 py-3'
+          ? 'flex-col items-center justify-start gap-y-0 py-3'
           : 'flex-row items-center justify-between py-3'
       )}
       style={{ paddingLeft: 4, paddingRight: 16 }}
@@ -403,19 +403,20 @@ function EditorSidebarFooter() {
   const isCollapsed = state === 'collapsed'
 
   return (
-    <SidebarFooter className="border-t border-neutral-100/80">
+    <SidebarFooter className="border-t border-neutral-100/80" style={{ paddingLeft: 0, paddingRight: 0 }}>
       <button
         onClick={() => window.open('https://github.com/prathm-k/inki', '_blank')}
         className={cn(
-          'group flex h-11 w-full items-center gap-2.5 rounded-lg text-left transition-all duration-150 hover:bg-neutral-50',
+          'group flex h-14 w-full items-center gap-0 rounded-lg text-left transition-all duration-150 hover:bg-neutral-50',
           isCollapsed ? 'justify-center px-0' : ''
         )}
-        style={isCollapsed ? undefined : { paddingLeft: 20, paddingRight: 16 }}
+        style={isCollapsed ? undefined : { paddingLeft: 0, paddingRight: 16 }}
         title="Shortcuts & Info"
         type="button"
       >
         {!isCollapsed && (
           <>
+            <img src="/inki.png" alt="Inki" className="size-[62px] shrink-0 object-contain object-left drop-shadow-sm -ml-5 -mr-5" />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[13px] font-semibold leading-5 text-neutral-900">Inki</span>
               <span className="block truncate text-[11px] font-normal leading-4 text-neutral-400">Free</span>
