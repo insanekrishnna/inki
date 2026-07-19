@@ -2120,8 +2120,20 @@ function applyWindowContainer() {
   const padding = 40;
   const shadowBlur = 30;
   const shadowColor = 'rgba(82, 52, 28, 0.26)';
-  const titleBarColor = '#e4ceb4';
-  const windowBgColor = '#d7bea2';
+  const frameThemes = {
+    default: { titleBar: '#e4ceb4', windowBg: '#d7bea2' },
+    dark: { titleBar: '#3a3a3c', windowBg: '#1e1e1e' },
+    light: { titleBar: '#e5e5e5', windowBg: '#ffffff' },
+    midnight: { titleBar: '#1e293b', windowBg: '#0f172a' },
+    slate: { titleBar: '#475569', windowBg: '#334155' },
+    minimal: { titleBar: '#f8f9fa', windowBg: '#ffffff' },
+    glass: { titleBar: 'rgba(255, 255, 255, 0.08)', windowBg: 'rgba(0, 0, 0, 0.3)' },
+    contrast: { titleBar: '#111111', windowBg: '#000000' }
+  };
+
+  const selectedTheme = frameThemes[state.windowFrameTheme || 'default'] || frameThemes.default;
+  const titleBarColor = selectedTheme.titleBar;
+  const windowBgColor = selectedTheme.windowBg;
 
   const gradients = {
     none: ['#dfc8ac', '#cfb18f'],
@@ -2428,6 +2440,33 @@ function bindRightSidebar() {
       });
     });
   }
+
+  const rsFrameSwatches = document.querySelectorAll('.rs-frame-swatch');
+  rsFrameSwatches.forEach(swatch => {
+    swatch.addEventListener('click', (e) => {
+      e.stopPropagation();
+      rsFrameSwatches.forEach(s => s.classList.remove('active'));
+      swatch.classList.add('active');
+      state.windowFrameTheme = swatch.dataset.theme;
+
+      if (state.windowContainerApplied) {
+        state.windowContainerApplied = false;
+        const originalImg = state.originalImageBeforeContainer;
+        const tempImg = new Image();
+        tempImg.onload = () => {
+          state.image = tempImg;
+          state.imageWidth = tempImg.width;
+          state.imageHeight = tempImg.height;
+          state.annotations = [];
+          state.history = [];
+          state.historyIndex = -1;
+          state.originalImageBeforeContainer = originalImg;
+          applyWindowContainer();
+        };
+        tempImg.src = originalImg;
+      }
+    });
+  });
 
   rsCopy.addEventListener('click', () => {
     copyToClipboard();

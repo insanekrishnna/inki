@@ -2298,3 +2298,64 @@ body.theme-dark .rs-select-option.active {
 .right-sidebar:not(.expanded) .rs-aspect-ratio-wrapper {
   display: none;
 }
+
+.right-sidebar.expanded .rs-frame-themes {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  padding: 0 6px 2px 6px;
+  gap: 8px;
+}
+
+.rs-frame-themes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.rs-frame-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.right-sidebar:not(.expanded) .rs-frame-swatch {
+  display: none;
+}
+
+.right-sidebar:not(.expanded) .rs-frame-swatch[data-theme="default"],
+.right-sidebar:not(.expanded) .rs-frame-swatch[data-theme="dark"] {
+  display: flex;
+}
+
+.rs-frame-swatch span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+body.theme-dark .rs-frame-swatch span {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.rs-frame-swatch:hover {
+  transform: scale(1.1);
+}
+
+.rs-frame-swatch.active {
+  border-color: #0ea5e9;
+  padding: 2px;
+}
