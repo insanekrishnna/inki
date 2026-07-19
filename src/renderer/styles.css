@@ -2006,8 +2006,8 @@ body .canvas-container.recording-preview-active .toolbar.auto-hidden {
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px 0;
+  gap: 5px;
+  padding: 10px 0;
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 16px;
@@ -2076,7 +2076,7 @@ body.theme-dark .rs-close-btn:hover {
   border: none;
   border-radius: 8px;
   width: 100%;
-  height: 36px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -2133,7 +2133,7 @@ body.theme-dark .rs-item.active {
 .rs-separator {
   height: 1px;
   background: rgba(0, 0, 0, 0.04);
-  margin: 4px 16px;
+  margin: 3px 16px;
 }
 
 body.theme-dark .rs-separator {
@@ -2148,7 +2148,7 @@ body.theme-dark .rs-separator {
   font-size: 11px;
   font-weight: 600;
   color: #a3a3a3;
-  margin: 0 16px 4px 16px;
+  margin: 0 16px 3px 16px;
   letter-spacing: 0.5px;
 }
 
@@ -2159,7 +2159,7 @@ body.theme-dark .rs-separator {
 .rs-gradients {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   align-items: center;
   padding: 0;
 }
@@ -2168,7 +2168,7 @@ body.theme-dark .rs-separator {
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: flex-start;
-  padding: 0 16px 2px 16px;
+  padding: 0 16px 1px 16px;
 }
 
 .rs-gradient-swatch {
@@ -2226,7 +2226,7 @@ body.theme-dark .rs-separator {
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .rs-aspect-ratio-label {
@@ -2330,10 +2330,9 @@ body.theme-dark .rs-select-option.active {
 .right-sidebar.expanded .rs-frame-themes {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
   justify-content: flex-start;
-  padding: 0 16px 2px 16px;
-  gap: 8px;
+  gap: 6px;
+  padding: 0 16px 1px 16px;
 }
 
 .rs-frame-themes {
