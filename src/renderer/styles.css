@@ -512,9 +512,9 @@ body:not(.has-image) .toolbar {
   gap: 24px;
   justify-content: space-between;
   border-radius: 0 0 18px 18px;
-  border: none;
-  background: rgb(0, 0, 0);
-  color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgb(255, 255, 255);
+  color: #000000;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
@@ -537,7 +537,7 @@ body:not(.has-image) .toolbar .capture-modes {
 body:not(.has-image) .toolbar .toolbar-btn {
   width: 45px;
   height: 38px;
-  color: #ffffff;
+  color: #000000;
   cursor: pointer;
   border-radius: 8px;
   transition: background-color 0.15s ease-out, color 0.15s ease-out;
@@ -549,24 +549,24 @@ body:not(.has-image) .toolbar .toolbar-btn svg {
 }
 
 body:not(.has-image) .toolbar .toolbar-btn:hover:not(:disabled) {
-  background: #ffffff;
+  background: #f4f4f5;
   color: #000000;
 }
 
 body.theme-dark:not(.has-image) .toolbar {
   border-radius: 0 0 18px 18px;
-  border: none;
-  background: rgb(255, 255, 255);
-  color: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #18181b; /* Beautiful dark color (zinc-900) instead of pitch black */
+  color: #ffffff;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 body.theme-dark:not(.has-image) .toolbar .toolbar-btn {
-  color: #000000;
+  color: #ffffff;
 }
 
 body.theme-dark:not(.has-image) .toolbar .toolbar-btn:hover:not(:disabled) {
-  background: #000000;
+  background: #27272a; /* zinc-800 */
   color: #ffffff;
 }
 
@@ -1684,17 +1684,17 @@ body.toolbar-transition .statusbar {
       background: rgba(255, 255, 255, 0.22);
     }
   
-    .liquidGlass-wrapper,
-    body:not(.has-image) .toolbar {
+    body:not(.theme-light) .liquidGlass-wrapper,
+    body:not(.theme-light):not(.has-image) .toolbar {
       background: rgba(30, 30, 32, 0.85) !important;
       border-color: rgba(255, 255, 255, 0.15) !important;
     }
   
-    body:not(.has-image) .toolbar .toolbar-btn {
+    body:not(.theme-light):not(.has-image) .toolbar .toolbar-btn {
       color: var(--toolbar-icon-muted) !important;
     }
   
-    body:not(.has-image) .toolbar .toolbar-btn:hover:not(:disabled) {
+    body:not(.theme-light):not(.has-image) .toolbar .toolbar-btn:hover:not(:disabled) {
       color: var(--toolbar-icon-hover) !important;
       background: rgba(255, 255, 255, 0.15) !important;
     }

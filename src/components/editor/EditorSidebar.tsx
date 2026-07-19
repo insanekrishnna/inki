@@ -66,9 +66,9 @@ const STROKES = [
 ]
 
 const sidebarButtonClass =
-  'h-9 rounded-lg text-neutral-500 transition-all duration-150 hover:bg-neutral-50 hover:text-neutral-900'
+  'h-9 !rounded-none text-neutral-500 dark:text-white/80 transition-all duration-150 hover:bg-neutral-50 dark:hover:bg-white/10 hover:text-neutral-900 dark:hover:text-white'
 const sidebarButtonInsetClass = 'px-3'
-const sidebarIconClass = 'size-[18px] shrink-0 text-neutral-400'
+const sidebarIconClass = 'size-[18px] shrink-0 text-neutral-400 dark:text-white/80'
 const sidebarMenuClass = 'gap-0.5'
 const sidebarGroupLabelClass = 'px-0'
 
@@ -83,7 +83,7 @@ function getSidebarButtonStyle(isCollapsed: boolean): React.CSSProperties | unde
 function ShortcutKey({ children }: { children: React.ReactNode }) {
   return (
     <kbd
-      className="inline-flex items-center justify-center font-mono text-neutral-400/70 shrink-0"
+      className="inline-flex items-center justify-center font-mono text-neutral-400/70 dark:text-white/70 shrink-0 border border-black/5 dark:border-white/20"
       style={{
         height: 18,
         minWidth: 18,
@@ -93,7 +93,6 @@ function ShortcutKey({ children }: { children: React.ReactNode }) {
         fontSize: 10,
         lineHeight: 1,
         borderRadius: 4,
-        border: '1px solid rgba(0,0,0,0.06)',
         background: 'transparent',
       }}
     >
@@ -109,7 +108,7 @@ function SidebarBrand() {
   return (
     <SidebarHeader
       className={cn(
-        'flex min-h-[56px] border-b border-neutral-100/80',
+        'flex min-h-[56px] border-b border-neutral-100/80 dark:border-white/5',
         isCollapsed
           ? 'flex-col items-center justify-start gap-y-0 py-3'
           : 'flex-row items-center justify-between py-3'
@@ -127,7 +126,7 @@ function SidebarBrand() {
         key={isCollapsed ? 'editor-header-collapsed' : 'editor-header-expanded'}
         transition={{ duration: 0.25 }}
       >
-        <SidebarTrigger className="shrink-0 size-7 rounded-md border border-transparent bg-transparent text-neutral-400 transition-all duration-150 hover:bg-neutral-50 hover:text-neutral-700" />
+        <SidebarTrigger className="shrink-0 size-7 rounded-md border border-transparent bg-transparent text-neutral-400 transition-all duration-150 hover:bg-neutral-50 hover:text-neutral-700 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white" />
       </motion.div>
     </SidebarHeader>
   )
@@ -161,7 +160,7 @@ function EditorSidebarTools() {
             <SidebarMenuButton
               className={cn(
                 sidebarButtonClass,
-                activeTool === tool.id && 'bg-neutral-100/80 text-neutral-900 font-semibold',
+                activeTool === tool.id && 'bg-neutral-100/80 text-neutral-900 font-semibold dark:bg-white/10 dark:text-white',
                 isCollapsed && 'justify-center px-0'
               )}
               isActive={activeTool === tool.id}
@@ -288,9 +287,9 @@ function EditorSidebarAppearance() {
             onClick={() => selectStroke(stroke.value)}
             title={stroke.label}
             className={cn(
-              'flex h-8 w-full items-center rounded-lg transition-all duration-150 hover:bg-neutral-50',
+              'flex h-8 w-full items-center !rounded-none transition-all duration-150 hover:bg-neutral-50 dark:hover:bg-white/10 dark:text-white/80',
               'justify-center',
-              activeStroke === stroke.value ? 'bg-neutral-100/80 text-neutral-900' : 'text-neutral-400'
+              activeStroke === stroke.value ? 'bg-neutral-100/80 text-neutral-900 dark:bg-white/10 dark:text-white' : 'text-neutral-400 dark:text-white/60'
             )}
           >
             <span className="rounded-full bg-current" style={{ width: !isCollapsed ? '24px' : '14px', height: stroke.height }} />
@@ -393,11 +392,11 @@ function EditorSidebarFooter() {
   const isCollapsed = state === 'collapsed'
 
   return (
-    <SidebarFooter className="border-t border-neutral-100/80" style={{ paddingLeft: 0, paddingRight: 0 }}>
+    <SidebarFooter className="border-t border-neutral-100/80 dark:border-white/5 !px-0 !gap-0" style={{ paddingLeft: 0, paddingRight: 0 }}>
       <button
         onClick={() => window.open('https://github.com/prathm-k/inki', '_blank')}
         className={cn(
-          'group flex h-14 w-full items-center gap-0 rounded-lg text-left transition-all duration-150 hover:bg-neutral-50',
+          'group flex h-14 w-full items-center gap-2 !rounded-none text-left transition-all duration-150 hover:bg-neutral-50 dark:hover:bg-white/10',
           isCollapsed ? 'justify-center px-0' : ''
         )}
         style={isCollapsed ? undefined : { paddingLeft: 0, paddingRight: 16 }}
@@ -408,10 +407,10 @@ function EditorSidebarFooter() {
           <>
             <img src="/inki.png" alt="Inki" className="size-[62px] shrink-0 object-contain object-left drop-shadow-sm -ml-5 -mr-5" />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13px] font-semibold leading-5 text-neutral-900">Inki</span>
-              <span className="block truncate text-[11px] font-normal leading-4 text-neutral-400">Free</span>
+              <span className="block truncate text-[13px] font-semibold leading-5 text-neutral-900 dark:text-white">Inki</span>
+              <span className="block truncate text-[11px] font-normal leading-4 text-neutral-400 dark:text-white/60">Free</span>
             </span>
-            <span className="flex items-center gap-1 text-[11px] font-normal text-neutral-400">
+            <span className="flex items-center gap-1 text-[11px] font-normal text-neutral-400 dark:text-white/70">
               <span>v0.1.0</span>
               <ChevronsUpDown className="size-3" />
             </span>
@@ -427,7 +426,7 @@ export function EditorSidebar() {
     <Sidebar
       variant="inset"
       collapsible="icon"
-      className="[&_[data-sidebar=sidebar]]:border-r-neutral-200/30 [&_[data-sidebar=sidebar]]:bg-white [&_[data-sidebar=sidebar]]:shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_6px_rgba(0,0,0,0.04)]"
+      className="[&_[data-sidebar=sidebar]]:border-r-neutral-200/30 dark:[&_[data-sidebar=sidebar]]:border-r-white/10 [&_[data-sidebar=sidebar]]:bg-white dark:[&_[data-sidebar=sidebar]]:bg-[#050505] [&_[data-sidebar=sidebar]]:shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_6px_rgba(0,0,0,0.04)] dark:[&_[data-sidebar=sidebar]]:shadow-none"
     >
       <SidebarBrand />
       <SidebarContent className="gap-0 pb-4 pt-4 group-data-[collapsible=icon]:pt-3 group-data-[collapsible=icon]:gap-1">
