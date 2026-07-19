@@ -467,13 +467,6 @@ function bindKeyboard() {
     }
 
     if (e.key === 'Escape') {
-      if (state.cropActive) {
-        state.cropActive = false;
-        elements.toolbarItems.crop.classList.remove('active');
-        render();
-        updateToolbarState();
-        return;
-      }
       if (state.selectedAnnotationIndex >= 0) {
         state.selectedAnnotationIndex = -1;
         render();
@@ -619,7 +612,7 @@ function startCrop() {
   state.cropW = state.imageWidth;
   state.cropH = state.imageHeight;
   elements.cropOverlay.classList.add('active');
-  elements.btnCrop.classList.add('active');
+  if (elements.btnCrop) elements.btnCrop.classList.add('active');
   updateCropUI();
 }
 
@@ -627,7 +620,11 @@ function cancelCrop() {
   state.cropActive = false;
   state.cropDragging = null;
   elements.cropOverlay.classList.remove('active');
-  elements.btnCrop.classList.remove('active');
+  if (elements.btnCrop) elements.btnCrop.classList.remove('active');
+  if (state.currentTool === 'crop') {
+    state.currentTool = 'select';
+    updateToolbarState();
+  }
 }
 
 function applyCrop() {
@@ -1001,13 +998,27 @@ const DRAWING_TOOLS = ['rect', 'ellipse', 'arrow', 'line', 'text', 'pixelate', '
 
 function selectTool(tool) {
   if (state.currentTool === tool && tool !== 'select') return;
-  state.currentTool = tool;
+  
+  if (state.isEditingText) commitInlineText();
+  
+  if (tool === 'crop') {
+    if (!state.cropActive) startCrop();
+    else cancelCrop();
+    state.currentTool = tool;
+    updateToolbarState();
+    return;
+  }
   
   if (state.cropActive && tool !== 'crop') {
-    state.cropActive = false;
-    elements.toolbarItems.crop.classList.remove('active');
+    cancelCrop();
   }
-
+  
+  state.currentTool = tool;
+  
+  if (elements.toolBtns) {
+    elements.toolBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
+  }
+  elements.container.className = tool ? `canvas-container tool-${tool}` : 'canvas-container';
   elements.canvas.style.cursor = !tool ? 'default' : (tool === 'text' ? 'text' : (tool === 'select' ? 'default' : 'crosshair'));
   render();
   updateToolbarState();
