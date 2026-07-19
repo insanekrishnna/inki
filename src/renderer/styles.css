@@ -1798,3 +1798,124 @@ body .canvas-container.recording-preview-active .toolbar.auto-hidden {
 }
 
 
+/* Right Sidebar (Minimal) */
+.right-sidebar {
+  position: fixed;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+body.has-image .right-sidebar, body.has-content .right-sidebar {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+body.theme-dark .right-sidebar {
+  background: #050505;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: none;
+}
+
+.rs-item {
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #737373;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.rs-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: #171717;
+}
+
+body.theme-dark .rs-item {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+body.theme-dark .rs-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.rs-item.active {
+  background: rgba(0, 0, 0, 0.08);
+  color: #171717;
+}
+
+body.theme-dark .rs-item.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.rs-item svg {
+  width: 18px;
+  height: 18px;
+}
+
+.rs-separator {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.04);
+  margin: 4px 0;
+}
+
+body.theme-dark .rs-separator {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.rs-gradients {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.rs-gradient-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.rs-gradient-swatch span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.rs-gradient-swatch:hover {
+  transform: scale(1.1);
+}
+
+.rs-gradient-swatch.active {
+  border-color: #0ea5e9;
+  padding: 2px;
+}
