@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { MousePointer2, Square, Circle, ArrowUpRight, Minus, Type, Grid3X3, Wand2 } from 'lucide-react'
+import { MousePointer2, Square, Circle, ArrowUpRight, Minus, Type, Grid3X3, Wand2, Droplets, ListOrdered } from 'lucide-react'
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from '../ui/sidebar'
 
 const TOOLS = [
@@ -9,8 +9,9 @@ const TOOLS = [
   { id: 'arrow', label: 'Arrow', icon: ArrowUpRight, shortcut: 'A' },
   { id: 'line', label: 'Line', icon: Minus, shortcut: 'L' },
   { id: 'text', label: 'Text', icon: Type, shortcut: 'T' },
+  { id: 'badge', label: 'Number Badge', icon: ListOrdered, shortcut: 'N' },
   { id: 'pixelate', label: 'Pixelate', icon: Grid3X3, shortcut: '' },
-  { id: 'magic-wand', label: 'Magic Wand', icon: Wand2, shortcut: 'M' },
+  { id: 'blur', label: 'Blur', icon: Droplets, shortcut: '' }
 ] as const
 
 export function EditorSidebarTools() {

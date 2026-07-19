@@ -74,12 +74,8 @@ const state = {
   recordingLoop: true,
   recordingSettings: { format: 'mp4', autoZoom: true, autoHideDelay: 0, captureProject: false },
   captureSettings: { hideDesktopIcons: true },
-  magicWand: null,
-  magicWandActive: false,
   imageModified: false,
   _queueStatusUpdate: false,
-  _marchingPhase: 0,
-  _marchingRAF: null,
 };
 
 const AUTO_HIDE_DELAYS = [500, 1000, 2000, 5000, 10000, 15000, 30000, Infinity];
@@ -443,8 +439,24 @@ function bindKeyboard() {
     if (cmdOrCtrl && e.key.toLowerCase() === 'v') { e.preventDefault(); pasteFromClipboard(); return; }
     if (cmdOrCtrl && e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); redo(); return; }
     if (cmdOrCtrl && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); return; }
+    
+    switch (e.key.toLowerCase()) {
+      case 'r': selectTool('rect'); break;
+      case 'e': selectTool('ellipse'); break;
+      case 'a': selectTool('arrow'); break;
+      case 'l': selectTool('line'); break;
+      case 't': selectTool('text'); break;
+      case '=': case '+': setZoom(state.zoom * 1.25); break;
+      case '-': setZoom(state.zoom / 1.25); break;
+      case '0': fitToWindow(); break;
+      case 'w': applyWindowContainer(); break;
+      case '[': elements.strokeWidthSlider.value = Math.max(1, parseInt(elements.strokeWidthSlider.value) - 1); state.strokeWidth = parseInt(elements.strokeWidthSlider.value); updateToolbarState(); render(); break;
+      case ']': elements.strokeWidthSlider.value = Math.min(20, parseInt(elements.strokeWidthSlider.value) + 1); state.strokeWidth = parseInt(elements.strokeWidthSlider.value); updateToolbarState(); render(); break;
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
     if (e.key === 'Delete' || e.key === 'Backspace' || e.key === 'Del' || e.key === 'Suppr') {
-      if (state.currentTool === 'magic-wand') return;
       const selected = state.annotations[state.selectedAnnotationIndex];
       const canDelete = state.selectedAnnotationIndex >= 0 && (state.currentTool === 'select' || selected?.type === 'text');
       if (canDelete) {
@@ -453,35 +465,20 @@ function bindKeyboard() {
       }
       return;
     }
-    
-    switch (e.key.toLowerCase()) {
-      case 'r': selectTool('rect'); break;
-      case 'e': selectTool('ellipse'); break;
-      case 'a': selectTool('arrow'); break;
-      case 'l': selectTool('line'); break;
-      case 't': selectTool('text'); break;
-      case 'm': selectTool('magic-wand'); break;
-      case '=': case '+': setZoom(state.zoom * 1.25); break;
-      case '-': setZoom(state.zoom / 1.25); break;
-      case '0': fitToWindow(); break;
-      case 'w': applyWindowContainer(); break;
-      case 'escape':
-        if (state.magicWand) {
-          stopMarchingAnts();
-          state.magicWand = null;
-          state.magicWandActive = false;
-          render();
-        }
-        break;
-    }
-  });
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Delete' || e.key === 'Backspace' || e.key === 'Del' || e.key === 'Suppr') {
-      if (state.magicWand?.selectionMask && state.currentTool === 'magic-wand') {
-        e.preventDefault();
-        applyMagicWandRemoval();
+    if (e.key === 'Escape') {
+      if (state.cropActive) {
+        state.cropActive = false;
+        elements.toolbarItems.crop.classList.remove('active');
+        render();
+        updateToolbarState();
+        return;
       }
+      if (state.selectedAnnotationIndex >= 0) {
+        state.selectedAnnotationIndex = -1;
+        render();
+      }
+      return;
     }
   });
 }
@@ -1000,20 +997,21 @@ function onWheel(e) {
 // Tool Selection
 // ------------------------------------------------------------------------------
 
-const DRAWING_TOOLS = ['rect', 'ellipse', 'arrow', 'line', 'text', 'pixelate'];
+const DRAWING_TOOLS = ['rect', 'ellipse', 'arrow', 'line', 'text', 'pixelate', 'blur', 'badge'];
 
 function selectTool(tool) {
-  if (state.isEditingText) commitInlineText();
-  if (state.cropActive) cancelCrop();
-  if (state.magicWandActive) {
-    state.magicWandActive = false;
-    state.magicWand = null;
-    stopMarchingAnts();
-  }
+  if (state.currentTool === tool && tool !== 'select') return;
   state.currentTool = tool;
-  elements.toolBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
-  elements.container.className = tool ? `canvas-container tool-${tool}` : 'canvas-container';
-  elements.canvas.style.cursor = !tool ? 'default' : (tool === 'text' ? 'text' : (tool === 'select' || tool === 'magic-wand' ? 'default' : 'crosshair'));
+  
+  if (state.cropActive && tool !== 'crop') {
+    state.cropActive = false;
+    elements.toolbarItems.crop.classList.remove('active');
+  }
+
+  elements.canvas.style.cursor = !tool ? 'default' : (tool === 'text' ? 'text' : (tool === 'select' ? 'default' : 'crosshair'));
+  render();
+  updateToolbarState();
+
   if (DRAWING_TOOLS.includes(tool)) {
     selectColor(state.currentColor || '#f97316');
   }
@@ -1256,6 +1254,9 @@ function findAnnotationAt(coords) {
     if (a.type === 'rect' || a.type === 'highlight' || a.type === 'blur' || a.type === 'ellipse' || a.type === 'pixelate') {
       if (coords.x >= a.x && coords.x <= a.x + a.width && coords.y >= a.y && coords.y <= a.y + a.height) return i;
     }
+    if (a.type === 'badge') {
+      if (Math.hypot(coords.x - a.x, coords.y - a.y) <= 18) return i;
+    }
     if (a.type === 'line' || a.type === 'arrow') {
       const dx = a.x2 - a.x1, dy = a.y2 - a.y1;
       const len2 = dx*dx + dy*dy || 1;
@@ -1327,6 +1328,22 @@ function onCanvasMouseDown(e) {
     return;
   }
 
+  if (state.currentTool === 'badge') {
+    const maxBadge = state.annotations.reduce((max, a) => (a.type === 'badge' && a.number > max) ? a.number : max, 0);
+    state.annotations.push({
+      type: 'badge',
+      x: coords.x,
+      y: coords.y,
+      number: maxBadge + 1,
+      color: state.currentColor
+    });
+    state.history = state.history.slice(0, state.historyIndex + 1);
+    state.history.push([...state.annotations.map(a => ({ ...a }))]);
+    state.historyIndex = state.history.length - 1;
+    render();
+    return;
+  }
+
   state.isDrawing = true;
   state.startX = coords.x;
   state.startY = coords.y;
@@ -1370,14 +1387,6 @@ function onCanvasMouseMove(e) {
     const coords = getCanvasCoords(e);
     elements.canvas.style.cursor = findTextAnnotationAt(coords) >= 0 ? 'grab' : 'text';
   }
-  
-  if (state.magicWandActive) {
-    const coords = getCanvasCoords(e);
-    state.magicWand.currentX = coords.x;
-    state.magicWand.currentY = coords.y;
-    updateMagicWand();
-    return;
-  }
 
   if (!state.isDrawing) return;
   const coords = getCanvasCoords(e);
@@ -1416,14 +1425,6 @@ function onCanvasMouseUp(e) {
     state.historyIndex = state.history.length - 1;
     updateToolbarState();
     elements.canvas.style.cursor = state.currentTool === 'select' ? 'default' : elements.canvas.style.cursor;
-    return;
-  }
-  
-  if (state.magicWandActive) {
-    state.magicWandActive = false;
-    queueUpdateStatus();
-    render();
-    startMarchingAnts();
     return;
   }
 
@@ -1545,8 +1546,6 @@ function undo() {
       state.image = img;
       state.annotations = entry.annotations ? [...entry.annotations.map(a => ({...a}))] : [];
       state.selectedAnnotationIndex = -1;
-      state.magicWand = null;
-      state.magicWandActive = false;
       render();
       updateStatus();
       updateToolbarState();
@@ -1576,8 +1575,6 @@ function redo() {
       state.image = img;
       state.annotations = entry.annotations ? [...entry.annotations.map(a => ({...a}))] : [];
       state.selectedAnnotationIndex = -1;
-      state.magicWand = null;
-      state.magicWandActive = false;
       render();
       updateStatus();
       updateToolbarState();
@@ -1603,7 +1600,6 @@ function render() {
   ctx.drawImage(state.image, 0, 0);
   state.annotations.forEach(drawAnnotation);
   drawSelectionHandles();
-  if (state.magicWand?.selectionMask) drawMagicWandOverlay(ctx);
 }
 
 function drawPreview(x1, y1, x2, y2) {
@@ -1634,8 +1630,13 @@ function drawAnnotation(ann) {
   ctx.lineWidth = ann.strokeWidth || 4;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
+
   switch (ann.type) {
-    case 'rect': ctx.strokeRect(ann.x, ann.y, ann.width, ann.height); break;
+    case 'rect':
+      ctx.beginPath();
+      ctx.roundRect(ann.x, ann.y, ann.width, ann.height, 8);
+      ctx.stroke();
+      break;
     case 'ellipse': drawEllipse(ctx, ann.x, ann.y, ann.width, ann.height); break;
     case 'arrow': drawArrow(ctx, ann.x1, ann.y1, ann.x2, ann.y2, true); break;
     case 'line': ctx.beginPath(); ctx.moveTo(ann.x1, ann.y1); ctx.lineTo(ann.x2, ann.y2); ctx.stroke(); break;
@@ -1648,6 +1649,22 @@ function drawAnnotation(ann) {
     case 'highlight': ctx.fillStyle = ann.color + '40'; ctx.fillRect(ann.x, ann.y, ann.width, ann.height); break;
     case 'blur': applyBlur(ctx, ann.x, ann.y, ann.width, ann.height); break;
     case 'pixelate': applyPixelate(ctx, ann.x, ann.y, ann.width, ann.height); break;
+    case 'badge':
+      ctx.shadowColor = 'rgba(0,0,0,0.3)';
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetY = 4;
+      ctx.beginPath();
+      ctx.arc(ann.x, ann.y, 16, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 16px Inter, system-ui, -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(ann.number, ann.x, ann.y + 1);
+      break;
   }
   ctx.restore();
 }
@@ -1659,17 +1676,23 @@ function drawEllipse(ctx, x, y, width, height) {
 }
 
 function drawArrow(ctx, x1, y1, x2, y2, solid) {
-  const headLength = Math.max(15, (ctx.lineWidth || 4) * 3);
+  const headLength = Math.max(20, (ctx.lineWidth || 4) * 3.5);
   const angle = Math.atan2(y2 - y1, x2 - x1);
+  
   ctx.beginPath();
   ctx.moveTo(x1, y1);
-  ctx.lineTo(x2, y2);
+  const lineEndX = x2 - headLength * 0.5 * Math.cos(angle);
+  const lineEndY = y2 - headLength * 0.5 * Math.sin(angle);
+  ctx.lineTo(lineEndX, lineEndY);
   ctx.stroke();
+  
   if (solid) ctx.setLineDash([]);
+  
   ctx.beginPath();
   ctx.moveTo(x2, y2);
-  ctx.lineTo(x2 - headLength * Math.cos(angle - Math.PI / 6), y2 - headLength * Math.sin(angle - Math.PI / 6));
-  ctx.lineTo(x2 - headLength * Math.cos(angle + Math.PI / 6), y2 - headLength * Math.sin(angle + Math.PI / 6));
+  ctx.lineTo(x2 - headLength * Math.cos(angle - Math.PI / 8), y2 - headLength * Math.sin(angle - Math.PI / 8));
+  ctx.lineTo(x2 - headLength * 0.6 * Math.cos(angle), y2 - headLength * 0.6 * Math.sin(angle));
+  ctx.lineTo(x2 - headLength * Math.cos(angle + Math.PI / 8), y2 - headLength * Math.sin(angle + Math.PI / 8));
   ctx.closePath();
   ctx.fill();
 }
@@ -1852,7 +1875,7 @@ function getCompositeImage() {
 }
 
 function updateStatus() {
-  const names = { select: 'Select', rect: 'Rectangle', ellipse: 'Ellipse', arrow: 'Arrow', line: 'Line', text: 'Text', highlight: 'Highlight', blur: 'Blur', pixelate: 'Pixelate', 'magic-wand': 'Magic Wand' };
+  const names = { select: 'Select', rect: 'Rectangle', ellipse: 'Ellipse', arrow: 'Arrow', line: 'Line', text: 'Text', highlight: 'Highlight', blur: 'Blur', pixelate: 'Pixelate' };
   elements.statusTool.textContent = state.cropActive ? 'Crop' : (names[state.currentTool] || 'Ready');
   elements.statusZoom.textContent = `${Math.round(state.zoom * 100)}%`;
 }
@@ -1905,200 +1928,7 @@ function replaceImage(dataUrl, cb) {
   img.src = dataUrl;
 }
 
-// ------------------------------------------------------------------------------
-// Magic Wand (remove background)
-// ------------------------------------------------------------------------------
-
-function floodFill(imageData, sx, sy, tolerance) {
-  const w = imageData.width, h = imageData.height;
-  const pixels = imageData.data;
-  const visited = new Uint8Array(w * h);
-  const mask = new Uint8Array(w * h);
-
-  const idx = (sy * w + sx) * 4;
-  const tr = pixels[idx];
-  const tg = pixels[idx + 1];
-  const tb = pixels[idx + 2];
-
-  const stack = [sx, sy];
-  while (stack.length > 0) {
-    const y = stack.pop();
-    const x = stack.pop();
-    const pos = y * w + x;
-    if (visited[pos]) continue;
-    visited[pos] = 1;
-
-    const pi = pos * 4;
-    const dr = pixels[pi] - tr;
-    const dg = pixels[pi + 1] - tg;
-    const db = pixels[pi + 2] - tb;
-    if (dr * dr + dg * dg + db * db > tolerance) continue;
-    if (pixels[pi + 3] < 128) continue;
-
-    mask[pos] = 1;
-    if (x > 0) { stack.push(x - 1, y); }
-    if (x < w - 1) { stack.push(x + 1, y); }
-    if (y > 0) { stack.push(x, y - 1); }
-    if (y < h - 1) { stack.push(x, y + 1); }
-  }
-  return mask;
-}
-
-function startMagicWandSelection(cx, cy) {
-  stopMarchingAnts();
-  state.magicWand = null;
-  state.magicWandActive = false;
-
-  const sx = Math.round(Math.max(0, Math.min(state.imageWidth - 1, cx)));
-  const sy = Math.round(Math.max(0, Math.min(state.imageHeight - 1, cy)));
-
-  const oc = document.createElement('canvas');
-  oc.width = state.imageWidth;
-  oc.height = state.imageHeight;
-  const octx = oc.getContext('2d');
-  octx.drawImage(state.image, 0, 0);
-  const imageData = octx.getImageData(0, 0, state.imageWidth, state.imageHeight);
-
-  const pi = (sy * state.imageWidth + sx) * 4;
-  state.magicWand = {
-    selectionMask: null,
-    overlayCanvas: document.createElement('canvas'),
-    startX: sx,
-    startY: sy,
-    currentX: sx,
-    currentY: sy,
-    targetR: imageData.data[pi],
-    targetG: imageData.data[pi + 1],
-    targetB: imageData.data[pi + 2],
-    tolerance: 0,
-    imageData: imageData,
-  };
-  state.magicWand.overlayCanvas.width = state.imageWidth;
-  state.magicWand.overlayCanvas.height = state.imageHeight;
-  state.magicWandActive = true;
-
-  state.magicWand.selectionMask = floodFill(imageData, sx, sy, 0);
-  render();
-}
-
-function updateMagicWand() {
-  if (!state.magicWand || !state.magicWandActive) return;
-  const dx = state.magicWand.currentX - state.magicWand.startX;
-  const dy = state.magicWand.currentY - state.magicWand.startY;
-  const distance = Math.sqrt(dx * dx + dy * dy);
-  const newTol = Math.min(Math.round(distance * 20), 5000);
-  if (Math.abs(newTol - state.magicWand.tolerance) > 5) {
-    state.magicWand.tolerance = newTol;
-    computeMagicWandMask();
-    render();
-  }
-}
-
-function computeMagicWandMask() {
-  if (!state.magicWand) return;
-  state.magicWand.selectionMask = floodFill(
-    state.magicWand.imageData,
-    state.magicWand.startX,
-    state.magicWand.startY,
-    state.magicWand.tolerance
-  );
-}
-
-function drawMagicWandOverlay(ctx) {
-  if (!state.magicWand?.selectionMask) return;
-  const w = state.imageWidth;
-  const h = state.imageHeight;
-  const mask = state.magicWand.selectionMask;
-  const overlayCtx = state.magicWand.overlayCanvas.getContext('2d');
-  const imageData = overlayCtx.createImageData(w, h);
-  const pixels = imageData.data;
-  const phase = state._marchingPhase || 0;
-
-  for (let i = 0; i < mask.length; i++) {
-    if (mask[i]) {
-      pixels[i * 4] = 255;
-      pixels[i * 4 + 1] = 50;
-      pixels[i * 4 + 2] = 50;
-      pixels[i * 4 + 3] = 100;
-    }
-  }
-
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const pos = y * w + x;
-      if (!mask[pos]) continue;
-      const isBoundary = (x === 0 || !mask[pos - 1]) ||
-                         (x === w - 1 || !mask[pos + 1]) ||
-                         (y === 0 || !mask[pos - w]) ||
-                         (y === h - 1 || !mask[pos + w]);
-      if (!isBoundary) continue;
-      if ((x + y + phase) % 6 >= 3) continue;
-      const pi = pos * 4;
-      pixels[pi] = 255; pixels[pi + 1] = 255; pixels[pi + 2] = 255; pixels[pi + 3] = 255;
-      if (x + 1 < w) {
-        const rpi = (pos + 1) * 4;
-        pixels[rpi] = 255; pixels[rpi + 1] = 255; pixels[rpi + 2] = 255; pixels[rpi + 3] = 255;
-      }
-      if (y + 1 < h) {
-        const bpi = (pos + w) * 4;
-        pixels[bpi] = 255; pixels[bpi + 1] = 255; pixels[bpi + 2] = 255; pixels[bpi + 3] = 255;
-      }
-    }
-  }
-
-  overlayCtx.putImageData(imageData, 0, 0);
-  ctx.drawImage(state.magicWand.overlayCanvas, 0, 0);
-}
-
-function stopMarchingAnts() {
-  if (state._marchingRAF != null) {
-    clearTimeout(state._marchingRAF);
-    state._marchingRAF = null;
-  }
-}
-
-function startMarchingAnts() {
-  stopMarchingAnts();
-  state._marchingPhase = 0;
-  (function march() {
-    if (!state.magicWand?.selectionMask) return;
-    state._marchingPhase = (state._marchingPhase + 1) % 6;
-    render();
-    state._marchingRAF = setTimeout(march, 150);
-  })();
-}
-
-function applyMagicWandRemoval() {
-  if (!state.magicWand?.selectionMask) return;
-
-  const beforeImage = getImageDataUrl();
-  const beforeAnnotations = [...state.annotations.map(a => ({...a}))];
-
-  const tc = document.createElement('canvas');
-  tc.width = state.imageWidth;
-  tc.height = state.imageHeight;
-  const tctx = tc.getContext('2d');
-  tctx.drawImage(state.image, 0, 0);
-  const id = tctx.getImageData(0, 0, state.imageWidth, state.imageHeight);
-  const mask = state.magicWand.selectionMask;
-  const px = id.data;
-  for (let i = 0; i < mask.length; i++) {
-    if (mask[i]) px[i * 4 + 3] = 0;
-  }
-  tctx.putImageData(id, 0, 0);
-
-  stopMarchingAnts();
-  state.magicWand = null;
-  state.magicWandActive = false;
-  state.imageModified = true;
-
-  state.history = state.history.slice(0, state.historyIndex + 1);
-  state.history.push({ image: beforeImage, annotations: beforeAnnotations });
-  state.historyIndex = state.history.length - 1;
-  updateToolbarState();
-
-  replaceImage(tc.toDataURL('image/png'));
-}
+// (Magic Wand was removed)
 
 function applyWindowContainer() {
   if (!state.image) return;
@@ -2122,17 +1952,14 @@ function applyWindowContainer() {
   const shadowBlur = 30;
   const shadowColor = 'rgba(82, 52, 28, 0.26)';
   const frameThemes = {
-    default: { titleBar: '#e4ceb4', windowBg: '#d7bea2' },
     dark: { titleBar: '#3a3a3c', windowBg: '#1e1e1e' },
     light: { titleBar: '#e5e5e5', windowBg: '#ffffff' },
     midnight: { titleBar: '#1e293b', windowBg: '#0f172a' },
-    slate: { titleBar: '#475569', windowBg: '#334155' },
     minimal: { titleBar: '#f8f9fa', windowBg: '#ffffff' },
-    glass: { titleBar: 'rgba(255, 255, 255, 0.08)', windowBg: 'rgba(0, 0, 0, 0.3)' },
     contrast: { titleBar: '#111111', windowBg: '#000000' }
   };
 
-  const selectedTheme = frameThemes[state.windowFrameTheme || 'default'] || frameThemes.default;
+  const selectedTheme = frameThemes[state.windowFrameTheme || 'dark'] || frameThemes.dark;
   const titleBarColor = selectedTheme.titleBar;
   const windowBgColor = selectedTheme.windowBg;
 

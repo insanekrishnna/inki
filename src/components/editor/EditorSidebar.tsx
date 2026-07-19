@@ -44,8 +44,7 @@ const TOOLS = [
   { id: 'arrow', label: 'Arrow', icon: ArrowUpRight, shortcut: 'A' },
   { id: 'line', label: 'Line', icon: Minus, shortcut: 'L' },
   { id: 'text', label: 'Text', icon: Type, shortcut: 'T' },
-  { id: 'pixelate', label: 'Pixelate', icon: Grid3X3, shortcut: '' },
-  { id: 'magic-wand', label: 'Magic Wand', icon: Wand2, shortcut: 'M' },
+  { id: 'pixelate', label: 'Pixelate', icon: Grid3X3, shortcut: '' }
 ] as const
 
 const COLORS = [
