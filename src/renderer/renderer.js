@@ -55,6 +55,7 @@ const state = {
   resizeHandle: null,
   windowContainerApplied: false,
   containerGradient: 'none',
+  containerBgBlur: 'none',
   originalImageBeforeContainer: null,
   // Crop state
   cropActive: false,
@@ -2244,7 +2245,15 @@ function applyWindowContainer() {
         const drawH = bgImg.height * scale;
         const drawX = (canvasW - drawW) / 2;
         const drawY = (canvasH - drawH) / 2;
+        
+        ctx.save();
+        if (state.containerBgBlur && state.containerBgBlur !== 'none') {
+          const blurAmounts = { weak: '10px', moderate: '25px', strong: '50px' };
+          ctx.filter = `blur(${blurAmounts[state.containerBgBlur] || '0px'})`;
+        }
         ctx.drawImage(bgImg, drawX, drawY, drawW, drawH);
+        ctx.restore();
+        
         drawRest();
       };
       bgImg.onerror = () => {
@@ -2422,6 +2431,50 @@ function bindRightSidebar() {
         state.containerAspectRatio = option.dataset.value;
         if (state.windowContainerApplied) {
           // re-apply to see new aspect ratio
+          state.windowContainerApplied = false;
+          const originalImg = state.originalImageBeforeContainer;
+          const tempImg = new Image();
+          tempImg.onload = () => {
+            state.image = tempImg;
+            state.imageWidth = tempImg.width;
+            state.imageHeight = tempImg.height;
+            state.annotations = [];
+            state.history = [];
+            state.historyIndex = -1;
+            state.originalImageBeforeContainer = originalImg;
+            applyWindowContainer();
+          };
+          tempImg.src = originalImg;
+        }
+      });
+    });
+  }
+
+  const rsBlurSelect = document.getElementById('rs-blur-select');
+  if (rsBlurSelect) {
+    const valueText = rsBlurSelect.querySelector('#rs-blur-value-text');
+    const options = rsBlurSelect.querySelectorAll('.rs-select-option');
+
+    rsBlurSelect.querySelector('.rs-select-value').addEventListener('click', (e) => {
+      e.stopPropagation();
+      rsBlurSelect.classList.toggle('open');
+    });
+
+    document.addEventListener('click', () => {
+      rsBlurSelect.classList.remove('open');
+    });
+
+    options.forEach(option => {
+      option.addEventListener('click', (e) => {
+        e.stopPropagation();
+        options.forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+        valueText.textContent = option.textContent;
+        rsBlurSelect.classList.remove('open');
+
+        state.containerBgBlur = option.dataset.value;
+        if (state.windowContainerApplied) {
+          // re-apply to see new blur
           state.windowContainerApplied = false;
           const originalImg = state.originalImageBeforeContainer;
           const tempImg = new Image();
