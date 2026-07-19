@@ -222,18 +222,17 @@ function EditorSidebarText() {
 
   if (activeTool !== 'text' && activeTool !== 'select') return null;
 
-  const selectFontFamily = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value
+  const selectFontFamily = (val: string) => {
     setFontFamily(val)
     const w = window as any
-    if (typeof w.editorSelectTextFontFamily === 'function') w.editorSelectTextFontFamily(val)
+    if (typeof w.editorSelectFontFamily === 'function') w.editorSelectFontFamily(val)
   }
 
   const changeFontSize = (delta: number) => {
     const newSize = Math.max(12, Math.min(120, fontSize + delta))
     setFontSize(newSize)
     const w = window as any
-    if (typeof w.editorSelectTextFontSize === 'function') w.editorSelectTextFontSize(newSize)
+    if (typeof w.editorSelectFontSize === 'function') w.editorSelectFontSize(newSize)
   }
 
   const toggleBold = () => {
