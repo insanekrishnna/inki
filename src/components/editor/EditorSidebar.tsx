@@ -37,8 +37,13 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '../ui/sidebar'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '../ui/dropdown-menu'
 import { cn } from '../../lib/utils'
-// import { Logo } from '../sidebar-02/logo'
 
 const TOOLS = [
   { id: 'crop', label: 'Crop', icon: Crop, shortcut: '' },
@@ -68,7 +73,7 @@ const STROKES = [
 
 const sidebarButtonClass =
   'h-8 !rounded-none text-[#333] dark:text-neutral-300 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-neutral-50 dark:hover:bg-white/10 hover:text-black dark:hover:text-white'
-const sidebarButtonInsetClass = 'px-3'
+const sidebarButtonInsetClass = 'px-2.5'
 const sidebarIconClass = 'size-[18px] shrink-0 text-[#333] dark:text-neutral-300'
 const sidebarMenuClass = 'gap-0'
 const sidebarGroupLabelClass = 'px-0 transition-opacity duration-500'
@@ -252,22 +257,33 @@ function EditorSidebarText() {
   return (
     <SidebarGroup>
       {!isCollapsed && <SidebarGroupLabel className={sidebarGroupLabelClass}>Text options</SidebarGroupLabel>}
-      <div className={cn(isCollapsed ? 'flex flex-col items-center gap-2' : 'flex flex-col gap-2', 'pt-2 pb-4 px-3')}>
+      <div className={cn(isCollapsed ? 'flex flex-col items-center gap-2' : 'flex flex-col gap-2', 'pt-2 pb-4 px-2.5')}>
         
         {/* Font Family Dropdown */}
         {!isCollapsed && (
-          <div className="relative flex items-center bg-neutral-100 dark:bg-white/5 rounded-md h-8 px-2 border border-transparent dark:border-white/10 focus-within:ring-2 focus-within:ring-neutral-200 transition-colors">
-            <select
-              value={fontFamily}
-              onChange={selectFontFamily}
-              className="w-full bg-transparent text-[13px] text-neutral-700 dark:text-neutral-200 outline-none appearance-none cursor-pointer"
-            >
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center justify-between w-full bg-neutral-100 hover:bg-neutral-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-md h-8 px-2 text-[13px] text-neutral-700 dark:text-neutral-200 outline-none transition-colors border border-transparent dark:border-white/10 focus-visible:ring-2 focus-visible:ring-neutral-200">
+                <span className="truncate">{FONTS.find(f => f.value === fontFamily)?.label || 'System'}</span>
+                <ChevronDown className="size-4 text-neutral-400 shrink-0" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent style={{ width: 'var(--radix-dropdown-menu-trigger-width)' }} className="min-w-[180px]">
               {FONTS.map(f => (
-                <option key={f.value} value={f.value} className="text-black dark:text-white bg-white dark:bg-neutral-800">{f.label}</option>
+                <DropdownMenuItem
+                  key={f.value}
+                  onClick={() => {
+                    setFontFamily(f.value)
+                    const w = window as any
+                    if (typeof w.editorSelectFontFamily === 'function') w.editorSelectFontFamily(f.value)
+                  }}
+                  className="text-[13px] cursor-pointer"
+                >
+                  {f.label}
+                </DropdownMenuItem>
               ))}
-            </select>
-            <ChevronDown className="absolute right-2 size-4 text-neutral-400 pointer-events-none" />
-          </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
 
         {/* Size and Toggles Row */}
@@ -341,7 +357,7 @@ function EditorSidebarAppearance() {
 
       <div
         className={cn(isCollapsed ? 'flex flex-col items-center gap-1.5' : 'flex flex-wrap gap-2')}
-        style={{ paddingTop: 10, paddingBottom: 16, paddingLeft: 20, paddingRight: 16 }}
+        style={{ paddingTop: 10, paddingBottom: 16, paddingLeft: 10, paddingRight: 10 }}
       >
         {COLORS.filter(color => !isCollapsed || color.value === '#111111' || color.value === '#ef4444')
           .sort((a, b) => {
@@ -400,7 +416,7 @@ function EditorSidebarAppearance() {
       )}
       <div
         className={cn('flex', isCollapsed ? 'flex-col items-center pt-1 gap-0.5 px-0' : 'flex-col gap-0.5')}
-        style={isCollapsed ? undefined : { paddingLeft: 20, paddingRight: 16 }}
+        style={isCollapsed ? undefined : { paddingLeft: 10, paddingRight: 10 }}
       >
         {STROKES.map((stroke) => (
           <button
