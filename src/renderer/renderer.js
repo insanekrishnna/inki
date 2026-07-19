@@ -848,7 +848,6 @@ async function pasteFromClipboard() {
 
 function clearCanvas() {
   if (state.cropActive) cancelCrop();
-  discardRecordingPreview({ silent: true });
   state.image = null;
   state.imageWidth = 0;
   state.imageHeight = 0;
@@ -860,7 +859,7 @@ function clearCanvas() {
   state.windowContainerApplied = false;
   state.originalImageBeforeContainer = null;
   elements.canvas.classList.remove('visible');
-  elements.emptyState.classList.add('hidden');
+  elements.emptyState.classList.remove('hidden');
   document.body.classList.remove('has-image');
   document.body.classList.remove('has-content');
   document.body.offsetHeight; // force reflow

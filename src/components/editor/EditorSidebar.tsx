@@ -63,10 +63,10 @@ const STROKES = [
 ]
 
 const sidebarButtonClass =
-  'h-9 !rounded-none text-neutral-500 dark:text-white/80 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-neutral-50 dark:hover:bg-white/10 hover:text-neutral-900 dark:hover:text-white'
+  'h-8 !rounded-none text-neutral-500 dark:text-white/80 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-neutral-50 dark:hover:bg-white/10 hover:text-neutral-900 dark:hover:text-white'
 const sidebarButtonInsetClass = 'px-3'
 const sidebarIconClass = 'size-[18px] shrink-0 text-neutral-400 dark:text-white/80'
-const sidebarMenuClass = 'gap-0.5'
+const sidebarMenuClass = 'gap-0'
 const sidebarGroupLabelClass = 'px-0 transition-opacity duration-500'
 
 function getSidebarButtonStyle(isCollapsed: boolean): React.CSSProperties | undefined {
@@ -388,11 +388,11 @@ export function EditorSidebar() {
       className="[&_[data-sidebar=sidebar]]:border-r-neutral-200/30 dark:[&_[data-sidebar=sidebar]]:border-r-white/10 [&_[data-sidebar=sidebar]]:bg-white dark:[&_[data-sidebar=sidebar]]:bg-[#050505] [&_[data-sidebar=sidebar]]:shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_6px_rgba(0,0,0,0.04)] dark:[&_[data-sidebar=sidebar]]:shadow-none"
     >
       <SidebarBrand />
-      <SidebarContent className="gap-0 pb-4 pt-4 group-data-[collapsible=icon]:pt-3 group-data-[collapsible=icon]:gap-1">
+      <SidebarContent className="gap-0 pb-2 pt-2 group-data-[collapsible=icon]:pt-2 group-data-[collapsible=icon]:gap-0">
         <EditorSidebarTools />
-        <SidebarSeparator className="my-2" />
+        <SidebarSeparator className="my-1" />
         <EditorSidebarAppearance />
-        <SidebarSeparator className="my-2" />
+        <SidebarSeparator className="my-1" />
         <EditorSidebarHistory />
       </SidebarContent>
       <EditorSidebarFooter />
