@@ -39,6 +39,7 @@ import { cn } from '../../lib/utils'
 // import { Logo } from '../sidebar-02/logo'
 
 const TOOLS = [
+  { id: 'crop', label: 'Crop', icon: Crop, shortcut: '' },
   { id: 'select', label: 'Select / Move', icon: MousePointer2, shortcut: 'V' },
   { id: 'rect', label: 'Rectangle', icon: Square, shortcut: 'R' },
   { id: 'ellipse', label: 'Ellipse', icon: Circle, shortcut: 'E' },
@@ -358,17 +359,6 @@ function EditorSidebarExport() {
     <SidebarGroup>
       <SidebarGroupLabel className={sidebarGroupLabelClass}>Export</SidebarGroupLabel>
       <SidebarMenu className={sidebarMenuClass}>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            className={cn(sidebarButtonClass, isCollapsed && 'justify-center px-0')}
-            onClick={() => w.editorCrop?.()}
-            style={getSidebarButtonStyle(isCollapsed)}
-            tooltip="Crop image"
-          >
-            <Crop className={sidebarIconClass} />
-            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium">Crop</span>}
-          </SidebarMenuButton>
-        </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton
             className={cn(sidebarButtonClass, isCollapsed && 'justify-center px-0')}
