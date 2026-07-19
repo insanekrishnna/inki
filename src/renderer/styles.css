@@ -1812,20 +1812,15 @@ body .canvas-container.recording-preview-active .toolbar.auto-hidden {
   border-radius: 12px;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
   z-index: 1000;
-  opacity: 0;
-  pointer-events: none;
+  opacity: 1;
+  pointer-events: auto;
   width: 52px;
   overflow: hidden;
   transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
 }
 
-body.has-image .right-sidebar.expanded, body.has-content .right-sidebar.expanded {
+.right-sidebar.expanded {
   width: 250px;
-}
-
-body.has-image .right-sidebar, body.has-content .right-sidebar {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 body.theme-dark .right-sidebar {
