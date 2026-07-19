@@ -257,7 +257,10 @@ function EditorSidebarText() {
   return (
     <SidebarGroup>
       {!isCollapsed && <SidebarGroupLabel className={sidebarGroupLabelClass}>Text options</SidebarGroupLabel>}
-      <div className={cn(isCollapsed ? 'flex flex-col items-center gap-2' : 'flex flex-col gap-2', 'pt-2 pb-4 px-5')}>
+      <div 
+        className={cn(isCollapsed ? 'flex flex-col items-center gap-2' : 'flex flex-col gap-2', 'pt-2 pb-4')}
+        style={{ paddingLeft: isCollapsed ? '0' : '20px', paddingRight: isCollapsed ? '0' : '20px' }}
+      >
         
         {/* Font Family Dropdown */}
         {!isCollapsed && (
