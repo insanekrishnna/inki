@@ -5,9 +5,7 @@ import {
   Bell,
   ChevronsUpDown,
   Circle,
-  Copy,
   Crop,
-  Download,
   Grid3X3,
   Info,
   Minus,
@@ -349,44 +347,6 @@ function EditorSidebarHistory() {
   )
 }
 
-function EditorSidebarExport() {
-  const { state } = useSidebar()
-  const isCollapsed = state === 'collapsed'
-  const w = window as any
-
-  return (
-    <SidebarGroup>
-      <SidebarGroupLabel className={sidebarGroupLabelClass}>Export</SidebarGroupLabel>
-      <SidebarMenu className={sidebarMenuClass}>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            className={cn(sidebarButtonClass, isCollapsed && 'justify-center px-0')}
-            onClick={() => w.editorCopy?.()}
-            style={getSidebarButtonStyle(isCollapsed)}
-            tooltip="Copy to clipboard"
-          >
-            <Copy className={sidebarIconClass} />
-            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in duration-500">Copy</span>}
-            {!isCollapsed && <span className="animate-in fade-in duration-500"><ShortcutKey>Ctrl C</ShortcutKey></span>}
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            className={cn(sidebarButtonClass, isCollapsed && 'justify-center px-0')}
-            onClick={() => w.editorSave?.()}
-            style={getSidebarButtonStyle(isCollapsed)}
-            tooltip="Save as PNG"
-          >
-            <Download className={sidebarIconClass} />
-            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in duration-500">Save PNG</span>}
-            {!isCollapsed && <span className="animate-in fade-in duration-500"><ShortcutKey>Ctrl E</ShortcutKey></span>}
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    </SidebarGroup>
-  )
-}
-
 function EditorSidebarFooter() {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
@@ -435,8 +395,6 @@ export function EditorSidebar() {
         <EditorSidebarAppearance />
         <SidebarSeparator className="my-2" />
         <EditorSidebarHistory />
-        <SidebarSeparator className="my-2" />
-        <EditorSidebarExport />
       </SidebarContent>
       <EditorSidebarFooter />
       <SidebarRail />
