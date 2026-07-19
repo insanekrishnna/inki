@@ -2150,8 +2150,24 @@ function applyWindowContainer() {
 
     const windowW = imgW;
     const windowH = imgH + titleBarHeight;
-    const canvasW = windowW + padding * 2;
-    const canvasH = windowH + padding * 2;
+    let canvasW = windowW + padding * 2;
+    let canvasH = windowH + padding * 2;
+
+    if (state.containerAspectRatio && state.containerAspectRatio !== 'native') {
+      const [ratioW, ratioH] = state.containerAspectRatio.split(':').map(Number);
+      if (ratioW && ratioH) {
+        const currentRatio = canvasW / canvasH;
+        const targetRatio = ratioW / ratioH;
+        if (currentRatio < targetRatio) {
+          canvasW = canvasH * targetRatio;
+        } else if (currentRatio > targetRatio) {
+          canvasH = canvasW / targetRatio;
+        }
+      }
+    }
+
+    const windowX = (canvasW - windowW) / 2;
+    const windowY = (canvasH - windowH) / 2;
 
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvasW;
@@ -2165,35 +2181,35 @@ function applyWindowContainer() {
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 8;
       ctx.beginPath();
-      roundRect(ctx, padding, padding, windowW, windowH, cornerRadius);
+      roundRect(ctx, windowX, windowY, windowW, windowH, cornerRadius);
       ctx.fillStyle = windowBgColor;
       ctx.fill();
       ctx.restore();
 
       ctx.save();
       ctx.beginPath();
-      roundRect(ctx, padding, padding, windowW, windowH, cornerRadius);
+      roundRect(ctx, windowX, windowY, windowW, windowH, cornerRadius);
       ctx.clip();
 
       ctx.fillStyle = titleBarColor;
-      ctx.fillRect(padding, padding, windowW, titleBarHeight);
+      ctx.fillRect(windowX, windowY, windowW, titleBarHeight);
 
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
       ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(padding, padding + titleBarHeight);
-      ctx.lineTo(padding + windowW, padding + titleBarHeight);
+      ctx.moveTo(windowX, windowY + titleBarHeight);
+      ctx.lineTo(windowX + windowW, windowY + titleBarHeight);
       ctx.stroke();
 
-      const lightY = padding + titleBarHeight / 2;
+      const lightY = windowY + titleBarHeight / 2;
       lights.forEach(light => {
         ctx.beginPath();
-        ctx.arc(padding + light.x, lightY, lightRadius, 0, Math.PI * 2);
+        ctx.arc(windowX + light.x, lightY, lightRadius, 0, Math.PI * 2);
         ctx.fillStyle = light.color;
         ctx.fill();
       });
 
-      ctx.drawImage(compositeImg, padding, padding + titleBarHeight, imgW, imgH);
+      ctx.drawImage(compositeImg, windowX, windowY + titleBarHeight, imgW, imgH);
       ctx.restore();
 
       const resultDataUrl = tempCanvas.toDataURL('image/png');
@@ -2368,6 +2384,50 @@ function bindRightSidebar() {
     applyWindowContainer();
     rsContainer.classList.toggle('active', state.windowContainerApplied);
   });
+
+  const rsCustomSelect = document.getElementById('rs-aspect-select');
+  if (rsCustomSelect) {
+    const valueText = rsCustomSelect.querySelector('#rs-aspect-value-text');
+    const options = rsCustomSelect.querySelectorAll('.rs-select-option');
+
+    rsCustomSelect.querySelector('.rs-select-value').addEventListener('click', (e) => {
+      e.stopPropagation();
+      rsCustomSelect.classList.toggle('open');
+    });
+
+    document.addEventListener('click', () => {
+      rsCustomSelect.classList.remove('open');
+    });
+
+    options.forEach(option => {
+      option.addEventListener('click', (e) => {
+        e.stopPropagation();
+        options.forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+        valueText.textContent = option.textContent;
+        rsCustomSelect.classList.remove('open');
+
+        state.containerAspectRatio = option.dataset.value;
+        if (state.windowContainerApplied) {
+          // re-apply to see new aspect ratio
+          state.windowContainerApplied = false;
+          const originalImg = state.originalImageBeforeContainer;
+          const tempImg = new Image();
+          tempImg.onload = () => {
+            state.image = tempImg;
+            state.imageWidth = tempImg.width;
+            state.imageHeight = tempImg.height;
+            state.annotations = [];
+            state.history = [];
+            state.historyIndex = -1;
+            state.originalImageBeforeContainer = originalImg;
+            applyWindowContainer();
+          };
+          tempImg.src = originalImg;
+        }
+      });
+    });
+  }
 
   rsCopy.addEventListener('click', () => {
     copyToClipboard();
