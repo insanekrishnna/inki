@@ -1941,19 +1941,31 @@ body.theme-dark .rs-separator {
   background: rgba(255, 255, 255, 0.1);
 }
 
+.rs-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a3a3a3;
+  margin: 0 0 4px 12px;
+  letter-spacing: 0.5px;
+}
+
+.right-sidebar:not(.expanded) .rs-section-title {
+  display: none;
+}
+
 .rs-gradients {
   display: flex;
   flex-direction: column;
   gap: 6px;
   align-items: center;
-  padding: 4px 0;
+  padding: 0;
 }
 
 .right-sidebar.expanded .rs-gradients {
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: flex-start;
-  padding: 4px 6px;
+  padding: 0 6px 2px 6px;
 }
 
 .rs-gradient-swatch {
