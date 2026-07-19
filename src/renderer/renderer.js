@@ -2158,64 +2158,86 @@ function applyWindowContainer() {
     tempCanvas.height = canvasH;
     const ctx = tempCanvas.getContext('2d');
 
-    const gradientColors = gradients[state.containerGradient || 'none'];
-    if (gradientColors) {
-      const grad = ctx.createLinearGradient(0, 0, canvasW, canvasH);
-      grad.addColorStop(0, gradientColors[0]);
-      grad.addColorStop(1, gradientColors[1]);
-      ctx.fillStyle = grad;
-    } else {
-      ctx.fillStyle = '#d7bea2';
-    }
-    ctx.fillRect(0, 0, canvasW, canvasH);
-
-    ctx.save();
-    ctx.shadowColor = shadowColor;
-    ctx.shadowBlur = shadowBlur;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 8;
-    ctx.beginPath();
-    roundRect(ctx, padding, padding, windowW, windowH, cornerRadius);
-    ctx.fillStyle = windowBgColor;
-    ctx.fill();
-    ctx.restore();
-
-    ctx.save();
-    ctx.beginPath();
-    roundRect(ctx, padding, padding, windowW, windowH, cornerRadius);
-    ctx.clip();
-
-    ctx.fillStyle = titleBarColor;
-    ctx.fillRect(padding, padding, windowW, titleBarHeight);
-
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(padding, padding + titleBarHeight);
-    ctx.lineTo(padding + windowW, padding + titleBarHeight);
-    ctx.stroke();
-
-    const lightY = padding + titleBarHeight / 2;
-    lights.forEach(light => {
+    const drawRest = () => {
+      ctx.save();
+      ctx.shadowColor = shadowColor;
+      ctx.shadowBlur = shadowBlur;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 8;
       ctx.beginPath();
-      ctx.arc(padding + light.x, lightY, lightRadius, 0, Math.PI * 2);
-      ctx.fillStyle = light.color;
+      roundRect(ctx, padding, padding, windowW, windowH, cornerRadius);
+      ctx.fillStyle = windowBgColor;
       ctx.fill();
-    });
+      ctx.restore();
 
-    ctx.drawImage(compositeImg, padding, padding + titleBarHeight, imgW, imgH);
-    ctx.restore();
+      ctx.save();
+      ctx.beginPath();
+      roundRect(ctx, padding, padding, windowW, windowH, cornerRadius);
+      ctx.clip();
 
-    const resultDataUrl = tempCanvas.toDataURL('image/png');
-    state.annotations = [];
-    state.history = [];
-    state.historyIndex = -1;
-    state.selectedAnnotationIndex = -1;
-    state.windowContainerApplied = true;
-    const btn = document.getElementById('btn-window-container');
-    if (btn) btn.classList.add('active');
-    loadImage(resultDataUrl);
-    showToast('Window container applied', 'success');
+      ctx.fillStyle = titleBarColor;
+      ctx.fillRect(padding, padding, windowW, titleBarHeight);
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padding, padding + titleBarHeight);
+      ctx.lineTo(padding + windowW, padding + titleBarHeight);
+      ctx.stroke();
+
+      const lightY = padding + titleBarHeight / 2;
+      lights.forEach(light => {
+        ctx.beginPath();
+        ctx.arc(padding + light.x, lightY, lightRadius, 0, Math.PI * 2);
+        ctx.fillStyle = light.color;
+        ctx.fill();
+      });
+
+      ctx.drawImage(compositeImg, padding, padding + titleBarHeight, imgW, imgH);
+      ctx.restore();
+
+      const resultDataUrl = tempCanvas.toDataURL('image/png');
+      state.annotations = [];
+      state.history = [];
+      state.historyIndex = -1;
+      state.selectedAnnotationIndex = -1;
+      state.windowContainerApplied = true;
+      const btn = document.getElementById('btn-window-container');
+      if (btn) btn.classList.add('active');
+      loadImage(resultDataUrl);
+      showToast('Window container applied', 'success');
+    };
+
+    if (state.containerBgImage) {
+      const bgImg = new Image();
+      bgImg.onload = () => {
+        const scale = Math.max(canvasW / bgImg.width, canvasH / bgImg.height);
+        const drawW = bgImg.width * scale;
+        const drawH = bgImg.height * scale;
+        const drawX = (canvasW - drawW) / 2;
+        const drawY = (canvasH - drawH) / 2;
+        ctx.drawImage(bgImg, drawX, drawY, drawW, drawH);
+        drawRest();
+      };
+      bgImg.onerror = () => {
+        ctx.fillStyle = '#d7bea2';
+        ctx.fillRect(0, 0, canvasW, canvasH);
+        drawRest();
+      };
+      bgImg.src = state.containerBgImage;
+    } else {
+      const gradientColors = gradients[state.containerGradient || 'none'];
+      if (gradientColors) {
+        const grad = ctx.createLinearGradient(0, 0, canvasW, canvasH);
+        grad.addColorStop(0, gradientColors[0]);
+        grad.addColorStop(1, gradientColors[1]);
+        ctx.fillStyle = grad;
+      } else {
+        ctx.fillStyle = '#d7bea2';
+      }
+      ctx.fillRect(0, 0, canvasW, canvasH);
+      drawRest();
+    }
   };
   compositeImg.src = compositeDataUrl;
 }
@@ -2357,8 +2379,13 @@ function bindRightSidebar() {
 
   rsGradientSwatches.forEach(swatch => {
     swatch.addEventListener('click', () => {
-      const gradient = swatch.dataset.gradient;
-      state.containerGradient = gradient;
+      if (swatch.dataset.bg) {
+        state.containerBgImage = swatch.dataset.bg;
+        state.containerGradient = null;
+      } else {
+        state.containerGradient = swatch.dataset.gradient;
+        state.containerBgImage = null;
+      }
       rsGradientSwatches.forEach(s => s.classList.remove('active'));
       swatch.classList.add('active');
 
