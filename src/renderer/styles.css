@@ -2074,7 +2074,7 @@ body.theme-dark .rs-close-btn:hover {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  padding: 0 9px;
+  padding: 0 16px;
   color: #737373;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -2127,7 +2127,7 @@ body.theme-dark .rs-item.active {
 .rs-separator {
   height: 1px;
   background: rgba(0, 0, 0, 0.04);
-  margin: 4px 0;
+  margin: 4px 16px;
 }
 
 body.theme-dark .rs-separator {
@@ -2142,7 +2142,7 @@ body.theme-dark .rs-separator {
   font-size: 11px;
   font-weight: 600;
   color: #a3a3a3;
-  margin: 0 0 4px 12px;
+  margin: 0 16px 4px 16px;
   letter-spacing: 0.5px;
 }
 
@@ -2162,7 +2162,7 @@ body.theme-dark .rs-separator {
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: flex-start;
-  padding: 0 6px 2px 6px;
+  padding: 0 16px 2px 16px;
 }
 
 .rs-gradient-swatch {
@@ -2206,10 +2206,30 @@ body.theme-dark .rs-separator {
 
 .rs-custom-select {
   position: relative;
-  width: 100%;
+  width: 120px;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: 12px;
   color: #333;
+}
+
+.right-sidebar.expanded .rs-aspect-ratio-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  margin-top: 4px;
+}
+
+.rs-aspect-ratio-label {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #333;
+}
+
+body.theme-dark .rs-aspect-ratio-label {
+  color: #e5e5e5;
 }
 
 body.theme-dark .rs-custom-select {
@@ -2304,7 +2324,7 @@ body.theme-dark .rs-select-option.active {
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: flex-start;
-  padding: 0 6px 2px 6px;
+  padding: 0 16px 2px 16px;
   gap: 8px;
 }
 
