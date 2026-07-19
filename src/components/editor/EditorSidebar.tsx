@@ -3,11 +3,14 @@ import { motion } from 'framer-motion'
 import {
   ArrowUpRight,
   Bell,
+  Bold,
+  ChevronDown,
   ChevronsUpDown,
   Circle,
   Crop,
   Grid3X3,
   Info,
+  Italic,
   Minus,
   MousePointer2,
   Plus,
@@ -15,6 +18,7 @@ import {
   Square,
   Trash2,
   Type,
+  Underline,
   Undo2,
   Wand2,
 } from 'lucide-react'
@@ -42,9 +46,9 @@ const TOOLS = [
   { id: 'rect', label: 'Rectangle', icon: Square, shortcut: 'R' },
   { id: 'ellipse', label: 'Ellipse', icon: Circle, shortcut: 'E' },
   { id: 'arrow', label: 'Arrow', icon: ArrowUpRight, shortcut: 'A' },
-  { id: 'line', label: 'Line', icon: Minus, shortcut: 'L' },
   { id: 'text', label: 'Text', icon: Type, shortcut: 'T' },
-  { id: 'pixelate', label: 'Pixelate', icon: Grid3X3, shortcut: '' }
+  { id: 'line', label: 'Line', icon: Minus, shortcut: 'L' },
+  { id: 'pixelate', label: 'Pixelate', icon: Grid3X3, shortcut: 'P' }
 ] as const
 
 const COLORS = [
@@ -65,7 +69,7 @@ const STROKES = [
 const sidebarButtonClass =
   'h-8 !rounded-none text-[#333] dark:text-neutral-300 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-neutral-50 dark:hover:bg-white/10 hover:text-black dark:hover:text-white'
 const sidebarButtonInsetClass = 'px-3'
-const sidebarIconClass = 'size-[18px] shrink-0 text-neutral-400 dark:text-white/80'
+const sidebarIconClass = 'size-[18px] shrink-0 text-[#333] dark:text-neutral-300'
 const sidebarMenuClass = 'gap-0'
 const sidebarGroupLabelClass = 'px-0 transition-opacity duration-500'
 
@@ -176,6 +180,126 @@ function EditorSidebarTools() {
   )
 }
 
+const FONTS = [
+  { label: 'System', value: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" },
+  { label: 'Arial', value: "Arial, sans-serif" },
+  { label: 'Courier New', value: "'Courier New', Courier, monospace" },
+  { label: 'Georgia', value: "Georgia, serif" },
+  { label: 'Times New Roman', value: "'Times New Roman', Times, serif" },
+  { label: 'Trebuchet MS', value: "'Trebuchet MS', sans-serif" },
+  { label: 'Verdana', value: "Verdana, sans-serif" },
+];
+
+function EditorSidebarText() {
+  const { state } = useSidebar()
+  const isCollapsed = state === 'collapsed'
+  
+  const [activeTool, setActiveTool] = useState<string | null>(null)
+  const [fontFamily, setFontFamily] = useState(FONTS[0].value)
+  const [fontSize, setFontSize] = useState(44)
+  const [isBold, setIsBold] = useState(false)
+  const [isItalic, setIsItalic] = useState(false)
+  const [isUnderline, setIsUnderline] = useState(false)
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (detail?.currentTool !== undefined) setActiveTool(detail.currentTool)
+      if (detail?.textFontFamily) setFontFamily(detail.textFontFamily)
+      if (detail?.textFontSize) setFontSize(detail.textFontSize)
+      if (detail?.textBold !== undefined) setIsBold(detail.textBold)
+      if (detail?.textItalic !== undefined) setIsItalic(detail.textItalic)
+      if (detail?.textUnderline !== undefined) setIsUnderline(detail.textUnderline)
+    }
+    window.addEventListener('editor-state-change', handler)
+    return () => window.removeEventListener('editor-state-change', handler)
+  }, [])
+
+  if (activeTool !== 'text' && activeTool !== 'select') return null;
+
+  const selectFontFamily = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value
+    setFontFamily(val)
+    const w = window as any
+    if (typeof w.editorSelectTextFontFamily === 'function') w.editorSelectTextFontFamily(val)
+  }
+
+  const changeFontSize = (delta: number) => {
+    const newSize = Math.max(12, Math.min(120, fontSize + delta))
+    setFontSize(newSize)
+    const w = window as any
+    if (typeof w.editorSelectTextFontSize === 'function') w.editorSelectTextFontSize(newSize)
+  }
+
+  const toggleBold = () => {
+    setIsBold(!isBold)
+    const w = window as any
+    if (typeof w.editorSelectTextBold === 'function') w.editorSelectTextBold()
+  }
+
+  const toggleItalic = () => {
+    setIsItalic(!isItalic)
+    const w = window as any
+    if (typeof w.editorSelectTextItalic === 'function') w.editorSelectTextItalic()
+  }
+
+  const toggleUnderline = () => {
+    setIsUnderline(!isUnderline)
+    const w = window as any
+    if (typeof w.editorSelectTextUnderline === 'function') w.editorSelectTextUnderline()
+  }
+
+  return (
+    <SidebarGroup>
+      {!isCollapsed && <SidebarGroupLabel className={sidebarGroupLabelClass}>Text options</SidebarGroupLabel>}
+      <div className={cn(isCollapsed ? 'flex flex-col items-center gap-2' : 'flex flex-col gap-2', 'pt-2 pb-4 px-3')}>
+        
+        {/* Font Family Dropdown */}
+        {!isCollapsed && (
+          <div className="relative flex items-center bg-neutral-100 dark:bg-white/5 rounded-md h-8 px-2 border border-transparent dark:border-white/10 focus-within:ring-2 focus-within:ring-neutral-200 transition-colors">
+            <select
+              value={fontFamily}
+              onChange={selectFontFamily}
+              className="w-full bg-transparent text-[13px] text-neutral-700 dark:text-neutral-200 outline-none appearance-none cursor-pointer"
+            >
+              {FONTS.map(f => (
+                <option key={f.value} value={f.value} className="text-black dark:text-white bg-white dark:bg-neutral-800">{f.label}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2 size-4 text-neutral-400 pointer-events-none" />
+          </div>
+        )}
+
+        {/* Size and Toggles Row */}
+        <div className={cn(isCollapsed ? 'flex flex-col gap-2' : 'flex flex-row items-center gap-2')}>
+          <div className="flex items-center justify-between bg-neutral-100 dark:bg-white/5 rounded-md h-8 px-1 flex-1 min-w-0 transition-colors">
+            <button onClick={() => changeFontSize(-4)} className="size-6 flex items-center justify-center text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors">
+              <Minus className="size-3" />
+            </button>
+            {!isCollapsed && <span className="text-[12px] font-medium text-neutral-700 dark:text-neutral-300">{fontSize}px</span>}
+            <button onClick={() => changeFontSize(4)} className="size-6 flex items-center justify-center text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors">
+              <Plus className="size-3" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-0.5 bg-neutral-100 dark:bg-white/5 p-0.5 rounded-md transition-colors">
+            <button onClick={toggleBold} className={cn("size-7 flex items-center justify-center rounded text-[13px] font-bold transition-colors", isBold ? "bg-black/10 dark:bg-white/20 text-black dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
+              B
+            </button>
+            <button onClick={toggleItalic} className={cn("size-7 flex items-center justify-center rounded text-[13px] italic font-serif transition-colors", isItalic ? "bg-black/10 dark:bg-white/20 text-black dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
+              I
+            </button>
+            <button onClick={toggleUnderline} className={cn("size-7 flex items-center justify-center rounded text-[13px] underline transition-colors", isUnderline ? "bg-black/10 dark:bg-white/20 text-black dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
+              U
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </SidebarGroup>
+  )
+}
+
 function EditorSidebarAppearance() {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
@@ -268,7 +392,7 @@ function EditorSidebarAppearance() {
 
       {!isCollapsed && (
         <div
-          className="text-[11px] font-medium text-[#333] dark:text-neutral-300 animate-in fade-in duration-500"
+          className="text-[11px] font-medium text-[#111] dark:text-neutral-300 animate-in fade-in duration-500"
           style={{ paddingTop: 18, paddingBottom: 8, paddingLeft: 20 }}
         >
           Stroke
@@ -390,6 +514,8 @@ export function EditorSidebar() {
       <SidebarBrand />
       <SidebarContent className="gap-0 pb-2 pt-2 group-data-[collapsible=icon]:pt-2 group-data-[collapsible=icon]:gap-0">
         <EditorSidebarTools />
+        <SidebarSeparator className="my-1" />
+        <EditorSidebarText />
         <SidebarSeparator className="my-1" />
         <EditorSidebarAppearance />
         <SidebarSeparator className="my-1" />

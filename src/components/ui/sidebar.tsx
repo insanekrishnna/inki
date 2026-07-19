@@ -455,8 +455,8 @@ const SidebarGroupLabel = React.forwardRef<
       ref={ref}
       data-sidebar="group-label"
       className={cn(
-        "flex h-6 shrink-0 items-center rounded-md mb-1 text-[11px] font-medium text-[#333] dark:text-neutral-300 outline-none ring-sidebar-ring transition-[margin,opacity] duration-500 ease-in-out focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-        "group-data-[collapsible=icon]:-mt-5 group-data-[collapsible=icon]:opacity-0 ",
+        "flex h-6 shrink-0 items-center rounded-md mb-1 text-[11px] font-medium text-[#111] dark:text-neutral-300 outline-none ring-sidebar-ring transition-[margin,opacity] duration-500 ease-in-out focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+        "group-data-[collapsible=icon]:-mt-5 group-data-[collapsible=icon]:opacity-0",
         className
       )}
       style={{ paddingLeft: 20, ...props.style }}
@@ -529,7 +529,7 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2.5 overflow-hidden rounded-lg px-2.5 py-1.5 text-left text-[13px] font-medium text-neutral-500 outline-none ring-sidebar-ring transition-all duration-150 hover:bg-neutral-50 hover:text-neutral-900 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-neutral-100/80 data-[active=true]:font-semibold data-[active=true]:text-neutral-900 data-[state=open]:text-neutral-900 group-data-[collapsible=icon]:!size-7 group-data-[collapsible=icon]:!p-1 group-data-[collapsible=icon]:justify-center [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-neutral-400",
+  "peer/menu-button flex w-full items-center gap-2.5 overflow-hidden rounded-lg px-2.5 py-1.5 text-left text-[13px] font-medium text-neutral-500 outline-none ring-sidebar-ring transition-all duration-150 hover:bg-neutral-50 hover:text-neutral-900 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-neutral-100/80 data-[active=true]:font-semibold data-[active=true]:text-neutral-900 data-[state=open]:text-neutral-900 group-data-[collapsible=icon]:!size-7 group-data-[collapsible=icon]:!p-1 group-data-[collapsible=icon]:justify-center [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       variant: {

@@ -18,6 +18,7 @@ window.editorSelectColor = (c) => selectColor(c);
 window.editorSelectStrokeWidth = (w) => selectStrokeWidth(w);
 window.editorSelectTextBold = () => selectTextBold();
 window.editorSelectTextItalic = () => selectTextItalic();
+window.editorSelectTextUnderline = () => selectTextUnderline();
 window.editorSelectFontFamily = (f) => selectTextFontFamily(f);
 window.editorSelectFontSize = (s) => selectTextFontSize(s);
 
@@ -34,6 +35,7 @@ const state = {
   textFontFamily: '-apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif',
   textBold: false,
   textItalic: false,
+  textUnderline: false,
   isDrawing: false,
   startX: 0,
   startY: 0,
@@ -1182,6 +1184,24 @@ function selectTextItalic() {
   }
 }
 
+function selectTextUnderline() {
+  state.textUnderline = !state.textUnderline;
+  if (state.currentTool === 'select' && state.selectedAnnotationIndex >= 0) {
+    const selected = state.annotations[state.selectedAnnotationIndex];
+    if (selected?.type === 'text') {
+      selected.fontUnderline = state.textUnderline;
+      state.history = state.history.slice(0, state.historyIndex + 1);
+      state.history.push([...state.annotations.map(a => ({ ...a }))]);
+      state.historyIndex = state.history.length - 1;
+      render();
+      updateToolbarState();
+    }
+  }
+  if (state.isEditingText) {
+    elements.textInput.style.textDecoration = state.textUnderline ? 'underline' : 'none';
+  }
+}
+
 function getTextBounds(annotation) {
   const ctx = elements.ctx;
   const fontSize = annotation.fontSize || state.textFontSize || 24;
@@ -1478,6 +1498,7 @@ function openInlineText(coords) {
   input.style.fontFamily = state.textFontFamily;
   input.style.fontWeight = state.textBold ? 'bold' : 'normal';
   input.style.fontStyle = state.textItalic ? 'italic' : 'normal';
+  input.style.textDecoration = state.textUnderline ? 'underline' : 'none';
   setTimeout(() => input.focus(), 0);
   autoResizeTextInput();
 }
@@ -1498,6 +1519,7 @@ function commitInlineText() {
       fontFamily: state.textFontFamily,
       fontBold: state.textBold,
       fontItalic: state.textItalic,
+      fontUnderline: state.textUnderline,
     });
   }
   state.pendingTextPos = null;
@@ -1650,12 +1672,23 @@ function drawAnnotation(ann) {
     case 'ellipse': drawEllipse(ctx, ann.x, ann.y, ann.width, ann.height); break;
     case 'arrow': drawArrow(ctx, ann.x1, ann.y1, ann.x2, ann.y2, true); break;
     case 'line': ctx.beginPath(); ctx.moveTo(ann.x1, ann.y1); ctx.lineTo(ann.x2, ann.y2); ctx.stroke(); break;
-    case 'text':
+    case 'text': {
       ctx.font = buildFontString(ann);
-      ann.text.split('\n').forEach((line, i) => {
-        ctx.fillText(line, ann.x, ann.y + i * ((ann.fontSize || 24) * 1.2));
+      const lines = ann.text.split('\n');
+      const lineHeight = (ann.fontSize || 24) * 1.2;
+      lines.forEach((line, i) => {
+        const lineY = ann.y + i * lineHeight;
+        ctx.fillText(line, ann.x, lineY);
+        if (ann.fontUnderline) {
+          const m = ctx.measureText(line);
+          const lineYOffset = lineY + (ann.fontSize || 24) * 0.15;
+          const w = m.width;
+          const underlineThickness = Math.max(1, (ann.fontSize || 24) / 12);
+          ctx.fillRect(ann.x, lineYOffset, w, underlineThickness);
+        }
       });
       break;
+    }
     case 'highlight': ctx.fillStyle = ann.color + '40'; ctx.fillRect(ann.x, ann.y, ann.width, ann.height); break;
     case 'blur': applyBlur(ctx, ann.x, ann.y, ann.width, ann.height); break;
     case 'pixelate': applyPixelate(ctx, ann.x, ann.y, ann.width, ann.height); break;
@@ -1902,7 +1935,12 @@ function updateToolbarState() {
       currentTool: state.currentTool,
       currentColor: state.currentColor,
       strokeWidth: state.strokeWidth,
-      hasImage: !!state.image
+      hasImage: !!state.image,
+      textBold: state.textBold,
+      textItalic: state.textItalic,
+      textUnderline: state.textUnderline,
+      textFontFamily: state.textFontFamily,
+      textFontSize: state.textFontSize
     }
   }));
 }

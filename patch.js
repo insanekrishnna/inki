@@ -1,0 +1,9 @@
+const fs = require('fs');
+let content = fs.readFileSync('src/renderer/renderer.js', 'utf8');
+content = content.replace('textItalic: false,', 'textItalic: false,\n  textUnderline: false,');
+content = content.replace('window.editorSelectTextItalic = selectTextItalic;', 'window.editorSelectTextItalic = selectTextItalic;\nwindow.editorSelectTextUnderline = selectTextUnderline;\nwindow.editorSelectTextFontFamily = selectTextFontFamily;\nwindow.editorSelectTextFontSize = selectTextFontSize;');
+const selectTextUnderlineFunc = 'function selectTextUnderline() {\\n  state.textUnderline = !state.textUnderline;\\n  if (state.currentTool === \'select\' && state.selectedAnnotationIndex >= 0) {\\n    const selected = state.annotations[state.selectedAnnotationIndex];\\n    if (selected?.type === \'text\') {\\n      selected.fontUnderline = state.textUnderline;\\n      state.history = state.history.slice(0, state.historyIndex + 1);\\n      state.history.push([...state.annotations.map(a => ({ ...a }))]);\\n      state.historyIndex = state.history.length - 1;\\n      render();\\n      updateToolbarState();\\n    }\\n  }\\n  if (state.isEditingText) {\\n    elements.textInput.style.textDecoration = state.textUnderline ? \'underline\' : \'none\';\\n  }\\n}';
+content = content.replace('function selectTextItalic() {', selectTextUnderlineFunc + '\nfunction selectTextItalic() {');
+content = content.replace('ctx.fillText(line, ann.x, ann.y + i * ((ann.fontSize || 24) * 1.2));', 'const yPos = ann.y + i * ((ann.fontSize || 24) * 1.2);\n        ctx.fillText(line, ann.x, yPos);\n        if (ann.fontUnderline) {\n          const metrics = ctx.measureText(line);\n          const underlineHeight = Math.max(1, (ann.fontSize || 24) * 0.08);\n          ctx.fillRect(ann.x, yPos + 2, metrics.width, underlineHeight);\n        }');
+fs.writeFileSync('src/renderer/renderer.js', content);
+console.log('renderer.js updated');
