@@ -66,11 +66,11 @@ const STROKES = [
 ]
 
 const sidebarButtonClass =
-  'h-9 !rounded-none text-neutral-500 dark:text-white/80 transition-all duration-150 hover:bg-neutral-50 dark:hover:bg-white/10 hover:text-neutral-900 dark:hover:text-white'
+  'h-9 !rounded-none text-neutral-500 dark:text-white/80 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-neutral-50 dark:hover:bg-white/10 hover:text-neutral-900 dark:hover:text-white'
 const sidebarButtonInsetClass = 'px-3'
 const sidebarIconClass = 'size-[18px] shrink-0 text-neutral-400 dark:text-white/80'
 const sidebarMenuClass = 'gap-0.5'
-const sidebarGroupLabelClass = 'px-0'
+const sidebarGroupLabelClass = 'px-0 transition-opacity duration-500'
 
 function getSidebarButtonStyle(isCollapsed: boolean): React.CSSProperties | undefined {
   if (isCollapsed) return undefined
@@ -126,7 +126,7 @@ function SidebarBrand() {
         key={isCollapsed ? 'editor-header-collapsed' : 'editor-header-expanded'}
         transition={{ duration: 0.25 }}
       >
-        <SidebarTrigger className="shrink-0 size-7 rounded-md border border-transparent bg-transparent text-neutral-400 transition-all duration-150 hover:bg-neutral-50 hover:text-neutral-700 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white" />
+        <SidebarTrigger className="shrink-0 size-7 rounded-md border border-transparent bg-transparent text-neutral-400 transition-all duration-500 hover:bg-neutral-50 hover:text-neutral-700 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white" />
       </motion.div>
     </SidebarHeader>
   )
@@ -169,8 +169,8 @@ function EditorSidebarTools() {
               tooltip={tool.label}
             >
               <tool.icon className={cn(sidebarIconClass, activeTool === tool.id && 'text-neutral-700')} />
-              {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium">{tool.label}</span>}
-              {!isCollapsed && tool.shortcut && <ShortcutKey>{tool.shortcut}</ShortcutKey>}
+              {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in duration-500">{tool.label}</span>}
+              {!isCollapsed && tool.shortcut && <span className="animate-in fade-in duration-500"><ShortcutKey>{tool.shortcut}</ShortcutKey></span>}
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}
@@ -236,7 +236,7 @@ function EditorSidebarAppearance() {
             onClick={() => selectColor(color.value)}
             title={color.label}
             className={cn(
-              'size-[22px] shrink-0 rounded-full border-[1.5px] transition-all duration-150 hover:scale-110 hover:shadow-sm',
+              'size-[22px] shrink-0 rounded-full border-[1.5px] transition-all duration-500 hover:scale-110 hover:shadow-sm',
               activeColor === color.value
                 ? 'scale-110 border-neutral-900 ring-2 ring-neutral-200/60'
                 : 'border-transparent hover:border-neutral-200'
@@ -250,7 +250,7 @@ function EditorSidebarAppearance() {
           onClick={() => customColorInputRef.current?.click()}
           title="Custom color"
           className={cn(
-            'relative flex size-[22px] shrink-0 items-center justify-center rounded-full border-[1.5px] transition-all duration-150 hover:scale-110',
+            'relative flex size-[22px] shrink-0 items-center justify-center rounded-full border-[1.5px] transition-all duration-500 hover:scale-110',
             customColor && activeColor === customColor
               ? 'scale-110 border-neutral-900 ring-2 ring-neutral-200/60'
               : 'border-dashed border-neutral-300 hover:border-neutral-400'
@@ -271,7 +271,7 @@ function EditorSidebarAppearance() {
 
       {!isCollapsed && (
         <div
-          className="text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400/80"
+          className="text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400/80 animate-in fade-in duration-500"
           style={{ paddingTop: 18, paddingBottom: 8, paddingLeft: 20 }}
         >
           Stroke
@@ -287,12 +287,12 @@ function EditorSidebarAppearance() {
             onClick={() => selectStroke(stroke.value)}
             title={stroke.label}
             className={cn(
-              'flex h-8 w-full items-center !rounded-none transition-all duration-150 hover:bg-neutral-50 dark:hover:bg-white/10 dark:text-white/80',
+              'flex h-8 w-full items-center !rounded-none transition-all duration-500 hover:bg-neutral-50 dark:hover:bg-white/10 dark:text-white/80',
               'justify-center',
               activeStroke === stroke.value ? 'bg-neutral-100/80 text-neutral-900 dark:bg-white/10 dark:text-white' : 'text-neutral-400 dark:text-white/60'
             )}
           >
-            <span className="rounded-full bg-current" style={{ width: !isCollapsed ? '24px' : '14px', height: stroke.height }} />
+            <span className="rounded-full bg-current transition-all duration-500" style={{ width: !isCollapsed ? '24px' : '14px', height: stroke.height }} />
           </button>
         ))}
       </div>
@@ -317,8 +317,8 @@ function EditorSidebarHistory() {
             tooltip="Undo"
           >
             <Undo2 className={sidebarIconClass} />
-            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium">Undo</span>}
-            {!isCollapsed && <ShortcutKey>Ctrl Z</ShortcutKey>}
+            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in duration-500">Undo</span>}
+            {!isCollapsed && <span className="animate-in fade-in duration-500"><ShortcutKey>Ctrl Z</ShortcutKey></span>}
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
@@ -329,8 +329,8 @@ function EditorSidebarHistory() {
             tooltip="Redo"
           >
             <Redo2 className={sidebarIconClass} />
-            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium">Redo</span>}
-            {!isCollapsed && <ShortcutKey>Ctrl Shift Z</ShortcutKey>}
+            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in duration-500">Redo</span>}
+            {!isCollapsed && <span className="animate-in fade-in duration-500"><ShortcutKey>Ctrl Shift Z</ShortcutKey></span>}
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
@@ -341,7 +341,7 @@ function EditorSidebarHistory() {
             tooltip="Clear canvas"
           >
             <Trash2 className={sidebarIconClass} />
-            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium">Clear Canvas</span>}
+            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in duration-500">Clear Canvas</span>}
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
@@ -366,8 +366,8 @@ function EditorSidebarExport() {
             tooltip="Copy to clipboard"
           >
             <Copy className={sidebarIconClass} />
-            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium">Copy</span>}
-            {!isCollapsed && <ShortcutKey>Ctrl C</ShortcutKey>}
+            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in duration-500">Copy</span>}
+            {!isCollapsed && <span className="animate-in fade-in duration-500"><ShortcutKey>Ctrl C</ShortcutKey></span>}
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
@@ -378,8 +378,8 @@ function EditorSidebarExport() {
             tooltip="Save as PNG"
           >
             <Download className={sidebarIconClass} />
-            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium">Save PNG</span>}
-            {!isCollapsed && <ShortcutKey>Ctrl E</ShortcutKey>}
+            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in duration-500">Save PNG</span>}
+            {!isCollapsed && <span className="animate-in fade-in duration-500"><ShortcutKey>Ctrl E</ShortcutKey></span>}
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
@@ -396,7 +396,7 @@ function EditorSidebarFooter() {
       <button
         onClick={() => window.open('https://github.com/prathm-k/inki', '_blank')}
         className={cn(
-          'group flex h-14 w-full items-center gap-2 !rounded-none text-left transition-all duration-150 hover:bg-neutral-50 dark:hover:bg-white/10',
+          'group flex h-14 w-full items-center gap-2 !rounded-none text-left transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-neutral-50 dark:hover:bg-white/10',
           isCollapsed ? 'justify-center px-0' : ''
         )}
         style={isCollapsed ? undefined : { paddingLeft: 0, paddingRight: 16 }}
@@ -404,7 +404,7 @@ function EditorSidebarFooter() {
         type="button"
       >
         {!isCollapsed && (
-          <>
+          <div className="flex min-w-0 flex-1 items-center gap-2 animate-in fade-in duration-500">
             <img src="/inki.png" alt="Inki" className="size-[62px] shrink-0 object-contain object-left drop-shadow-sm -ml-5 -mr-5" />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[13px] font-semibold leading-5 text-neutral-900 dark:text-white">Inki</span>
@@ -414,7 +414,7 @@ function EditorSidebarFooter() {
               <span>v0.1.0</span>
               <ChevronsUpDown className="size-3" />
             </span>
-          </>
+          </div>
         )}
       </button>
     </SidebarFooter>
