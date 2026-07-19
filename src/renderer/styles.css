@@ -556,7 +556,7 @@ body:not(.has-image) .toolbar .toolbar-btn:hover:not(:disabled) {
 body.theme-dark:not(.has-image) .toolbar {
   border-radius: 0 0 18px 18px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: #18181b; /* Beautiful dark color (zinc-900) instead of pitch black */
+  background: #050505;
   color: #ffffff;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
@@ -1672,67 +1672,34 @@ body.toolbar-transition .statusbar {
     body.platform-darwin.has-content {
       background: transparent;
     }
-
-    .toolbar {
-      --toolbar-icon-color: rgba(241, 245, 255, 0.94);
-      --toolbar-icon-muted: rgba(226, 233, 250, 0.88);
-      --toolbar-icon-hover: rgba(255, 255, 255, 0.99);
-      --toolbar-icon-active: rgba(255, 255, 255, 0.99);
-    }
-  
-    .toolbar-btn:hover:not(:disabled) {
-      background: rgba(255, 255, 255, 0.22);
-    }
-  
-    body:not(.theme-light) .liquidGlass-wrapper,
-    body:not(.theme-light):not(.has-image) .toolbar {
-      background: rgba(30, 30, 32, 0.85) !important;
-      border-color: rgba(255, 255, 255, 0.15) !important;
-    }
-  
-    body:not(.theme-light):not(.has-image) .toolbar .toolbar-btn {
-      color: var(--toolbar-icon-muted) !important;
-    }
-  
-    body:not(.theme-light):not(.has-image) .toolbar .toolbar-btn:hover:not(:disabled) {
-      color: var(--toolbar-icon-hover) !important;
-      background: rgba(255, 255, 255, 0.15) !important;
-    }
-
-    .toolbar-separator {
-      background: rgba(255, 255, 255, 0.22);
-    }
-
-    .app-tooltip {
-      border-color: rgba(255,255,255,0.18);
-      background: rgba(30, 31, 36, 0.88);
-      color: rgba(241, 245, 255, 0.94);
-    }
-  }
-
-@media (prefers-color-scheme: light) {
-  .toolbar {
-    --toolbar-icon-color: rgba(15, 23, 42, 0.9);
-    --toolbar-icon-muted: rgba(15, 23, 42, 0.78);
-    --toolbar-icon-hover: rgba(2, 6, 23, 0.97);
-    --toolbar-icon-active: rgba(2, 6, 23, 0.97);
-  }
 }
 
-body.theme-light:not(.has-image) .toolbar {
-  border-color: rgba(8, 9, 13, 0.08) !important;
-  background: rgba(255, 255, 255, 0.96) !important;
-  color: #05070a;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08), 0 1px 0 rgba(255,255,255,0.9) inset;
+.toolbar {
+  --toolbar-icon-color: rgba(15, 23, 42, 0.9);
+  --toolbar-icon-muted: rgba(15, 23, 42, 0.78);
+  --toolbar-icon-hover: rgba(2, 6, 23, 0.97);
+  --toolbar-icon-active: rgba(2, 6, 23, 0.97);
 }
 
-body.theme-light:not(.has-image) .toolbar .toolbar-btn {
-  color: rgba(5, 7, 10, 0.82) !important;
+body.theme-dark .toolbar {
+  --toolbar-icon-color: rgba(241, 245, 255, 0.94);
+  --toolbar-icon-muted: rgba(226, 233, 250, 0.88);
+  --toolbar-icon-hover: rgba(255, 255, 255, 0.99);
+  --toolbar-icon-active: rgba(255, 255, 255, 0.99);
 }
 
-body.theme-light:not(.has-image) .toolbar .toolbar-btn:hover:not(:disabled) {
-  background: rgba(5, 7, 10, 0.06) !important;
-  color: rgba(5, 7, 10, 0.96) !important;
+body.theme-dark .toolbar-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+body.theme-dark .toolbar-separator {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+body.theme-dark .app-tooltip {
+  border-color: rgba(255,255,255,0.18);
+  background: rgba(30, 31, 36, 0.88);
+  color: rgba(241, 245, 255, 0.94);
 }
 
 .canvas-container.recording-preview-active {
