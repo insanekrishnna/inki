@@ -266,7 +266,7 @@ function EditorSidebarText() {
         {!isCollapsed && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center justify-between w-full bg-neutral-100 hover:bg-neutral-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-md h-8 px-2 text-[13px] text-neutral-700 dark:text-neutral-200 outline-none transition-colors border border-transparent dark:border-white/10 focus-visible:ring-2 focus-visible:ring-neutral-200">
+              <button className="flex items-center justify-between w-full bg-neutral-100 hover:bg-neutral-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-md h-8 px-3 text-[13px] text-neutral-700 dark:text-neutral-200 outline-none transition-colors border border-transparent dark:border-white/10 focus-visible:ring-2 focus-visible:ring-neutral-200">
                 <span className="truncate">{FONTS.find(f => f.value === fontFamily)?.label || 'System'}</span>
                 <ChevronDown className="size-4 text-neutral-400 shrink-0" />
               </button>
@@ -299,7 +299,7 @@ function EditorSidebarText() {
 
         {/* Size and Toggles Row */}
         <div className={cn(isCollapsed ? 'flex flex-col gap-2' : 'flex flex-row items-center gap-2')}>
-          <div className="flex items-center justify-between bg-neutral-100 dark:bg-white/5 rounded-md h-8 px-1 flex-1 min-w-0 transition-colors">
+          <div className="flex items-center justify-between bg-neutral-100 dark:bg-white/5 rounded-md h-8 px-2 flex-1 min-w-0 transition-colors">
             <button onClick={() => changeFontSize(-4)} className="size-6 flex items-center justify-center text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors">
               <Minus className="size-3" />
             </button>
