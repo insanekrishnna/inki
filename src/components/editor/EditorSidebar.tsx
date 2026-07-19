@@ -266,12 +266,15 @@ function EditorSidebarText() {
         {!isCollapsed && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center justify-between w-full bg-neutral-100 hover:bg-neutral-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-md h-8 px-2 text-[13px] text-neutral-700 dark:text-neutral-200 outline-none transition-colors border border-transparent dark:border-white/10 focus-visible:ring-2 focus-visible:ring-neutral-200">
+              <button className="flex items-center justify-between w-full bg-transparent hover:bg-black/5 dark:hover:bg-white/5 border border-black/10 dark:border-white/10 rounded-md py-[6px] px-[10px] text-[12px] text-[#333] dark:text-[#e5e5e5] font-['Inter',system-ui,sans-serif] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500">
                 <span className="truncate">{FONTS.find(f => f.value === fontFamily)?.label || 'System'}</span>
-                <ChevronDown className="size-4 text-neutral-400 shrink-0" />
+                <ChevronDown className="size-4 shrink-0" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent style={{ width: 'var(--radix-dropdown-menu-trigger-width)' }} className="min-w-[180px]">
+            <DropdownMenuContent 
+              style={{ width: 'var(--radix-dropdown-menu-trigger-width)' }} 
+              className="min-w-[180px] bg-white dark:bg-[#1e1e1e] border border-black/10 dark:border-white/10 rounded-md py-1 shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.5)] z-50 font-['Inter',system-ui,sans-serif] text-[12px] text-[#333] dark:text-[#e5e5e5]"
+            >
               {FONTS.map(f => (
                 <DropdownMenuItem
                   key={f.value}
@@ -280,7 +283,12 @@ function EditorSidebarText() {
                     const w = window as any
                     if (typeof w.editorSelectFontFamily === 'function') w.editorSelectFontFamily(f.value)
                   }}
-                  className="text-[13px] cursor-pointer"
+                  className={cn(
+                    "cursor-pointer py-[6px] px-[10px] transition-colors rounded-none outline-none",
+                    fontFamily === f.value 
+                      ? "bg-blue-500 text-white dark:bg-blue-500" 
+                      : "hover:bg-black/5 dark:hover:bg-white/10 focus:bg-black/5 dark:focus:bg-white/10"
+                  )}
                 >
                   {f.label}
                 </DropdownMenuItem>
