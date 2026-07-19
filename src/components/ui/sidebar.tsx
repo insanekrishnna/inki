@@ -230,7 +230,7 @@ const Sidebar = React.forwardRef<
         data-side={side}
         onMouseEnter={() => {
           if (!isMobile) setOpen(true)
-        }}
+        }}  
       >
         {/* This is what handles the sidebar gap on desktop */}
         <div
