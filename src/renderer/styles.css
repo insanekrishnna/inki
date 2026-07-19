@@ -2190,7 +2190,9 @@ body.theme-dark .rs-separator {
 }
 
 .right-sidebar:not(.expanded) .rs-gradient-swatch[data-gradient="ocean"],
-.right-sidebar:not(.expanded) .rs-gradient-swatch[data-gradient="midnight"] {
+.right-sidebar:not(.expanded) .rs-gradient-swatch[data-bg="f1.png"],
+.right-sidebar:not(.expanded) .rs-gradient-swatch[data-bg="g1.png"],
+.right-sidebar:not(.expanded) .rs-gradient-swatch[data-bg="Mac1.png"] {
   display: flex;
 }
 
@@ -2359,8 +2361,7 @@ body.theme-dark .rs-select-option.active {
   display: none;
 }
 
-.right-sidebar:not(.expanded) .rs-frame-swatch[data-theme="default"],
-.right-sidebar:not(.expanded) .rs-frame-swatch[data-theme="dark"] {
+.right-sidebar:not(.expanded) .rs-frame-swatch[data-theme="default"] {
   display: flex;
 }
 
