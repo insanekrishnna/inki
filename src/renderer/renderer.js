@@ -2324,8 +2324,23 @@ function bindRightSidebar() {
   const rsSavePng = document.getElementById('rs-save-png');
   const rsCopy = document.getElementById('rs-copy');
   const rsGradientSwatches = document.querySelectorAll('.rs-gradient-swatch');
+  const rightSidebar = document.getElementById('right-sidebar');
+  const rsCloseBtn = document.getElementById('rs-close-btn');
 
-  if (!rsContainer) return;
+  if (!rsContainer || !rightSidebar) return;
+
+  rightSidebar.addEventListener('mouseenter', () => {
+    if (!rightSidebar.classList.contains('expanded')) {
+      rightSidebar.classList.add('expanded');
+    }
+  });
+
+  if (rsCloseBtn) {
+    rsCloseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      rightSidebar.classList.remove('expanded');
+    });
+  }
 
   rsContainer.addEventListener('click', () => {
     applyWindowContainer();
