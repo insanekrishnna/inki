@@ -67,7 +67,7 @@ export function EditorSidebarAppearance() {
       </div>
 
       {/* Stroke width */}
-      {open && <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 px-2 mt-2 mb-1">Stroke</div>}
+      {open && <div className="text-[11px] font-medium text-[#333] dark:text-neutral-300 px-2 mt-2 mb-1">Stroke</div>}
       <div className={cn("flex gap-1 px-2 mt-1", !open && "flex-col items-center mt-2")}>
         {STROKES.map((stroke) => (
           <button

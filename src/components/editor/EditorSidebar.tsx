@@ -63,7 +63,7 @@ const STROKES = [
 ]
 
 const sidebarButtonClass =
-  'h-8 !rounded-none text-neutral-500 dark:text-white/80 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-neutral-50 dark:hover:bg-white/10 hover:text-neutral-900 dark:hover:text-white'
+  'h-8 !rounded-none text-[#333] dark:text-neutral-300 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-neutral-50 dark:hover:bg-white/10 hover:text-black dark:hover:text-white'
 const sidebarButtonInsetClass = 'px-3'
 const sidebarIconClass = 'size-[18px] shrink-0 text-neutral-400 dark:text-white/80'
 const sidebarMenuClass = 'gap-0'
@@ -268,7 +268,7 @@ function EditorSidebarAppearance() {
 
       {!isCollapsed && (
         <div
-          className="text-[11px] font-semibold uppercase tracking-[0.06em] text-neutral-400/80 animate-in fade-in duration-500"
+          className="text-[11px] font-medium text-[#333] dark:text-neutral-300 animate-in fade-in duration-500"
           style={{ paddingTop: 18, paddingBottom: 8, paddingLeft: 20 }}
         >
           Stroke
