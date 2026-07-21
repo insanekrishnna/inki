@@ -16,9 +16,9 @@ export const Hero = () => {
           <img src="inki.png" alt="INKI" className="toolbar-logo" />
         </div>
         <div className="toolbar-group capture-modes">
-          <button className="toolbar-btn" id="btn-capture-region" data-tooltip="Capture region"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 8V4h4"/><path d="M4 16v4h4"/><path d="M16 4h4v4"/><path d="M16 20h4v-4"/><rect x="8" y="8" width="8" height="8" rx="1" strokeDasharray="2 2"/></svg></button>
-          <button className="toolbar-btn" id="btn-capture-window" data-tooltip="Capture window"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 8h18"/><circle cx="5.5" cy="6" r=".5" fill="currentColor"/><circle cx="7.5" cy="6" r=".5" fill="currentColor"/><circle cx="9.5" cy="6" r=".5" fill="currentColor"/></svg></button>
-          <button className="toolbar-btn" id="btn-capture-fullscreen" data-tooltip="Capture fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M6 21h12"/><path d="M12 17v4"/></svg></button>
+          <button className="toolbar-btn" id="btn-capture-region" data-tooltip="Capture region" onClick={() => window.location.href = '/capture.html'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M4 8V4h4"/><path d="M4 16v4h4"/><path d="M16 4h4v4"/><path d="M16 20h4v-4"/><rect x="8" y="8" width="8" height="8" rx="1" strokeDasharray="2 2"/></svg></button>
+          <button className="toolbar-btn" id="btn-capture-window" data-tooltip="Capture window" onClick={() => window.location.href = '/capture.html'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 8h18"/><circle cx="5.5" cy="6" r=".5" fill="currentColor"/><circle cx="7.5" cy="6" r=".5" fill="currentColor"/><circle cx="9.5" cy="6" r=".5" fill="currentColor"/></svg></button>
+          <button className="toolbar-btn" id="btn-capture-fullscreen" data-tooltip="Capture fullscreen" onClick={() => window.location.href = '/capture.html'}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M6 21h12"/><path d="M12 17v4"/></svg></button>
         </div>
         <div id="react-theme-toggle-root">
           <ToggleTheme />

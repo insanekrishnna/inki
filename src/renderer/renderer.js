@@ -201,10 +201,15 @@ function init() {
 }
 
 function initThemeToggle() {
-  const savedTheme = localStorage.getItem(THEME_SETTING_KEY);
-  const initialTheme = savedTheme || 'light';
-  document.body.classList.toggle('theme-dark', initialTheme === 'dark');
-  document.body.classList.toggle('theme-light', initialTheme !== 'dark');
+  // Always default to light theme on page load
+  localStorage.removeItem(THEME_SETTING_KEY);
+  localStorage.removeItem('theme');
+  localStorage.removeItem('vite-ui-theme');
+  const initialTheme = 'light';
+  document.body.classList.remove('theme-dark');
+  document.body.classList.add('theme-light');
+  document.documentElement.classList.remove('dark');
+  document.documentElement.classList.add('light');
   elements.btnToggleTheme?.addEventListener('click', () => {
     const nextTheme = document.body.classList.contains('theme-dark') ? 'light' : 'dark';
     document.body.classList.toggle('theme-dark', nextTheme === 'dark');
