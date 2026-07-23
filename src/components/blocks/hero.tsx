@@ -120,7 +120,7 @@ const EditorPreview = () => {
   ];
 
   return (
-    <div className="relative w-full max-w-[580px]">
+    <div className="relative w-full max-w-[650px]">
       {/* Glow behind preview */}
       <div
         className="absolute -inset-8 rounded-3xl opacity-[0.06] dark:opacity-[0.08] blur-2xl pointer-events-none"
@@ -128,7 +128,7 @@ const EditorPreview = () => {
       />
 
       {/* Main editor container */}
-      <div className="relative rounded-2xl border border-zinc-200/80 dark:border-zinc-800/60 bg-white dark:bg-[#0c0c0e] shadow-2xl overflow-hidden transition-all duration-500 hover:shadow-zinc-300/40 dark:hover:shadow-zinc-900/60">
+      <div className="relative rounded-2xl border border-zinc-200/80 dark:border-zinc-800/60 bg-white dark:bg-[#0c0c0e] shadow-md shadow-zinc-200/40 dark:shadow-black/40 overflow-hidden transition-shadow duration-500 hover:shadow-xl hover:shadow-zinc-300/50 dark:hover:shadow-black/60">
 
         {/* ── macOS Title Bar ── */}
         <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-50/80 dark:bg-[#141416] border-b border-zinc-200/60 dark:border-zinc-800/60">
@@ -171,7 +171,7 @@ const EditorPreview = () => {
           </div>
 
           {/* ── Canvas Area ── */}
-          <div className="flex-1 relative bg-zinc-100/50 dark:bg-[#0a0a0c] min-h-[320px] overflow-hidden">
+          <div className="flex-1 relative bg-white dark:bg-[#0c0c0e] flex items-center justify-center overflow-hidden group" style={{ minHeight: '320px' }}>
             {/* Canvas grid */}
             <div
               className="absolute inset-0 opacity-[0.4] dark:opacity-[0.15]"
@@ -181,102 +181,17 @@ const EditorPreview = () => {
               }}
             />
 
-            {/* Mock "captured screenshot" — a fake UI card */}
-            <div className="absolute top-8 left-6 right-16 bottom-12">
-              {/* Fake captured content — a simple card/page screenshot */}
-              <div className="w-full h-full rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800/60 shadow-lg overflow-hidden">
-                {/* Fake page header */}
-                <div className="h-8 bg-zinc-50 dark:bg-zinc-800/60 border-b border-zinc-200/60 dark:border-zinc-700/40 flex items-center px-3 gap-2">
-                  <div className="w-14 h-2 rounded bg-zinc-200 dark:bg-zinc-700" />
-                  <div className="w-8 h-2 rounded bg-zinc-200 dark:bg-zinc-700" />
-                  <div className="w-10 h-2 rounded bg-zinc-200 dark:bg-zinc-700" />
-                  <div className="flex-1" />
-                  <div className="w-5 h-2 rounded bg-zinc-200 dark:bg-zinc-700" />
-                </div>
-                {/* Fake content blocks */}
-                <div className="p-4 space-y-3">
-                  <div className="w-3/4 h-3 rounded bg-zinc-100 dark:bg-zinc-800" />
-                  <div className="w-1/2 h-3 rounded bg-zinc-100 dark:bg-zinc-800" />
-                  <div className="flex gap-3 mt-4">
-                    <div className="w-1/3 h-20 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/50 dark:border-zinc-700/30" />
-                    <div className="w-1/3 h-20 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/50 dark:border-zinc-700/30" />
-                    <div className="w-1/3 h-20 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/50 dark:border-zinc-700/30" />
-                  </div>
-                  <div className="w-2/3 h-3 rounded bg-zinc-100 dark:bg-zinc-800 mt-3" />
-                  <div className="w-5/6 h-3 rounded bg-zinc-100 dark:bg-zinc-800" />
-                  <div className="w-1/3 h-3 rounded bg-zinc-100 dark:bg-zinc-800" />
-                </div>
-              </div>
-            </div>
-
-            {/* ── Annotation Overlays ── */}
-
-            {/* Arrow annotation */}
-            <svg className="absolute top-14 left-12 z-10 pointer-events-none" width="160" height="60" viewBox="0 0 160 60">
-              <defs>
-                <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto" fill="#3b82f6">
-                  <polygon points="0 0, 8 3, 0 6" />
-                </marker>
-              </defs>
-              <path d="M 10 50 Q 80 10 145 25" stroke="#3b82f6" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" strokeLinecap="round" />
-            </svg>
-
-            {/* Blur region */}
-            <div
-              className="absolute z-10 pointer-events-none rounded-md overflow-hidden"
-              style={{ top: '145px', left: '48px', width: '80px', height: '48px' }}
-            >
-              <div className="w-full h-full backdrop-blur-md bg-zinc-400/20 dark:bg-zinc-500/20 border border-dashed border-zinc-400/50 dark:border-zinc-500/40 rounded-md" />
-            </div>
-
-            {/* Text callout annotation */}
-            <div
-              className="absolute z-10 pointer-events-none flex items-center gap-1.5"
-              style={{ bottom: '48px', right: '28px' }}
-            >
-              <div className="px-2.5 py-1 rounded-md bg-[#3b82f6] text-white text-[10px] font-medium shadow-lg shadow-blue-500/20">
-                Check this section
-              </div>
-              {/* Cursor blink */}
-              <div
-                className="w-[2px] h-3.5 bg-[#3b82f6] rounded-full"
-                style={{ animation: 'cursor-blink 1s ease-in-out infinite' }}
-              />
-            </div>
-
-            {/* Selection handles on the blur region */}
-            <div className="absolute z-10 pointer-events-none" style={{ top: '143px', left: '46px', width: '84px', height: '52px' }}>
-              <div className="absolute -top-1 -left-1 w-2 h-2 rounded-full bg-white border-2 border-[#3b82f6]" />
-              <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-white border-2 border-[#3b82f6]" />
-              <div className="absolute -bottom-1 -left-1 w-2 h-2 rounded-full bg-white border-2 border-[#3b82f6]" />
-              <div className="absolute -bottom-1 -right-1 w-2 h-2 rounded-full bg-white border-2 border-[#3b82f6]" />
-            </div>
-
-            {/* Floating properties mini-panel */}
-            <div className="absolute top-6 right-4 z-20 pointer-events-none">
-              <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200/80 dark:border-zinc-700/60 shadow-xl p-2 space-y-1.5 w-[100px]">
-                <div className="flex items-center justify-between">
-                  <span className="text-[8px] text-zinc-400 font-medium uppercase tracking-wider">Stroke</span>
-                  <div className="flex items-center gap-1">
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#3b82f6]" />
-                    <span className="text-[8px] text-zinc-500 font-medium">2px</span>
-                  </div>
-                </div>
-                <div className="w-full h-px bg-zinc-100 dark:bg-zinc-800" />
-                <div className="flex items-center justify-between">
-                  <span className="text-[8px] text-zinc-400 font-medium uppercase tracking-wider">Opacity</span>
-                  <div className="w-12 h-1 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
-                    <div className="w-4/5 h-full bg-zinc-500 dark:bg-zinc-400 rounded-full" />
-                  </div>
-                </div>
-                <div className="w-full h-px bg-zinc-100 dark:bg-zinc-800" />
-                <div className="flex items-center justify-between">
-                  <span className="text-[8px] text-zinc-400 font-medium uppercase tracking-wider">Fill</span>
-                  <span className="text-[8px] text-zinc-500 font-medium">None</span>
-                </div>
-              </div>
-            </div>
-
+            {/* sketch.png internal canvas taking full width/height */}
+            <img 
+              src="/sketch.png" 
+              alt="Minimal Sketch Canvas" 
+              className="absolute inset-0 w-full h-full object-contain opacity-95 dark:invert dark:contrast-125 dark:opacity-85 z-10" 
+              draggable={false}
+              style={{ padding: '24px' }}
+            />
+            
+            {/* Subtle gradient fade at the bottom for depth */}
+            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-zinc-100/30 dark:from-[#0a0a0c]/80 to-transparent pointer-events-none z-10" />
           </div>
         </div>
 
