@@ -181,12 +181,14 @@ const EditorPreview = () => {
               }}
             />
 
-            {/* sketch.png internal canvas taking full width/height */}
-            <img 
-              src="/sketch.png" 
-              alt="Minimal Sketch Canvas" 
-              className="absolute inset-0 w-full h-full object-contain opacity-95 dark:invert dark:contrast-125 dark:opacity-85 z-10" 
-              draggable={false}
+            {/* mac.webm internal canvas taking full width/height */}
+            <video 
+              src="/mac.webm" 
+              autoPlay 
+              loop 
+              muted 
+              playsInline
+              className="absolute inset-0 w-full h-full object-contain opacity-95 z-10 scale-[2.1]" 
               style={{ padding: '24px' }}
             />
             
@@ -251,14 +253,14 @@ export const Hero = () => {
             </p>
 
             <div className="mt-10 flex flex-wrap items-center justify-start gap-4">
-              <Button asChild size="lg" className="rounded-md px-6 h-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 hover:scale-[1.02] active:scale-95 text-sm font-medium transition-all duration-300">
+              <Button asChild size="lg" className="rounded-md px-6 h-10 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 hover:scale-[1.02] active:scale-95 text-sm font-medium transition-all duration-300">
                 <a href="/capture.html">
-                  Download App
+                  Get started
                 </a>
               </Button>
-              <Button asChild variant="outline" size="lg" className="rounded-md px-6 h-12 bg-white dark:bg-transparent border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 hover:scale-[1.02] active:scale-95 text-sm font-medium transition-all duration-300">
+              <Button asChild variant="outline" size="lg" className="rounded-md px-6 h-10 bg-white dark:bg-transparent border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 hover:scale-[1.02] active:scale-95 text-sm font-medium transition-all duration-300">
                 <a href="#features">
-                  Check out features
+                  See in action
                 </a>
               </Button>
             </div>
