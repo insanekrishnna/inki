@@ -43,10 +43,18 @@ export const Features = () => {
       <div className="landing-dot-grid" aria-hidden="true" />
       <div className="landing-feature-shell">
         <div className="landing-feature-intro fade-in-view">
+          <div className="landing-feature-compact-list">
+            {items.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.title} className="landing-feature-compact-item">
+                  <Icon size={18} strokeWidth={1.5} />
+                  <span>{item.title}</span>
+                </div>
+              );
+            })}
+          </div>
           <h2>Minimal. Powerful.</h2>
-          <p>
-            Clean captures, precise annotation, and instant sharing without leaving the focused tool surface.
-          </p>
         </div>
 
         <div className="landing-feature-grid">

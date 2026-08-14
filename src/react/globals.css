@@ -248,7 +248,7 @@ html, body {
   padding: 0 28px;
   font-size: 0.86rem;
   font-weight: 500;
-  border-radius: 9999px;
+  border-radius: 0;
   text-decoration: none;
   transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
@@ -351,20 +351,40 @@ html, body {
 
 .landing-feature-intro {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 430px);
-  gap: clamp(40px, 9vw, 120px);
-  align-items: end;
-  min-height: 276px;
-  padding: 92px clamp(24px, 4vw, 64px) 34px;
+  grid-template-columns: minmax(240px, 360px) minmax(0, 1fr);
+  gap: clamp(32px, 6vw, 80px);
+  align-items: center;
+  min-height: 240px;
+  padding: 68px clamp(24px, 4vw, 64px) 38px;
   border-bottom: 1px solid rgba(17, 17, 17, 0.08);
 }
 
-.landing-feature-intro span {
-  display: block;
-  margin-bottom: 20px;
-  color: rgba(17, 17, 17, 0.58);
-  font-size: 0.7rem;
-  text-transform: uppercase;
+.landing-feature-compact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.landing-feature-compact-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  font-weight: 450;
+  color: rgba(17, 17, 17, 0.78);
+  letter-spacing: 0.01em;
+}
+
+.landing-feature-compact-item svg {
+  color: #2f54ff;
+  flex-shrink: 0;
+}
+
+.landing-feature-compact-num {
+  font-size: 0.82rem;
+  font-weight: 550;
+  color: rgba(17, 17, 17, 0.45);
+  margin-right: 2px;
 }
 
 .landing-feature-intro h2 {
@@ -374,13 +394,6 @@ html, body {
   font-weight: 400;
   line-height: 1.04;
   letter-spacing: 0;
-}
-
-.landing-feature-intro p {
-  color: rgba(17, 17, 17, 0.62);
-  font-size: 1rem;
-  line-height: 1.55;
-  padding-bottom: 8px;
 }
 
 .landing-feature-grid {
