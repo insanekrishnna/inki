@@ -39,7 +39,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     // TWEEN FACTORIES
     const resetPeep = ({ stage, peep }: { stage: any; peep: any }) => {
       const direction = Math.random() > 0.5 ? 1 : -1;
-      const offsetY = 80 - 180 * gsap.parseEase("power2.in")(Math.random());
+      const offsetY = 120 - 200 * gsap.parseEase("power2.in")(Math.random());
       const startY = stage.height - peep.height + offsetY;
       let startX: number;
       let endX: number;
@@ -260,7 +260,6 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     const init = () => {
       createPeeps();
       resize();
-      gsap.ticker.add(render);
     };
 
     img.onload = init;
@@ -269,8 +268,21 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     const handleResize = () => resize();
     window.addEventListener("resize", handleResize);
 
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        gsap.ticker.add(render);
+      } else {
+        gsap.ticker.remove(render);
+      }
+    });
+
+    if (canvas) {
+      observer.observe(canvas);
+    }
+
     return () => {
       window.removeEventListener("resize", handleResize);
+      observer.disconnect();
       gsap.ticker.remove(render);
       crowd.forEach((peep) => {
         if (peep.walk) peep.walk.kill();

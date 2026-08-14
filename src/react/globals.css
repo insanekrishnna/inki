@@ -285,23 +285,24 @@ html, body {
   z-index: 1;
   align-self: stretch;
   justify-self: start;
-  width: min(42vw, 560px);
-  min-width: 360px;
+  width: min(54vw, 720px);
+  min-width: 420px;
   height: 100%;
   pointer-events: none;
 }
 
 .landing-stroke-svg {
   position: absolute;
-  top: 72px;
-  left: -130px;
-  width: min(54vw, 684px);
+  top: -50px;
+  right: -200px;
+  width: min(110vw, 900px);
   height: auto;
-  max-height: calc(100vh + 60px);
+  max-height: clamp(600px, 70vh, 760px);
   overflow: hidden;
-  mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 98%);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 98%);
-  transform: rotate(-6deg);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 92%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 92%);
+  transform: scale(1.75) rotate(-6deg);
+  transform-origin: top right;
 }
 
 .landing-stroke-path {
@@ -312,12 +313,12 @@ html, body {
 
 .landing-stroke-path--ghost {
   stroke: rgba(17, 17, 17, 0.08);
-  stroke-width: 24;
+  stroke-width: 26;
 }
 
 .landing-stroke-path--active {
   stroke: #2f54ff;
-  stroke-width: 25;
+  stroke-width: 27;
   filter: drop-shadow(0 10px 22px rgba(47, 84, 255, 0.18));
 }
 
@@ -332,7 +333,7 @@ html, body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  overflow: visible;
+  overflow: hidden;
   background: #ffffff;
 }
 
@@ -340,7 +341,7 @@ html, body {
   position: relative;
   overflow: visible;
   background: #ffffff;
-  padding: 0 0 20px;
+  padding: 0;
 }
 
 .landing-feature-shell {
