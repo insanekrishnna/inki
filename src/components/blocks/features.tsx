@@ -43,14 +43,17 @@ export const Features = () => {
       <div className="landing-dot-grid" aria-hidden="true" />
       <div className="landing-feature-shell">
         <div className="landing-feature-intro fade-in-view">
-          <h5>Capture. Design. Deliver.</h5>
-          <div className="landing-feature-compact-list">
+          <h2 className="landing-feature-heading">Capture. Design. Deliver.</h2>
+          <div className="landing-feature-grid">
             {items.map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.title} className="landing-feature-compact-item">
-                  <Icon size={18} strokeWidth={1.5} />
-                  <span>{item.title}</span>
+                <div key={item.title} className="landing-feature-card fade-in-view">
+                  <div className="landing-feature-icon-wrapper">
+                    <Icon size={20} strokeWidth={1.5} />
+                  </div>
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
                 </div>
               );
             })}
