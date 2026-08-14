@@ -5,12 +5,12 @@
    ══════════════════════════════════════════════════════════════ */
 
 /* ── Floating Pill Toolbar ── */
-.toolbar {
-  --toolbar-offset: 0px;
+.landing-island {
+  --landing-island-offset: 0px;
   position: fixed;
   top: 0px;
   left: 50%;
-  transform: translateX(-50%) translateY(var(--toolbar-offset));
+  transform: translateX(-50%) translateY(var(--landing-island-offset));
   display: inline-flex;
   align-items: center;
   width: fit-content;
@@ -31,12 +31,12 @@
   z-index: 50;
 }
 
-.toolbar,
-.toolbar > div {
+.landing-island,
+.landing-island > div {
   border-radius: inherit;
 }
 
-.liquidGlass-wrapper {
+.landing-island-glass {
   background: rgba(255, 255, 255, 0.28);
   backdrop-filter: blur(24px) saturate(180%) brightness(1.08);
   -webkit-backdrop-filter: blur(24px) saturate(180%) brightness(1.08);
@@ -44,17 +44,12 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.dark .liquidGlass-wrapper {
-  background: #050505;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.liquidGlass-effect,
-.liquidGlass-tint {
+.landing-island-glass-effect,
+.landing-island-glass-tint {
   display: none;
 }
 
-.liquidGlass-shine {
+.landing-island-glass-shine {
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -65,11 +60,11 @@
   display: none;
 }
 
-.toolbar-dismiss-hint {
+.landing-island-dismiss-hint {
   display: none;
 }
 
-.toolbar-group {
+.landing-island-group {
   display: flex;
   align-items: center;
   gap: 2px;
@@ -77,12 +72,12 @@
   z-index: 3;
 }
 
-.toolbar-group.capture-modes {
+.landing-island-group.capture-modes {
   display: flex !important;
   gap: 16px !important;
 }
 
-.toolbar-brand {
+.landing-island-brand {
   position: relative;
   z-index: 3;
   display: inline-flex;
@@ -92,7 +87,7 @@
   padding: 0 4px;
 }
 
-.toolbar-logo {
+.landing-island-logo {
   display: block;
   width: auto !important;
   height: 36px !important;
@@ -100,18 +95,8 @@
   margin: 0 !important;
 }
 
-#react-theme-toggle-root {
-  display: flex;
-  width: auto !important;
-  justify-content: center;
-  align-items: center;
-  padding: 0 4px !important;
-  position: relative;
-  z-index: 3;
-}
-
 /* ── Toolbar buttons ── */
-.toolbar-btn {
+.landing-island-btn {
   width: 45px;
   height: 38px;
   border: none;
@@ -127,55 +112,38 @@
   outline: none;
 }
 
-.toolbar-btn svg {
+.landing-island-btn svg {
   width: 20px;
   height: 20px;
 }
 
-.toolbar-btn:hover:not(:disabled) {
+.landing-island-btn:hover:not(:disabled) {
   background: #f4f4f5;
   color: #000000;
 }
 
-.toolbar-btn:disabled {
+.landing-island-btn:disabled {
   opacity: 0.3;
   cursor: default;
 }
 
-.toolbar-btn:focus,
-.toolbar-btn:focus-visible {
+.landing-island-btn:focus,
+.landing-island-btn:focus-visible {
   outline: none;
   box-shadow: none;
 }
 
 /* ── Landing page toolbar (no image loaded state) ── */
-.toolbar {
+.landing-island {
+  top: 0px;
   width: fit-content;
   min-height: 52px;
-  padding: 8px 20px;
+  padding: 8px 24px;
   gap: 16px;
   justify-content: center;
   border-radius: 0 0 24px 24px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: rgb(255, 255, 255);
   color: #000000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* ── Dark mode ── */
-.dark .toolbar {
-  border-radius: 0 0 24px 24px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: #050505;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.dark .toolbar .toolbar-btn {
-  color: #ffffff;
-}
-
-.dark .toolbar .toolbar-btn:hover:not(:disabled) {
-  background: #27272a;
-  color: #ffffff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }

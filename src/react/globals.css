@@ -118,21 +118,29 @@ html, body {
 }
 
 .landing-nav {
-  position: relative;
-  z-index: 8;
+  position: fixed;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: min(100% - 48px, 1120px);
-  margin: 0 auto;
-  padding: 23px 0 0;
+  gap: 24px;
+  width: auto;
+  min-height: 52px;
+  padding: 8px 24px;
+  margin: 0;
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #ffffff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 .landing-brand {
   display: inline-flex;
   align-items: center;
-  width: 46px;
-  height: 46px;
+  width: 24px;
+  height: 24px;
 }
 
 .landing-brand img {
@@ -144,13 +152,7 @@ html, body {
 .landing-nav-actions {
   display: flex;
   align-items: center;
-  gap: 7px;
-  min-height: 38px;
-  padding: 5px;
-  border-radius: 9999px;
-  border: 1px solid rgba(17, 17, 17, 0.09);
-  background: rgba(255, 255, 255, 0.58);
-  backdrop-filter: blur(14px);
+  gap: 16px;
 }
 
 .landing-nav-icon,
@@ -158,11 +160,11 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 9999px;
-  color: rgba(17, 17, 17, 0.72);
-  transition: color 180ms ease, background 180ms ease;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  color: #111111;
+  transition: background 0.15s ease-out;
 }
 
 .landing-nav-icon:hover,
@@ -176,6 +178,32 @@ html, body {
   border: 0;
 }
 
+.landing-top-logo {
+  position: absolute;
+  top: 32px;
+  left: max(24px, calc((100% - 1160px) / 2));
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 10;
+  text-decoration: none;
+}
+
+.landing-top-logo img {
+  width: 76px;
+  height: 76px;
+  object-fit: contain;
+  margin-right: -18px;
+}
+
+.landing-top-logo span {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #0d0d0d;
+  letter-spacing: 0;
+}
+
 .landing-hero-layout {
   position: relative;
   z-index: 5;
@@ -187,7 +215,7 @@ html, body {
   flex: 1;
   min-height: calc(100vh - 80px);
   margin: 0 auto;
-  padding: clamp(110px, 14vh, 160px) 0 74px;
+  padding: clamp(170px, 22vh, 240px) 0 74px;
 }
 
 .landing-hero-copy {

@@ -22,22 +22,38 @@ export const Hero = () => {
     <section className="landing-hero">
       <div className="landing-dot-grid" aria-hidden="true" />
 
-      <header className="landing-nav" aria-label="Landing navigation">
-        <a className="landing-brand" href="/" aria-label="INKI home">
-          <img src="/inki.png" alt="INKI" />
+      <a href="/" className="landing-top-logo" aria-label="INKI home">
+        <img src="/inki.png" alt="" />
+        <span>INKI</span>
+      </a>
+
+      <header className="landing-island landing-island-glass" aria-label="Landing navigation">
+        <div className="landing-island-dismiss-hint" aria-hidden="true"></div>
+        <div className="landing-island-glass-effect" aria-hidden="true"></div>
+        <div className="landing-island-glass-tint" aria-hidden="true"></div>
+        <div className="landing-island-glass-shine" aria-hidden="true"></div>
+        
+        <a className="landing-island-brand" href="/" aria-label="INKI">
+          <img src="/inki.png" alt="INKI" className="landing-island-logo" />
         </a>
 
-        <nav className="landing-nav-actions" aria-label="Capture shortcuts">
-          <CaptureNavButton href="/capture.html" label="Capture region">
-            <SquareDashedMousePointer size={17} strokeWidth={1.5} />
-          </CaptureNavButton>
-          <CaptureNavButton href="/capture.html" label="Capture window">
-            <ScanLine size={17} strokeWidth={1.5} />
-          </CaptureNavButton>
-          <CaptureNavButton href="/capture.html" label="Capture fullscreen">
-            <Monitor size={17} strokeWidth={1.5} />
-          </CaptureNavButton>
-        </nav>
+        <div className="landing-island-group capture-modes">
+          <a className="landing-island-btn" href="/capture.html" aria-label="Capture region">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M4 8V4h4"></path><path d="M4 16v4h4"></path><path d="M16 4h4v4"></path><path d="M16 20h4v-4"></path><rect x="8" y="8" width="8" height="8" rx="1" strokeDasharray="2 2"></rect>
+            </svg>
+          </a>
+          <a className="landing-island-btn" href="/capture.html" aria-label="Capture window">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 8h18"></path><circle cx="5.5" cy="6" r=".5" fill="currentColor"></circle><circle cx="7.5" cy="6" r=".5" fill="currentColor"></circle><circle cx="9.5" cy="6" r=".5" fill="currentColor"></circle>
+            </svg>
+          </a>
+          <a className="landing-island-btn" href="/capture.html" aria-label="Capture fullscreen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="2" y="3" width="20" height="14" rx="2"></rect><path d="M6 21h12"></path><path d="M12 17v4"></path>
+            </svg>
+          </a>
+        </div>
       </header>
 
       <div className="landing-hero-layout">
