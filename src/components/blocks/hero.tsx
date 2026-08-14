@@ -52,7 +52,8 @@ export const Hero = () => {
             with <span>elegance.</span>
           </h1>
           <p>
-            Fast captures. Clean marks. Zero friction. A minimalist operating tool designed for absolute focus.
+            Fast captures. Clean marks. Zero friction. <br />
+            A minimalist operating tool designed for absolute focus.
           </p>
           <div className="landing-hero-actions">
             <a className="landing-primary-cta" href="/capture.html">

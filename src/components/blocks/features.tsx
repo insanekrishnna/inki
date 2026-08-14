@@ -43,7 +43,6 @@ export const Features = () => {
       <div className="landing-dot-grid" aria-hidden="true" />
       <div className="landing-feature-shell">
         <div className="landing-feature-intro fade-in-view">
-          <span>[ Built for modern workflows ]</span>
           <h2>Minimal. Powerful.</h2>
           <p>
             Clean captures, precise annotation, and instant sharing without leaving the focused tool surface.
