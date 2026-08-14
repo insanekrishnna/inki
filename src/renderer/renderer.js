@@ -976,15 +976,21 @@ function fitToWindow() {
   const styles = getComputedStyle(container);
   const horizontalPadding = parseFloat(styles.paddingLeft || '0') + parseFloat(styles.paddingRight || '0');
   const verticalPadding = parseFloat(styles.paddingTop || '0') + parseFloat(styles.paddingBottom || '0');
-  const availW = container.clientWidth - horizontalPadding - 48;
-  const availH = container.clientHeight - verticalPadding - 48;
+  const availW = container.clientWidth - horizontalPadding - 700; // Account for left and right sidebars
+  const availH = container.clientHeight - verticalPadding - 180;  // Account for top toolbar
+  
   // If container hasn't laid out yet, retry on next frame
-  if (availW <= 0 || availH <= 0) {
+  if (container.clientWidth <= 0 || container.clientHeight <= 0) {
     requestAnimationFrame(() => fitToWindow());
     return;
   }
-  const scaleX = availW / state.imageWidth;
-  const scaleY = availH / state.imageHeight;
+  
+  // Ensure we don't get negative or tiny sizes on small screens
+  const safeAvailW = Math.max(availW, container.clientWidth * 0.4);
+  const safeAvailH = Math.max(availH, container.clientHeight * 0.4);
+
+  const scaleX = safeAvailW / state.imageWidth;
+  const scaleY = safeAvailH / state.imageHeight;
   state.zoom = Math.min(scaleX, scaleY, 1);
   applyZoom();
   updateStatus();

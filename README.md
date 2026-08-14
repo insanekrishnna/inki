@@ -17,4 +17,4 @@ Placeholder README for your rebranded screen capture application.
 npm install
 npm start
 ```
-# inki
+# Icodraw

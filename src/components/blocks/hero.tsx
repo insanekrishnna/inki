@@ -22,9 +22,9 @@ export const Hero = () => {
     <section className="landing-hero">
       <div className="landing-dot-grid" aria-hidden="true" />
 
-      <a href="/" className="landing-top-logo" aria-label="INKI home">
+      <a href="/" className="landing-top-logo" aria-label="Icodraw home">
         <img src="/inki.png" alt="" />
-        <span>INKI</span>
+        <span>Icodraw</span>
       </a>
 
       <header className="landing-island landing-island-glass" aria-label="Landing navigation">
@@ -33,8 +33,8 @@ export const Hero = () => {
         <div className="landing-island-glass-tint" aria-hidden="true"></div>
         <div className="landing-island-glass-shine" aria-hidden="true"></div>
         
-        <a className="landing-island-brand" href="/" aria-label="INKI">
-          <img src="/inki.png" alt="INKI" className="landing-island-logo" />
+        <a className="landing-island-brand" href="/" aria-label="Icodraw">
+          <img src="/inki.png" alt="Icodraw" className="landing-island-logo" />
         </a>
 
         <div className="landing-island-group capture-modes">
@@ -60,7 +60,7 @@ export const Hero = () => {
         <div className="landing-hero-copy">
           <span className="landing-eyebrow">Screen capture, cleaned up</span>
           <h1>
-            Inki lets you capture screen <br className="landing-heading-break" />
+            Icodraw lets you capture screen <br className="landing-heading-break" />
             with <span>elegance.</span>
           </h1>
           <p>

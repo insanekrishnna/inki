@@ -122,7 +122,7 @@ function SidebarBrand() {
       style={{ paddingLeft: 4, paddingRight: 16 }}
     >
       <a className="group flex min-w-0 items-center gap-2.5 outline-none" href="#">
-        <img src="/inki.png" alt="Inki" className="size-16 shrink-0 object-contain object-left drop-shadow-sm transition-transform duration-200 group-hover:scale-105" />
+        <img src="/inki.png" alt="Icodraw" className="size-16 shrink-0 object-contain object-left drop-shadow-sm transition-transform duration-200 group-hover:scale-105" />
       </a>
 
       <motion.div
@@ -514,9 +514,9 @@ function EditorSidebarFooter() {
       >
         {!isCollapsed && (
           <div className="flex min-w-0 flex-1 items-center gap-2 animate-in fade-in duration-500">
-            <img src="/inki.png" alt="Inki" className="size-[62px] shrink-0 object-contain object-left drop-shadow-sm -ml-5 -mr-5" />
+            <img src="/inki.png" alt="Icodraw" className="size-[62px] shrink-0 object-contain object-left drop-shadow-sm -ml-5 -mr-5" />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13px] font-semibold leading-5 text-neutral-900 dark:text-white">Inki</span>
+              <span className="block truncate text-[13px] font-semibold leading-5 text-neutral-900 dark:text-white">Icodraw</span>
               <span className="block truncate text-[11px] font-normal leading-4 text-neutral-400 dark:text-white/60">Free</span>
             </span>
             <span className="flex items-center gap-1 text-[11px] font-normal text-neutral-400 dark:text-white/70">
