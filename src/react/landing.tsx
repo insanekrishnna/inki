@@ -12,7 +12,7 @@ export default function Landing() {
         <Hero />
         <Features />
         
-        <footer className="landing-footer relative z-10 h-[72vh] min-h-[520px] overflow-hidden">
+        <footer className="landing-footer relative z-10 w-full h-[60vh] min-h-[440px] overflow-hidden">
           <Skiper39 />
         </footer>
       </div>

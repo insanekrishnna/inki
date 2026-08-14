@@ -297,7 +297,10 @@ html, body {
   left: -130px;
   width: min(54vw, 684px);
   height: auto;
-  overflow: visible;
+  max-height: calc(100vh + 60px);
+  overflow: hidden;
+  mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 98%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 98%);
   transform: rotate(-6deg);
 }
 

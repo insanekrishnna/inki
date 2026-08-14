@@ -39,7 +39,7 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     // TWEEN FACTORIES
     const resetPeep = ({ stage, peep }: { stage: any; peep: any }) => {
       const direction = Math.random() > 0.5 ? 1 : -1;
-      const offsetY = 100 - 250 * gsap.parseEase("power2.in")(Math.random());
+      const offsetY = 45 - 180 * gsap.parseEase("power2.in")(Math.random());
       const startY = stage.height - peep.height + offsetY;
       let startX: number;
       let endX: number;
@@ -278,16 +278,14 @@ const CrowdCanvas = ({ src, rows = 15, cols = 7 }: CrowdCanvasProps) => {
     };
   }, []);
   return (
-    <canvas ref={canvasRef} className="absolute bottom-0 h-[90vh] w-full" />
+    <canvas ref={canvasRef} className="block h-full w-full" />
   );
 };
 
 const Skiper39 = () => {
   return (
     <div className="relative h-full w-full bg-white text-black">
-      <div className="absolute bottom-0 h-full w-screen">
-        <CrowdCanvas src="/images/peeps/all-peeps.png" rows={15} cols={7} />
-      </div>
+      <CrowdCanvas src="/images/peeps/all-peeps.png" rows={15} cols={7} />
     </div>
   );
 };

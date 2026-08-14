@@ -43,7 +43,7 @@ export const Features = () => {
       <div className="landing-dot-grid" aria-hidden="true" />
       <div className="landing-feature-shell">
         <div className="landing-feature-intro fade-in-view">
-          <h5>Minimal. Powerful.</h5>
+          <h5>Capture. Design. Deliver.</h5>
           <div className="landing-feature-compact-list">
             {items.map((item) => {
               const Icon = item.icon;
