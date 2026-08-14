@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: data:;">
+  <title>Your Project</title>
+  <link rel="icon" type="image/png" href="/assets/inki-7mJTzZQZ.png">
+  <script type="module" crossorigin src="/assets/globals-caDTfBil.js"></script>
+  <script type="module" crossorigin src="/assets/editor-mount-BRlYlnFT.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/globals-CAg8t03Y.css">
+  <link rel="stylesheet" crossorigin href="/assets/editor-mount-C2YqPXYr.css">
+</head>
+<body>
+  <div class="toolbar liquidGlass-wrapper">
+    <div class="toolbar-dismiss-hint" aria-hidden="true"></div>
+    <div class="liquidGlass-effect" aria-hidden="true"></div>
+    <div class="liquidGlass-tint" aria-hidden="true"></div>
+    <div class="liquidGlass-shine" aria-hidden="true"></div>
+    <div class="toolbar-brand" aria-label="INKI">
+      <img src="/assets/inki-7mJTzZQZ.png" alt="INKI" class="toolbar-logo">
+    </div>
+    <div class="toolbar-group capture-modes">
+      <button class="toolbar-btn" id="btn-capture-region" data-tooltip="Capture region"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 8V4h4"/><path d="M4 16v4h4"/><path d="M16 4h4v4"/><path d="M16 20h4v-4"/><rect x="8" y="8" width="8" height="8" rx="1" stroke-dasharray="2 2"/></svg></button>
+      <button class="toolbar-btn" id="btn-capture-window" data-tooltip="Capture window"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 8h18"/><circle cx="5.5" cy="6" r=".5" fill="currentColor"/><circle cx="7.5" cy="6" r=".5" fill="currentColor"/><circle cx="9.5" cy="6" r=".5" fill="currentColor"/></svg></button>
+      <button class="toolbar-btn" id="btn-capture-fullscreen" data-tooltip="Capture fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M6 21h12"/><path d="M12 17v4"/></svg></button>
+    </div>
+    <div id="react-theme-toggle-root"></div>
+  </div>
+
+  <div id="editor-sidebar-root"></div>
+  <div class="editor-main">
+    <div class="canvas-container" id="canvas-container">
+      <div class="editor-drag-region" aria-hidden="true"></div>
+
+    <!-- Crop overlay UI -->
+    <div class="crop-overlay" id="crop-overlay">
+      <div class="crop-mask" id="crop-mask"></div>
+      <div class="crop-box" id="crop-box">
+        <div class="crop-handle crop-handle-n" data-handle="n"></div>
+        <div class="crop-handle crop-handle-s" data-handle="s"></div>
+        <div class="crop-handle crop-handle-e" data-handle="e"></div>
+        <div class="crop-handle crop-handle-w" data-handle="w"></div>
+        <div class="crop-handle crop-handle-nw" data-handle="nw"></div>
+        <div class="crop-handle crop-handle-ne" data-handle="ne"></div>
+        <div class="crop-handle crop-handle-sw" data-handle="sw"></div>
+        <div class="crop-handle crop-handle-se" data-handle="se"></div>
+      </div>
+      <div class="crop-hint" id="crop-hint"><kbd>Enter</kbd> to crop &middot; <kbd>Esc</kbd> to cancel</div>
+    </div>
+
+    <div class="empty-state hidden" id="empty-state">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <path d="M8 21h8M12 17v4"/>
+        </svg>
+      </div>
+      <h2>No image loaded</h2>
+      <p>Capture your screen or open an image to begin</p>
+      <div class="empty-actions">
+        <button class="btn btn-primary" id="empty-capture"><span class="camera-dot"></span>Capture screen</button>
+        <button class="btn btn-secondary" id="empty-open">Open image</button>
+      </div>
+    </div>
+    <canvas id="canvas"></canvas>
+    <div class="text-input-wrapper" id="text-input-wrapper">
+      <textarea id="inline-text-input" placeholder="Type here..."></textarea>
+    </div>
+  </div>
+
+    <div class="statusbar">
+      <span class="status-tool" id="status-tool">Ready</span>
+      <div class="statusbar-spacer"></div>
+      <span class="zoom-level" id="status-zoom">100%</span>
+    </div>
+  </div>
+
+  <div class="context-menu" id="context-menu">
+    <button class="context-menu-item" id="ctx-window-container">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18"/><circle cx="6.5" cy="6.5" r="1" fill="#ff5f57" stroke="none"/><circle cx="9.5" cy="6.5" r="1" fill="#febc2e" stroke="none"/><circle cx="12.5" cy="6.5" r="1" fill="#28c840" stroke="none"/></svg>
+      <span>Window container</span>
+      <span class="ctx-shortcut">W</span>
+    </button>
+    <div class="context-menu-separator"></div>
+    <div class="context-menu-label">Background</div>
+    <div class="context-menu-gradients" id="ctx-gradients">
+      <button class="gradient-swatch" data-gradient="none" title="Landing page"><span style="background:linear-gradient(180deg,#dfc8ac,#d7bea2 60%,#cfb18f)"></span></button>
+      <button class="gradient-swatch" data-gradient="sunset" title="Sunset"><span style="background:linear-gradient(135deg,#f97316,#ec4899)"></span></button>
+      <button class="gradient-swatch" data-gradient="ocean" title="Ocean"><span style="background:linear-gradient(135deg,#06b6d4,#3b82f6)"></span></button>
+      <button class="gradient-swatch" data-gradient="forest" title="Forest"><span style="background:linear-gradient(135deg,#22c55e,#14b8a6)"></span></button>
+      <button class="gradient-swatch" data-gradient="purple" title="Purple"><span style="background:linear-gradient(135deg,#8b5cf6,#ec4899)"></span></button>
+      <button class="gradient-swatch" data-gradient="midnight" title="Midnight"><span style="background:linear-gradient(135deg,#1e1b4b,#312e81)"></span></button>
+      <button class="gradient-swatch" data-gradient="warm" title="Warm"><span style="background:linear-gradient(135deg,#fbbf24,#f97316)"></span></button>
+    </div>
+    <div class="context-menu-separator"></div>
+    <button class="context-menu-item" id="ctx-copy">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M5 15V5h10"/></svg>
+      <span>Copy to clipboard</span>
+      <span class="ctx-shortcut">Ctrl+C</span>
+    </button>
+    <button class="context-menu-item" id="ctx-save-png">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2"/></svg>
+      <span>Save as PNG</span>
+      <span class="ctx-shortcut">Ctrl+E</span>
+    </button>
+  </div>
+
+  <div class="right-sidebar" id="right-sidebar">
+    <button class="rs-close-btn" id="rs-close-btn" title="Close sidebar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <button class="rs-item" id="rs-window-container" title="Window container (W)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18"/><circle cx="6.5" cy="6.5" r="1" fill="#ff5f57" stroke="none"/><circle cx="9.5" cy="6.5" r="1" fill="#febc2e" stroke="none"/><circle cx="12.5" cy="6.5" r="1" fill="#28c840" stroke="none"/></svg>
+      <span class="rs-label">Window container</span>
+    </button>
+
+    <div class="rs-aspect-ratio-wrapper" title="Aspect Ratio">
+      <span class="rs-aspect-ratio-label">Aspect ratio</span>
+      <div class="rs-custom-select" id="rs-aspect-select">
+        <div class="rs-select-value">
+          <span id="rs-aspect-value-text">Native</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+        <div class="rs-select-options">
+          <div class="rs-select-option active" data-value="native">Native</div>
+          <div class="rs-select-option" data-value="21:9">21:9</div>
+          <div class="rs-select-option" data-value="16:9">16:9</div>
+          <div class="rs-select-option" data-value="16:10">16:10</div>
+          <div class="rs-select-option" data-value="3:2">3:2</div>
+          <div class="rs-select-option" data-value="4:3">4:3</div>
+          <div class="rs-select-option" data-value="1:1">1:1</div>
+          <div class="rs-select-option" data-value="3:4">3:4</div>
+          <div class="rs-select-option" data-value="2:3">2:3</div>
+          <div class="rs-select-option" data-value="10:16">10:16</div>
+          <div class="rs-select-option" data-value="9:16">9:16</div>
+        </div>
+      </div>
+    </div>
+    <div class="rs-aspect-ratio-wrapper" title="Image Blur" style="margin-top: 12px;">
+      <span class="rs-aspect-ratio-label">Image blur</span>
+      <div class="rs-custom-select" id="rs-blur-select">
+        <div class="rs-select-value">
+          <span id="rs-blur-value-text">None</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+        <div class="rs-select-options">
+          <div class="rs-select-option active" data-value="none">None</div>
+          <div class="rs-select-option" data-value="weak">Weak</div>
+          <div class="rs-select-option" data-value="moderate">Moderate</div>
+          <div class="rs-select-option" data-value="strong">Strong</div>
+        </div>
+      </div>
+    </div>
+    <div class="rs-separator"></div>
+    <div class="rs-section-title">Frame theme</div>
+    <div class="rs-frame-themes" id="rs-frame-themes">
+      <button class="rs-frame-swatch active" data-theme="dark" title="macOS Dark">
+        <span style="background: linear-gradient(to bottom, #3a3a3c 50%, #1e1e1e 50%);"></span>
+      </button>
+      <button class="rs-frame-swatch" data-theme="light" title="macOS Light">
+        <span style="background: linear-gradient(to bottom, #e5e5e5 50%, #ffffff 50%);"></span>
+      </button>
+      <button class="rs-frame-swatch" data-theme="midnight" title="Midnight">
+        <span style="background: linear-gradient(to bottom, #1e293b 50%, #0f172a 50%);"></span>
+      </button>
+      <button class="rs-frame-swatch" data-theme="minimal" title="Minimal White">
+        <span style="background: linear-gradient(to bottom, #f8f9fa 50%, #ffffff 50%);"></span>
+      </button>
+      <button class="rs-frame-swatch" data-theme="contrast" title="High Contrast">
+        <span style="background: linear-gradient(to bottom, #111111 50%, #000000 50%); border: 1px solid rgba(255,255,255,0.1);"></span>
+      </button>
+    </div>
+    <div class="rs-separator"></div>
+    <div class="rs-section-title">Colors</div>
+    <div class="rs-gradients" id="rs-gradients">
+      <button class="rs-gradient-swatch" data-gradient="none" title="Landing page"><span style="background:linear-gradient(180deg,#dfc8ac,#d7bea2 60%,#cfb18f)"></span></button>
+      <button class="rs-gradient-swatch" data-gradient="sunset" title="Sunset"><span style="background:linear-gradient(135deg,#f97316,#ec4899)"></span></button>
+      <button class="rs-gradient-swatch" data-gradient="ocean" title="Ocean"><span style="background:linear-gradient(135deg,#06b6d4,#3b82f6)"></span></button>
+      <button class="rs-gradient-swatch" data-gradient="forest" title="Forest"><span style="background:linear-gradient(135deg,#22c55e,#14b8a6)"></span></button>
+      <button class="rs-gradient-swatch" data-gradient="purple" title="Purple"><span style="background:linear-gradient(135deg,#8b5cf6,#ec4899)"></span></button>
+      <button class="rs-gradient-swatch" data-gradient="midnight" title="Midnight"><span style="background:linear-gradient(135deg,#1e1b4b,#312e81)"></span></button>
+      <button class="rs-gradient-swatch" data-gradient="warm" title="Warm"><span style="background:linear-gradient(135deg,#fbbf24,#f97316)"></span></button>
+    </div>
+    <div class="rs-separator rs-separator-collapsible"></div>
+    <div class="rs-section-title">Plain gradients</div>
+    <div class="rs-gradients">
+      <button class="rs-gradient-swatch" data-bg="f1.png" title="Plain 1"><span style="background-image:url('f1.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="f2.png" title="Plain 2"><span style="background-image:url('f2.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="f3.png" title="Plain 3"><span style="background-image:url('f3.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="f4.png" title="Plain 4"><span style="background-image:url('f4.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="f5.png" title="Plain 5"><span style="background-image:url('f5.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="f6.png" title="Plain 6"><span style="background-image:url('f6.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="f7.png" title="Plain 7"><span style="background-image:url('f7.png'); background-size: cover; background-position: center;"></span></button>
+    </div>
+    <div class="rs-separator rs-separator-collapsible"></div>
+    <div class="rs-section-title">Abstract gradients</div>
+    <div class="rs-gradients">
+      <button class="rs-gradient-swatch" data-bg="g1.png" title="Abstract 1"><span style="background-image:url('g1.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="g2.png" title="Abstract 2"><span style="background-image:url('g2.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="g3.png" title="Abstract 3"><span style="background-image:url('g3.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="g4.png" title="Abstract 4"><span style="background-image:url('g4.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="g5.png" title="Abstract 5"><span style="background-image:url('g5.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="g6.png" title="Abstract 6"><span style="background-image:url('g6.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="g7.png" title="Abstract 7"><span style="background-image:url('g7.png'); background-size: cover; background-position: center;"></span></button>
+    </div>
+    <div class="rs-separator rs-separator-collapsible"></div>
+    <div class="rs-section-title">Mac wallpapers</div>
+    <div class="rs-gradients">
+      <button class="rs-gradient-swatch" data-bg="Mac1.png" title="Mac 1"><span style="background-image:url('Mac1.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="mac2.png" title="Mac 2"><span style="background-image:url('mac2.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="mac3.png" title="Mac 3"><span style="background-image:url('mac3.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="mac4.png" title="Mac 4"><span style="background-image:url('mac4.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="mac5.png" title="Mac 5"><span style="background-image:url('mac5.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="mac6.png" title="Mac 6"><span style="background-image:url('mac6.png'); background-size: cover; background-position: center;"></span></button>
+      <button class="rs-gradient-swatch" data-bg="mac7.png" title="Mac 7"><span style="background-image:url('mac7.png'); background-size: cover; background-position: center;"></span></button>
+    </div>
+    <div class="rs-separator"></div>
+    <button class="rs-item" id="rs-copy" title="Copy to clipboard (Ctrl+C)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M5 15V5h10"/></svg>
+      <span class="rs-label">Copy to clipboard</span>
+    </button>
+    <button class="rs-item" id="rs-save-png" title="Save as PNG (Ctrl+E)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M3 17v2a2 2 0 002 2h14a2 2 0 002-2v-2"/></svg>
+      <span class="rs-label">Save as PNG</span>
+    </button>
+  </div>
+
+
+
+
+  <div class="app-tooltip" id="app-tooltip" aria-hidden="true"></div>
+
+  <script src="/src/renderer/web-preview.js"></script>
+  <script src="/src/renderer/renderer.js"></script>
+</body>
+</html>

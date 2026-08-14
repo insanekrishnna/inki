@@ -1,51 +1,8 @@
 import { Monitor, ScanLine, SquareDashedMousePointer } from "lucide-react";
 import { ToggleTheme } from "@/components/ui/toggle-theme";
+import { ScrollStroke } from "./scroll-stroke";
 
 import "../../react/toolbar-exact.css";
-
-const ProductVisual = () => (
-  <div className="landing-product-visual" aria-label="Inki capture editor preview">
-    <div className="landing-product-window">
-      <div className="landing-window-bar">
-        <div className="landing-window-dots" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
-        <span>Inki capture</span>
-      </div>
-      <div className="landing-product-body">
-        <aside className="landing-product-tools" aria-hidden="true">
-          <SquareDashedMousePointer size={18} strokeWidth={1.4} />
-          <ScanLine size={18} strokeWidth={1.4} />
-          <Monitor size={18} strokeWidth={1.4} />
-          <span />
-          <span />
-          <span />
-        </aside>
-        <div className="landing-product-canvas">
-          <div className="landing-canvas-selection">
-            <div className="landing-selection-header">
-              <span />
-              <strong>Screenshot</strong>
-            </div>
-            <div className="landing-selection-lines">
-              <span />
-              <span />
-              <span />
-            </div>
-          </div>
-          <div className="landing-annotation landing-annotation-one" />
-          <div className="landing-annotation landing-annotation-two" />
-        </div>
-      </div>
-    </div>
-    <div className="landing-product-note">
-      <strong>3 tools</strong>
-      <span>Capture, mark, share</span>
-    </div>
-  </div>
-);
 
 const CaptureNavButton = ({
   href,
@@ -107,7 +64,7 @@ export const Hero = () => {
           </div>
         </div>
 
-        <ProductVisual />
+        <ScrollStroke />
       </div>
     </section>
   );
