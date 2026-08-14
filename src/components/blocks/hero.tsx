@@ -1,5 +1,4 @@
 import { Monitor, ScanLine, SquareDashedMousePointer } from "lucide-react";
-import { ToggleTheme } from "@/components/ui/toggle-theme";
 import { ScrollStroke } from "./scroll-stroke";
 
 import "../../react/toolbar-exact.css";
@@ -38,9 +37,6 @@ export const Hero = () => {
           <CaptureNavButton href="/capture.html" label="Capture fullscreen">
             <Monitor size={17} strokeWidth={1.5} />
           </CaptureNavButton>
-          <div className="landing-theme-toggle">
-            <ToggleTheme />
-          </div>
         </nav>
       </header>
 

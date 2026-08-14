@@ -438,70 +438,7 @@ html, body {
   background: #ffffff;
 }
 
-.dark .landing-page,
-.dark .landing-hero,
-.dark .landing-features,
-.dark .landing-footer {
-  background: #070809;
-  color: #f5f5f1;
-}
 
-.dark .landing-dot-grid {
-  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.07) 0.8px, transparent 0);
-}
-
-.dark .landing-nav-actions,
-.dark .landing-secondary-cta,
-.dark .landing-feature-card {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-
-.dark .landing-nav-icon,
-.dark .landing-theme-toggle button,
-.dark .landing-hero-copy p,
-.dark .landing-feature-intro p,
-.dark .landing-feature-card p {
-  color: rgba(245, 245, 241, 0.64);
-}
-
-.dark .landing-hero-copy h1,
-.dark .landing-feature-intro h2,
-.dark .landing-secondary-cta {
-  color: #f7f7f2;
-}
-
-.dark .landing-hero-copy h1 span,
-.dark .landing-feature-intro span,
-.dark .landing-feature-index {
-  color: rgba(247, 247, 242, 0.62);
-}
-
-.dark .landing-primary-cta {
-  background: #f7f7f2;
-  color: #070809;
-  border-color: #f7f7f2;
-}
-
-.dark .landing-eyebrow {
-  color: rgba(245, 245, 241, 0.62);
-}
-
-.dark .landing-stroke-path--ghost {
-  stroke: rgba(255, 255, 255, 0.1);
-}
-
-.dark .landing-stroke-path--active {
-  stroke: #8da0ff;
-  filter: drop-shadow(0 10px 22px rgba(141, 160, 255, 0.18));
-}
-
-.dark .landing-feature-shell,
-.dark .landing-feature-intro,
-.dark .landing-feature-card,
-.dark .landing-footer {
-  border-color: rgba(255, 255, 255, 0.1);
-}
 
 @media (max-width: 900px) {
   .landing-hero {
