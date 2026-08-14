@@ -312,12 +312,12 @@ html, body {
 
 .landing-stroke-path--ghost {
   stroke: rgba(17, 17, 17, 0.08);
-  stroke-width: 19;
+  stroke-width: 24;
 }
 
 .landing-stroke-path--active {
   stroke: #2f54ff;
-  stroke-width: 20;
+  stroke-width: 25;
   filter: drop-shadow(0 10px 22px rgba(47, 84, 255, 0.18));
 }
 
