@@ -109,7 +109,10 @@ html, body {
 
 .landing-hero {
   position: relative;
-  min-height: 88vh;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   overflow: hidden;
   background: #fbfbfa;
   border-bottom: 1px solid rgba(17, 17, 17, 0.08);
@@ -145,6 +148,7 @@ html, body {
   gap: 7px;
   min-height: 38px;
   padding: 5px;
+  border-radius: 9999px;
   border: 1px solid rgba(17, 17, 17, 0.09);
   background: rgba(255, 255, 255, 0.58);
   backdrop-filter: blur(14px);
@@ -157,6 +161,7 @@ html, body {
   justify-content: center;
   width: 30px;
   height: 30px;
+  border-radius: 9999px;
   color: rgba(17, 17, 17, 0.72);
   transition: color 180ms ease, background 180ms ease;
 }
@@ -168,7 +173,7 @@ html, body {
 }
 
 .landing-theme-toggle button {
-  border-radius: 0;
+  border-radius: 9999px;
   border: 0;
 }
 
@@ -180,9 +185,10 @@ html, body {
   gap: clamp(20px, 3vw, 44px);
   align-items: flex-start;
   width: min(100% - 48px, 1160px);
-  min-height: calc(88vh - 74px);
+  flex: 1;
+  min-height: calc(100vh - 80px);
   margin: 0 auto;
-  padding: clamp(52px, 8vh, 96px) 0 74px;
+  padding: clamp(110px, 14vh, 160px) 0 74px;
 }
 
 .landing-hero-copy {
@@ -228,7 +234,7 @@ html, body {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 14px;
   margin-top: 36px;
 }
 
@@ -237,24 +243,27 @@ html, body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 38px;
-  min-width: 172px;
-  padding: 0 24px;
-  font-size: 0.84rem;
+  height: 42px;
+  min-width: 168px;
+  padding: 0 28px;
+  font-size: 0.86rem;
+  font-weight: 500;
+  border-radius: 9999px;
   text-decoration: none;
-  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+  transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .landing-primary-cta {
   background: #171717;
   color: #ffffff;
   border: 1px solid #171717;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .landing-secondary-cta {
-  background: rgba(255, 255, 255, 0.54);
+  background: rgba(255, 255, 255, 0.64);
   color: #171717;
-  border: 1px solid rgba(17, 17, 17, 0.12);
+  border: 1px solid rgba(17, 17, 17, 0.14);
 }
 
 .landing-primary-cta:hover,
@@ -264,10 +273,12 @@ html, body {
 
 .landing-primary-cta:hover {
   background: #000000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .landing-secondary-cta:hover {
-  border-color: rgba(17, 17, 17, 0.22);
+  border-color: rgba(17, 17, 17, 0.26);
+  background: rgba(255, 255, 255, 0.85);
 }
 
 .landing-scroll-stroke {
@@ -283,7 +294,7 @@ html, body {
 
 .landing-stroke-svg {
   position: absolute;
-  top: 36px;
+  top: 72px;
   left: -130px;
   width: min(54vw, 684px);
   height: auto;
