@@ -5,7 +5,7 @@ const strokePath =
 
 export const ScrollStroke = () => {
   const { scrollYProgress } = useScroll();
-  const pathLength = useTransform(scrollYProgress, [0, 0.45], [0.12, 1]);
+  const pathLength = useTransform(scrollYProgress, [0, 0.85], [0.08, 1]);
 
   return (
     <div className="landing-scroll-stroke" aria-hidden="true">

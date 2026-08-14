@@ -43,6 +43,7 @@ export const Features = () => {
       <div className="landing-dot-grid" aria-hidden="true" />
       <div className="landing-feature-shell">
         <div className="landing-feature-intro fade-in-view">
+          <h5>Minimal. Powerful.</h5>
           <div className="landing-feature-compact-list">
             {items.map((item) => {
               const Icon = item.icon;
@@ -54,24 +55,6 @@ export const Features = () => {
               );
             })}
           </div>
-          <h2>Minimal. Powerful.</h2>
-        </div>
-
-        <div className="landing-feature-grid">
-          {items.map((item, index) => {
-            const Icon = item.icon;
-            return (
-              <article
-                className="landing-feature-card fade-in-view"
-                style={{ transitionDelay: `${index * 120}ms` }}
-                key={item.title}
-              >
-                <div className="landing-feature-index">0{index + 1} / {item.title}</div>
-                <Icon size={26} strokeWidth={1.25} aria-hidden="true" />
-                <p>{item.description}</p>
-              </article>
-            );
-          })}
         </div>
       </div>
     </section>

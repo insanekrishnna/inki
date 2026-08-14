@@ -94,7 +94,7 @@ html, body {
 }
 
 .landing-page {
-  background: #fbfbfa;
+  background: #ffffff;
   color: #111111;
 }
 
@@ -114,8 +114,7 @@ html, body {
   flex-direction: column;
   justify-content: space-between;
   overflow: hidden;
-  background: #fbfbfa;
-  border-bottom: 1px solid rgba(17, 17, 17, 0.08);
+  background: #ffffff;
 }
 
 .landing-nav {
@@ -319,11 +318,26 @@ html, body {
   filter: drop-shadow(0 10px 22px rgba(47, 84, 255, 0.18));
 }
 
+.landing-page {
+  position: relative;
+  overflow-x: hidden;
+}
+
+.landing-hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: visible;
+  background: #ffffff;
+}
+
 .landing-features {
   position: relative;
-  overflow: hidden;
-  background: #fbfbfa;
-  padding: 0 0 92px;
+  overflow: visible;
+  background: #ffffff;
+  padding: 0 0 20px;
 }
 
 .landing-feature-shell {
@@ -331,45 +345,31 @@ html, body {
   z-index: 3;
   width: min(100% - 48px, 1120px);
   margin: 0 auto;
-  border-left: 1px solid rgba(17, 17, 17, 0.08);
-  border-right: 1px solid rgba(17, 17, 17, 0.08);
 }
 
 .landing-feature-shell::before {
-  content: "";
-  position: absolute;
-  left: 12%;
-  top: -88px;
-  width: 44%;
-  height: 260px;
-  border-top: 1px solid rgba(17, 17, 17, 0.08);
-  border-right: 1px solid rgba(17, 17, 17, 0.08);
-  transform: skewX(43deg);
-  transform-origin: top left;
-  pointer-events: none;
+  display: none;
 }
 
 .landing-feature-intro {
   display: grid;
-  grid-template-columns: minmax(240px, 360px) minmax(0, 1fr);
-  gap: clamp(32px, 6vw, 80px);
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 360px);
+  gap: clamp(24px, 4vw, 60px);
   align-items: center;
-  min-height: 240px;
-  padding: 68px clamp(24px, 4vw, 64px) 38px;
-  border-bottom: 1px solid rgba(17, 17, 17, 0.08);
+  padding: 16px 0;
 }
 
 .landing-feature-compact-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .landing-feature-compact-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 450;
   color: rgba(17, 17, 17, 0.78);
   letter-spacing: 0.01em;
@@ -387,13 +387,14 @@ html, body {
   margin-right: 2px;
 }
 
+.landing-feature-intro h5,
 .landing-feature-intro h2 {
   max-width: 560px;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2.65rem, 5.2vw, 4.8rem);
-  font-weight: 400;
-  line-height: 1.04;
-  letter-spacing: 0;
+  font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
 }
 
 .landing-feature-grid {
@@ -432,8 +433,7 @@ html, body {
 }
 
 .landing-footer {
-  border-top: 1px solid rgba(17, 17, 17, 0.08);
-  background: #fbfbfa;
+  background: #ffffff;
 }
 
 .dark .landing-page,
