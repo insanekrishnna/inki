@@ -16,6 +16,7 @@
     "utils": "@/lib/utils"
   },
   "registries": {
-    "@blocks-so": "https://blocks.so/r/{name}.json"
+    "@blocks-so": "https://blocks.so/r/{name}.json",
+    "@skiper-ui": "https://skiper-ui.com/registry/{name}.json"
   }
 }
