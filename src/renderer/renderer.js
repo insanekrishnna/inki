@@ -2300,6 +2300,8 @@ function bindRightSidebar() {
   const rsContainer = document.getElementById('rs-window-container');
   const rsSavePng = document.getElementById('rs-save-png');
   const rsCopy = document.getElementById('rs-copy');
+  const rsCustomBg = document.getElementById('rs-custom-bg');
+  const customBgInput = document.getElementById('custom-bg-input');
   const rsGradientSwatches = document.querySelectorAll('.rs-gradient-swatch');
   const rightSidebar = document.getElementById('right-sidebar');
   const rsCloseBtn = document.getElementById('rs-close-btn');
@@ -2323,6 +2325,31 @@ function bindRightSidebar() {
     applyWindowContainer();
     rsContainer.classList.toggle('active', state.windowContainerApplied);
   });
+
+  if (rsCustomBg && customBgInput) {
+    rsCustomBg.addEventListener('click', () => customBgInput.click());
+    customBgInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        state.containerBgImage = event.target.result;
+        state.containerGradient = null;
+        
+        // Remove active state from other swatches
+        rsGradientSwatches.forEach(s => s.classList.remove('active'));
+
+        // If window container is already applied, temporarily disable it to force a full recalculation
+        if (state.windowContainerApplied) {
+          state.windowContainerApplied = false;
+        }
+        applyWindowContainer();
+      };
+      reader.readAsDataURL(file);
+      // Reset input value so same file can be selected again
+      e.target.value = '';
+    });
+  }
 
   const rsCustomSelect = document.getElementById('rs-aspect-select');
   if (rsCustomSelect) {
