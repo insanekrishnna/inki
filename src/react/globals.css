@@ -189,7 +189,7 @@ html, body {
 
 .landing-top-logo {
   position: absolute;
-  top: 30px;
+  top: 14px;
   left: max(20px, calc((100% - 1200px) / 2));
   display: flex;
   align-items: center;
@@ -206,11 +206,11 @@ html, body {
 }
 
 .landing-top-logo span {
-  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  font-size: 1.28rem;
-  font-weight: 500;
+  font-family: var(--font-sans);
+  font-size: 1.15rem;
+  font-weight: 600;
   color: #0d0d0d;
-  letter-spacing: 0;
+  letter-spacing: -0.02em;
   transform: translateY(2px);
 }
 
