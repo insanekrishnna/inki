@@ -1,5 +1,6 @@
 import React from 'react';
 import { ThemeProvider } from 'next-themes';
+import { Analytics } from '@vercel/analytics/react';
 import { Hero } from '../components/blocks/hero';
 import { Features } from '../components/blocks/features';
 import { Skiper39 } from '../components/ui/skiper-ui/skiper39';
@@ -16,6 +17,7 @@ export default function Landing() {
           <Skiper39 />
         </footer>
       </div>
+      <Analytics />
     </ThemeProvider>
   );
 }
