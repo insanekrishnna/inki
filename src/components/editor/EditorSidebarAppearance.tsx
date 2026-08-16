@@ -3,12 +3,12 @@ import { SidebarGroup, SidebarGroupLabel, useSidebar } from '../ui/sidebar'
 import { cn } from '../../lib/utils'
 
 const COLORS = [
-  { value: '#f97316', label: 'Orange' },
+  { value: '#111111', label: 'Black' },
+  { value: '#ffffff', label: 'White' },
   { value: '#ef4444', label: 'Red' },
   { value: '#22c55e', label: 'Green' },
   { value: '#3b82f6', label: 'Blue' },
   { value: '#a855f7', label: 'Purple' },
-  { value: '#111111', label: 'Black' },
 ]
 
 const STROKES = [
@@ -56,7 +56,7 @@ export function EditorSidebarAppearance() {
             onClick={() => selectColor(color.value)}
             title={color.label}
             className={cn(
-              "w-6 h-6 rounded-full transition-all border-2 shrink-0",
+              "w-6 h-6 rounded-full transition-all border-2 shrink-0 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]",
               activeColor === color.value
                 ? "border-black dark:border-white scale-110 shadow-sm"
                 : "border-transparent hover:scale-105"
@@ -64,6 +64,19 @@ export function EditorSidebarAppearance() {
             style={{ backgroundColor: color.value }}
           />
         ))}
+        {/* Custom color picker */}
+        <div className="relative w-6 h-6 shrink-0 group">
+          <input
+            type="color"
+            value={activeColor}
+            onChange={(e) => selectColor(e.target.value)}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+            title="Custom Color"
+          />
+          <div className="absolute inset-0 flex items-center justify-center rounded-full border-[1.5px] border-dashed border-zinc-300 dark:border-zinc-700 text-zinc-400 group-hover:border-zinc-400 group-hover:text-zinc-500 transition-colors bg-transparent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+        </div>
       </div>
 
       {/* Stroke width */}

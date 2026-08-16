@@ -115,6 +115,7 @@ const elements = {
   btnCaptureRegion: $('#btn-capture-region'),
   btnCaptureWindow: $('#btn-capture-window'),
   btnCaptureFullscreen: $('#btn-capture-fullscreen'),
+  btnUploadFile: $('#btn-upload-file'),
   btnToggleTheme: $('#btn-toggle-theme'),
   emptyCapture: $('#empty-capture'),
   emptyOpen: $('#empty-open'),
@@ -275,6 +276,9 @@ function bindToolbar() {
 
   elements.emptyCapture.addEventListener('click', startCapture);
   elements.emptyOpen.addEventListener('click', openFile);
+  if (elements.btnUploadFile) {
+    elements.btnUploadFile.addEventListener('click', openFile);
+  }
 
   elements.toolBtns.forEach(btn => {
     btn.addEventListener('click', () => selectTool(btn.dataset.tool));
