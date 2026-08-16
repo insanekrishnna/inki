@@ -928,17 +928,6 @@ async function pasteFromClipboard() {
 function clearCanvas() {
   if (state.cropActive) cancelCrop();
 
-  if (!state.image) {
-    state.annotations = [];
-    state.history = [];
-    state.historyIndex = -1;
-    state.selectedAnnotationIndex = -1;
-    elements.ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
-    updateStatus();
-    updateToolbarState();
-    return;
-  }
-
   // Cancel any active text input
   if (state.isEditingText) {
     cancelInlineText();
@@ -946,6 +935,12 @@ function clearCanvas() {
   
   // Deselect current tool to reset to a clean state
   selectTool(null);
+
+  // IMMEDIATELY CLEAR ANNOTATIONS AND HISTORY
+  state.annotations = [];
+  state.history = [];
+  state.historyIndex = -1;
+  state.selectedAnnotationIndex = -1;
 
   // Reset container background settings
   state.windowContainerApplied = false;
@@ -963,15 +958,22 @@ function clearCanvas() {
   const btnWindowContainer = document.getElementById('btn-window-container');
   if (btnWindowContainer) btnWindowContainer.classList.remove('active');
 
-  // Reload the very first original image if available, else just wipe annotations
+  // Immediately clear the canvas visually while the image loads
+  elements.ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
+
+  // Reload the very first original image if available
   if (state.baseOriginalImage) {
     loadImage(state.baseOriginalImage, { isInternal: true });
   } else {
-    state.annotations = [];
-    state.history = [];
-    state.historyIndex = -1;
-    state.selectedAnnotationIndex = -1;
-    render();
+    // If there is no base original image, we just wipe the canvas (already done above)
+    // but we need to remove the image from state as well.
+    state.image = null;
+    state.imageWidth = 0;
+    state.imageHeight = 0;
+    elements.canvas.classList.remove('visible');
+    elements.emptyState.classList.remove('hidden');
+    document.body.classList.remove('has-image');
+    document.body.classList.add('has-content');
     updateStatus();
     updateToolbarState();
     window.dispatchEvent(new CustomEvent('editor-state-change', {
