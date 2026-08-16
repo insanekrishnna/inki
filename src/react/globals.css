@@ -180,28 +180,29 @@ html, body {
 
 .landing-top-logo {
   position: absolute;
-  top: 32px;
-  left: max(24px, calc((100% - 1160px) / 2));
+  top: 30px;
+  left: max(20px, calc((100% - 1200px) / 2));
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 1px;
   z-index: 10;
   text-decoration: none;
 }
 
 .landing-top-logo img {
-  width: 76px;
-  height: 76px;
+  width: 70px;
+  height: 70px;
   object-fit: contain;
   margin-right: -18px;
 }
 
 .landing-top-logo span {
   font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  font-size: 1.6rem;
+  font-size: 1.28rem;
   font-weight: 500;
   color: #0d0d0d;
   letter-spacing: 0;
+  transform: translateY(2px);
 }
 
 .landing-hero-layout {
@@ -275,22 +276,23 @@ html, body {
   padding: 0 28px;
   font-size: 0.86rem;
   font-weight: 500;
-  border-radius: 0;
+  border-radius: 9999px;
   text-decoration: none;
   transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .landing-primary-cta {
-  background: #171717;
+  background: linear-gradient(180deg, #2d2d2d 0%, #171717 100%);
   color: #ffffff;
-  border: 1px solid #171717;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #111;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15);
 }
 
 .landing-secondary-cta {
-  background: rgba(255, 255, 255, 0.64);
+  background: linear-gradient(180deg, #ffffff 0%, #f4f4f4 100%);
   color: #171717;
   border: 1px solid rgba(17, 17, 17, 0.14);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 1);
 }
 
 .landing-primary-cta:hover,
