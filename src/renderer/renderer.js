@@ -859,36 +859,68 @@ async function pasteFromClipboard() {
 
 function clearCanvas() {
   if (state.cropActive) cancelCrop();
-  state.image = null;
-  state.imageWidth = 0;
-  state.imageHeight = 0;
+
+  if (!state.image) {
+    state.annotations = [];
+    state.history = [];
+    state.historyIndex = -1;
+    state.selectedAnnotationIndex = -1;
+    elements.ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
+    updateStatus();
+    updateToolbarState();
+    return;
+  }
+
+  // Restore original image if a background style (window container) was applied
+  if (state.windowContainerApplied && state.originalImageBeforeContainer) {
+    state.image = state.originalImageBeforeContainer;
+    state.windowContainerApplied = false;
+    state.originalImageBeforeContainer = null;
+    elements.canvas.width = state.image.width;
+    elements.canvas.height = state.image.height;
+    state.imageWidth = state.image.width;
+    state.imageHeight = state.image.height;
+  }
+
+  // Reset container background settings
+  state.containerGradient = 'none';
+  state.containerBgBlur = 'none';
+  
+  // Update sidebar active states
+  const rsGradientSwatches = document.querySelectorAll('.rs-gradient-swatch');
+  rsGradientSwatches.forEach(s => s.classList.remove('active'));
+  const gradientSwatches = document.querySelectorAll('.gradient-swatch');
+  gradientSwatches.forEach(s => s.classList.remove('active'));
+  const frameSwatches = document.querySelectorAll('.rs-frame-swatch');
+  frameSwatches.forEach(s => s.classList.toggle('active', s.dataset.theme === 'default'));
+
+  // Clear annotations and reset history
   state.annotations = [];
   state.history = [];
   state.historyIndex = -1;
   state.selectedAnnotationIndex = -1;
-  state.currentColor = null;
-  state.windowContainerApplied = false;
-  state.originalImageBeforeContainer = null;
-  elements.canvas.classList.remove('visible');
-  elements.emptyState.classList.remove('hidden');
-  document.body.classList.remove('has-image');
-  document.body.classList.remove('has-content');
-  document.body.offsetHeight; // force reflow
-  elements.colorSwatches.forEach(s => s.classList.remove('active'));
-  if (elements.textStyleBold) {
-    elements.textStyleBold.style.removeProperty('--style-active-color');
-    elements.textStyleBold.style.removeProperty('--style-active-bg');
+
+  // Cancel any active text input
+  if (state.isEditingText) {
+    cancelInlineText();
   }
-  if (elements.textStyleItalic) {
-    elements.textStyleItalic.style.removeProperty('--style-active-color');
-    elements.textStyleItalic.style.removeProperty('--style-active-bg');
-  }
-  resetFloatingToolbar();
-  setAppWindowMode('toolbar');
-  elements.statusTool?.parentElement?.classList.remove('visible');
-  elements.ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
+  
+  // Deselect current tool to reset to a clean state
+  selectTool(null);
+
+  // Redraw the original base image
+  render();
+
+  // Save this clean slate to history
+  saveHistoryState();
+
   updateStatus();
   updateToolbarState();
+
+  // Notify the React sidebar to clear any tool selections
+  window.dispatchEvent(new CustomEvent('editor-state-change', {
+    detail: { hasSelection: false }
+  }));
 }
 
 // ------------------------------------------------------------------------------
