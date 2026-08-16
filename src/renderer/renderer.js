@@ -59,6 +59,7 @@ const state = {
   containerGradient: 'none',
   containerBgBlur: 'none',
   originalImageBeforeContainer: null,
+  baseOriginalImage: null,
   // Crop state
   cropActive: false,
   cropX: 0,
@@ -879,46 +880,37 @@ function clearCanvas() {
   // Deselect current tool to reset to a clean state
   selectTool(null);
 
-  // Restore original image if a background style (window container) was applied
-  if (state.windowContainerApplied && state.originalImageBeforeContainer) {
-    const originalSrc = state.originalImageBeforeContainer;
-    state.windowContainerApplied = false;
-    state.originalImageBeforeContainer = null;
-    
-    // Reset container background settings
-    state.containerGradient = 'none';
-    state.containerBgBlur = 'none';
-    
-    // Update sidebar active states
-    const rsGradientSwatches = document.querySelectorAll('.rs-gradient-swatch');
-    rsGradientSwatches.forEach(s => s.classList.remove('active'));
-    const gradientSwatches = document.querySelectorAll('.gradient-swatch');
-    gradientSwatches.forEach(s => s.classList.remove('active'));
-    const frameSwatches = document.querySelectorAll('.rs-frame-swatch');
-    frameSwatches.forEach(s => s.classList.toggle('active', s.dataset.theme === 'default'));
-    const btnWindowContainer = document.getElementById('btn-window-container');
-    if (btnWindowContainer) btnWindowContainer.classList.remove('active');
+  // Reset container background settings
+  state.windowContainerApplied = false;
+  state.originalImageBeforeContainer = null;
+  state.containerGradient = 'none';
+  state.containerBgBlur = 'none';
+  
+  // Update sidebar active states
+  const rsGradientSwatches = document.querySelectorAll('.rs-gradient-swatch');
+  rsGradientSwatches.forEach(s => s.classList.remove('active'));
+  const gradientSwatches = document.querySelectorAll('.gradient-swatch');
+  gradientSwatches.forEach(s => s.classList.remove('active'));
+  const frameSwatches = document.querySelectorAll('.rs-frame-swatch');
+  frameSwatches.forEach(s => s.classList.toggle('active', s.dataset.theme === 'default'));
+  const btnWindowContainer = document.getElementById('btn-window-container');
+  if (btnWindowContainer) btnWindowContainer.classList.remove('active');
 
-    // loadImage will handle resetting canvas dimensions, annotations, and history
-    loadImage(originalSrc);
+  // Reload the very first original image if available, else just wipe annotations
+  if (state.baseOriginalImage) {
+    loadImage(state.baseOriginalImage, { isInternal: true });
   } else {
-    // If no window container was applied, just wipe annotations and redraw
     state.annotations = [];
     state.history = [];
     state.historyIndex = -1;
     state.selectedAnnotationIndex = -1;
-    
-    // Redraw the original base image
     render();
+    updateStatus();
+    updateToolbarState();
+    window.dispatchEvent(new CustomEvent('editor-state-change', {
+      detail: { hasSelection: false }
+    }));
   }
-
-  updateStatus();
-  updateToolbarState();
-
-  // Notify the React sidebar to clear any tool selections
-  window.dispatchEvent(new CustomEvent('editor-state-change', {
-    detail: { hasSelection: false }
-  }));
 }
 
 // ------------------------------------------------------------------------------
@@ -964,7 +956,13 @@ function loadImage(dataUrl, options = {}) {
     state.image = img;
     state.imageWidth = img.width;
     state.imageHeight = img.height;
-    if (!state.windowContainerApplied) state.originalImageBeforeContainer = null;
+    if (!options.isInternal) {
+      state.baseOriginalImage = dataUrl;
+      state.originalImageBeforeContainer = null;
+      state.windowContainerApplied = false;
+    } else {
+      if (!state.windowContainerApplied) state.originalImageBeforeContainer = null;
+    }
     state.annotations = [];
     state.history = [];
     state.historyIndex = -1;
@@ -2034,7 +2032,7 @@ function applyWindowContainer() {
     state.selectedAnnotationIndex = -1;
     const btn = document.getElementById('btn-window-container');
     if (btn) btn.classList.remove('active');
-    loadImage(state.originalImageBeforeContainer);
+    loadImage(state.originalImageBeforeContainer, { isInternal: true });
     showToast('Window container removed', 'success');
     return;
   }
@@ -2153,7 +2151,7 @@ function applyWindowContainer() {
       state.windowContainerApplied = true;
       const btn = document.getElementById('btn-window-container');
       if (btn) btn.classList.add('active');
-      loadImage(resultDataUrl);
+      loadImage(resultDataUrl, { isInternal: true });
       showToast('Window container applied', 'success');
     };
 
