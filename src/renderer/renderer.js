@@ -4,8 +4,75 @@
  */
 
 // ------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 // App State
 // ------------------------------------------------------------------------------
+
+// Web Fallback Polyfill (For Vercel/Browser Deployments)
+// This intercepts Electron-specific API calls and polyfills them with standard Web APIs 
+// so the app remains fully functional as a web-based image editor.
+if (!window.projectApi) {
+  window.projectApi = {
+    platform: 'web',
+    setWindowMode: async () => {},
+    onCaptureModeStarted: () => {},
+    onCaptureFinished: () => {},
+    getLicenseState: async () => ({ isPro: false, type: 'web' }),
+    onTriggerCapture: () => {},
+    onTriggerCaptureMenu: () => {},
+    onTriggerCaptureWindow: () => {},
+    onTriggerRecordScreen: () => {},
+    onTriggerCaptureFullscreen: () => {},
+    onShortcutCaptureReady: () => {},
+    onOpenPreferences: () => {},
+    onLoadCapture: () => {},
+    onLoadCaptureData: () => {},
+    onToolbarOpenRequested: () => {},
+    onRecordingStopRequested: () => {},
+    onRecordingWindowCloseRequested: () => {},
+    onAppWindowCloseRequested: () => {},
+    onSettingsChanged: () => {},
+    onSaveRecordingStarted: () => {},
+    onLicenseStatusChanged: () => {},
+    startCapture: async () => ({ success: false, error: 'Native screen capture requires the desktop app.' }),
+    startCaptureWindow: async () => ({ success: false, error: 'Native screen capture requires the desktop app.' }),
+    startCaptureFullscreen: async () => ({ success: false, error: 'Native screen capture requires the desktop app.' }),
+    openFile: async () => {
+      return new Promise((resolve) => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => {
+          const file = e.target.files[0];
+          if (!file) return resolve(null);
+          const reader = new FileReader();
+          reader.onload = (ev) => resolve(ev.target.result);
+          reader.readAsDataURL(file);
+        };
+        input.click();
+      });
+    },
+    saveFile: async (dataUrl) => {
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = 'icodraw-export.png';
+      a.click();
+      return { success: true };
+    },
+    copyToClipboard: async (dataUrl) => {
+      try {
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+        return { success: true };
+      } catch (e) {
+        return { success: false, error: e.message };
+      }
+    },
+    readClipboardImage: async () => null,
+    minimizeWindow: async () => {}
+  };
+}
 
 // Expose functions for React sidebar
 window.editorUndo = () => undo();
@@ -1134,7 +1201,7 @@ function selectTextFontSize(size) {
   document.querySelectorAll('.size-option').forEach((opt) => {
     opt.classList.toggle('active', parseInt(opt.dataset.size, 10) === size);
   });
-  if (state.currentTool === 'select' && state.selectedAnnotationIndex >= 0) {
+  if ((state.currentTool === 'select' || state.currentTool === 'text') && state.selectedAnnotationIndex >= 0) {
     const selected = state.annotations[state.selectedAnnotationIndex];
     if (selected?.type === 'text') {
       selected.fontSize = size;
@@ -1165,7 +1232,7 @@ function selectTextFontFamily(family) {
   document.querySelectorAll('.font-option').forEach((opt) => {
     opt.classList.toggle('active', opt.dataset.family === family);
   });
-  if (state.currentTool === 'select' && state.selectedAnnotationIndex >= 0) {
+  if ((state.currentTool === 'select' || state.currentTool === 'text') && state.selectedAnnotationIndex >= 0) {
     const selected = state.annotations[state.selectedAnnotationIndex];
     if (selected?.type === 'text') {
       selected.fontFamily = family;
@@ -1192,7 +1259,7 @@ function buildFontString(annotation) {
 function selectTextBold() {
   state.textBold = !state.textBold;
   if (elements.textStyleBold) elements.textStyleBold.setAttribute('aria-pressed', String(state.textBold));
-  if (state.currentTool === 'select' && state.selectedAnnotationIndex >= 0) {
+  if ((state.currentTool === 'select' || state.currentTool === 'text') && state.selectedAnnotationIndex >= 0) {
     const selected = state.annotations[state.selectedAnnotationIndex];
     if (selected?.type === 'text') {
       selected.fontBold = state.textBold;
@@ -1211,7 +1278,7 @@ function selectTextBold() {
 function selectTextItalic() {
   state.textItalic = !state.textItalic;
   if (elements.textStyleItalic) elements.textStyleItalic.setAttribute('aria-pressed', String(state.textItalic));
-  if (state.currentTool === 'select' && state.selectedAnnotationIndex >= 0) {
+  if ((state.currentTool === 'select' || state.currentTool === 'text') && state.selectedAnnotationIndex >= 0) {
     const selected = state.annotations[state.selectedAnnotationIndex];
     if (selected?.type === 'text') {
       selected.fontItalic = state.textItalic;
@@ -1229,7 +1296,7 @@ function selectTextItalic() {
 
 function selectTextUnderline() {
   state.textUnderline = !state.textUnderline;
-  if (state.currentTool === 'select' && state.selectedAnnotationIndex >= 0) {
+  if ((state.currentTool === 'select' || state.currentTool === 'text') && state.selectedAnnotationIndex >= 0) {
     const selected = state.annotations[state.selectedAnnotationIndex];
     if (selected?.type === 'text') {
       selected.fontUnderline = state.textUnderline;
@@ -1375,6 +1442,7 @@ function onCanvasMouseDown(e) {
       state.dragStartY = coords.y;
       elements.canvas.style.cursor = 'grabbing';
     }
+    updateToolbarState();
     render();
     return;
   }
@@ -1388,9 +1456,12 @@ function onCanvasMouseDown(e) {
       state.dragOffsetX = coords.x - state.annotations[textIdx].x;
       state.dragOffsetY = coords.y - state.annotations[textIdx].y;
       elements.canvas.style.cursor = 'grabbing';
+      updateToolbarState();
       render();
       return;
     }
+    state.selectedAnnotationIndex = -1;
+    updateToolbarState();
     openInlineText(coords);
     e.stopPropagation();
     return;
@@ -1973,17 +2044,34 @@ function updateToolbarState() {
   if (elements.btnRedo) elements.btnRedo.disabled = state.historyIndex >= state.history.length - 1;
   if (elements.btnClear) elements.btnClear.disabled = !state.image;
 
+  let textBold = state.textBold;
+  let textItalic = state.textItalic;
+  let textUnderline = state.textUnderline;
+  let textFontFamily = state.textFontFamily;
+  let textFontSize = state.textFontSize;
+
+  if ((state.currentTool === 'select' || state.currentTool === 'text') && state.selectedAnnotationIndex >= 0) {
+    const selected = state.annotations[state.selectedAnnotationIndex];
+    if (selected?.type === 'text') {
+      if (selected.fontBold !== undefined) textBold = selected.fontBold;
+      if (selected.fontItalic !== undefined) textItalic = selected.fontItalic;
+      if (selected.fontUnderline !== undefined) textUnderline = selected.fontUnderline;
+      if (selected.fontFamily !== undefined) textFontFamily = selected.fontFamily;
+      if (selected.fontSize !== undefined) textFontSize = selected.fontSize;
+    }
+  }
+
   window.dispatchEvent(new CustomEvent('editor-state-change', {
     detail: {
       currentTool: state.currentTool,
       currentColor: state.currentColor,
       strokeWidth: state.strokeWidth,
       hasImage: !!state.image,
-      textBold: state.textBold,
-      textItalic: state.textItalic,
-      textUnderline: state.textUnderline,
-      textFontFamily: state.textFontFamily,
-      textFontSize: state.textFontSize
+      textBold,
+      textItalic,
+      textUnderline,
+      textFontFamily,
+      textFontSize
     }
   }));
 }
