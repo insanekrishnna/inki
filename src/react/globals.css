@@ -271,7 +271,7 @@ html, body {
   flex: 1;
   min-height: calc(100vh - 80px);
   margin: 0 auto;
-  padding: clamp(200px, 26vh, 280px) 0 120px;
+  padding: clamp(170px, 20vh, 200px) 0 120px;
 }
 
 .landing-hero-copy {
