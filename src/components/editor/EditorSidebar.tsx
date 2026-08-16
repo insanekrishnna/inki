@@ -119,7 +119,7 @@ function SidebarBrand() {
           ? 'flex-col items-center justify-start gap-y-0 py-3'
           : 'flex-row items-center justify-between py-3'
       )}
-      style={{ paddingLeft: 4, paddingRight: 16 }}
+      style={{ paddingLeft: 16, paddingRight: 16 }}
     >
       <a className="group flex min-w-0 items-center gap-2.5 outline-none" href="#">
         <img src="/inki.png" alt="Icodraw" className="size-[26px] shrink-0 object-contain object-left drop-shadow-sm transition-transform duration-200 group-hover:scale-105" />
@@ -508,7 +508,7 @@ function EditorSidebarFooter() {
           'group flex h-14 w-full items-center gap-2 !rounded-none text-left transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-neutral-50 dark:hover:bg-white/10',
           isCollapsed ? 'justify-center px-0' : ''
         )}
-        style={isCollapsed ? undefined : { paddingLeft: 0, paddingRight: 16 }}
+        style={isCollapsed ? undefined : { paddingLeft: 16, paddingRight: 16 }}
         title="Shortcuts & Info"
         type="button"
       >
