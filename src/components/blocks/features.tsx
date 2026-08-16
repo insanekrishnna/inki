@@ -65,7 +65,7 @@ const items = [
   {
     title: "Region & Window",
     description:
-      "Capture exactly what you need with precision. Select any region, window, or full screen with a single shortcut. Zero friction, pixel-perfect results.",
+      "Capture exactly what you need with precision. Select any region, window, or full screen with a single shortcut. Zero friction.",
     Illustration: CaptureIllustration,
   },
   {
