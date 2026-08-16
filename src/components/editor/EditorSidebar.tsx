@@ -32,7 +32,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
   useSidebar,
@@ -61,8 +60,6 @@ const COLORS = [
   { value: '#ffffff', label: 'White' },
   { value: '#ef4444', label: 'Red' },
   { value: '#22c55e', label: 'Green' },
-  { value: '#3b82f6', label: 'Blue' },
-  { value: '#a855f7', label: 'Purple' },
 ]
 
 const STROKES = [
@@ -71,16 +68,21 @@ const STROKES = [
   { value: 8, height: '5.5px', label: 'Bold' },
 ]
 
+/* ─── Shared class tokens ─────────────────────────────────────────────── */
+
 const sidebarButtonClass =
-  'h-8 !rounded-none text-[#333] dark:text-neutral-300 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-neutral-50 dark:hover:bg-white/10 hover:text-black dark:hover:text-white'
-const sidebarButtonInsetClass = 'px-2.5'
-const sidebarIconClass = 'size-[18px] shrink-0 text-[#333] dark:text-neutral-300'
-const sidebarMenuClass = 'gap-0'
-const sidebarGroupLabelClass = 'px-0 transition-opacity duration-500'
+  'h-8 !rounded-md text-neutral-600 dark:text-neutral-400 transition-all duration-200 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:bg-neutral-100/70 dark:hover:bg-white/[0.06] hover:text-neutral-900 dark:hover:text-white'
+
+const sidebarIconClass = 'size-[16px] shrink-0 text-neutral-500 dark:text-neutral-400'
+
+const sidebarMenuClass = 'gap-0.5 px-3'
+
+const sidebarGroupLabelClass =
+  'px-5 py-1.5 text-[11px] font-medium tracking-wide text-neutral-400 dark:text-neutral-500 uppercase transition-opacity duration-300'
 
 function getSidebarButtonStyle(isCollapsed: boolean): React.CSSProperties | undefined {
   if (isCollapsed) return undefined
-  return { paddingLeft: 20, paddingRight: 16 }
+  return { paddingLeft: 20, paddingRight: 20 }
 }
 
 // Small reusable "keyboard key" chip. Sits close to the label instead of
@@ -89,7 +91,7 @@ function getSidebarButtonStyle(isCollapsed: boolean): React.CSSProperties | unde
 function ShortcutKey({ children }: { children: React.ReactNode }) {
   return (
     <kbd
-      className="inline-flex items-center justify-center font-mono text-neutral-400/70 dark:text-white/70 shrink-0 border border-black/5 dark:border-white/20"
+      className="inline-flex items-center justify-center font-mono text-neutral-400/60 dark:text-white/50 shrink-0 border border-black/[0.04] dark:border-white/15"
       style={{
         height: 18,
         minWidth: 18,
@@ -107,6 +109,8 @@ function ShortcutKey({ children }: { children: React.ReactNode }) {
   )
 }
 
+/* ─── Header ──────────────────────────────────────────────────────────── */
+
 function SidebarBrand() {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
@@ -114,15 +118,15 @@ function SidebarBrand() {
   return (
     <SidebarHeader
       className={cn(
-        'flex min-h-[56px] border-b border-neutral-100/80 dark:border-white/5',
+        'flex border-b border-neutral-100/80 dark:border-white/5',
         isCollapsed
-          ? 'flex-col items-center justify-start gap-y-0 py-3'
-          : 'flex-row items-center justify-between py-3'
+          ? 'flex-col items-center justify-start gap-y-0 pb-3 px-2 min-h-[52px]'
+          : 'flex-row items-center justify-between py-3 min-h-[56px]'
       )}
-      style={{ paddingLeft: 16, paddingRight: 16 }}
+      style={isCollapsed ? { paddingTop: 12 } : { paddingLeft: 20, paddingRight: 20 }}
     >
       <a className="group flex min-w-0 items-center gap-2.5 outline-none" href="#">
-        <img src="/inki.png" alt="Icodraw" className="size-[26px] shrink-0 object-contain object-left drop-shadow-sm transition-transform duration-200 group-hover:scale-105" />
+        <img src="/inki.png" alt="Icodraw" className={cn('shrink-0 object-contain object-left drop-shadow-sm transition-transform duration-200 group-hover:scale-105', isCollapsed ? 'size-[22px]' : 'size-[26px]')} />
       </a>
 
       <motion.div
@@ -137,6 +141,8 @@ function SidebarBrand() {
     </SidebarHeader>
   )
 }
+
+/* ─── Tools ────────────────────────────────────────────────────────────── */
 
 function EditorSidebarTools() {
   const { state } = useSidebar()
@@ -166,7 +172,7 @@ function EditorSidebarTools() {
             <SidebarMenuButton
               className={cn(
                 sidebarButtonClass,
-                activeTool === tool.id && 'bg-neutral-100/80 text-neutral-900 font-semibold dark:bg-white/10 dark:text-white',
+                activeTool === tool.id && 'bg-neutral-100/80 text-neutral-900 dark:bg-white/[0.08] dark:text-white',
                 isCollapsed && 'justify-center px-0'
               )}
               isActive={activeTool === tool.id}
@@ -174,7 +180,7 @@ function EditorSidebarTools() {
               style={getSidebarButtonStyle(isCollapsed)}
               tooltip={tool.label}
             >
-              <tool.icon className={cn(sidebarIconClass, activeTool === tool.id && 'text-neutral-700')} />
+              <tool.icon className={cn(sidebarIconClass, activeTool === tool.id && 'text-neutral-800 dark:text-white')} />
               {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in duration-500">{tool.label}</span>}
               {!isCollapsed && tool.shortcut && <span className="animate-in fade-in duration-500"><ShortcutKey>{tool.shortcut}</ShortcutKey></span>}
             </SidebarMenuButton>
@@ -184,6 +190,8 @@ function EditorSidebarTools() {
     </SidebarGroup>
   )
 }
+
+/* ─── Text Options ─────────────────────────────────────────────────────── */
 
 const FONTS = [
   { label: 'System', value: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" },
@@ -220,7 +228,8 @@ function EditorSidebarText() {
     return () => window.removeEventListener('editor-state-change', handler)
   }, [])
 
-  if (activeTool !== 'text' && activeTool !== 'select') return null;
+  // Only show text options when the text tool is active and sidebar is expanded
+  if (activeTool !== 'text' || isCollapsed) return null;
 
   const selectFontFamily = (val: string) => {
     setFontFamily(val)
@@ -257,17 +266,20 @@ function EditorSidebarText() {
     <SidebarGroup>
       {!isCollapsed && <SidebarGroupLabel className={sidebarGroupLabelClass}>Text options</SidebarGroupLabel>}
       <div 
-        className={cn(isCollapsed ? 'flex flex-col items-center gap-2' : 'flex flex-col gap-2', 'pt-2 pb-4')}
-        style={{ paddingLeft: isCollapsed ? '0' : '20px', paddingRight: isCollapsed ? '0' : '20px' }}
+        className={cn(
+          isCollapsed ? 'flex flex-col items-center gap-2' : 'flex flex-col gap-2.5',
+          'px-5 pt-1 pb-1'
+        )}
+        style={{ paddingLeft: 9       , paddingRight: 9 }}
       >
         
         {/* Font Family Dropdown */}
         {!isCollapsed && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center justify-between w-full bg-neutral-100 hover:bg-neutral-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-md h-8 px-3 text-[13px] text-neutral-700 dark:text-neutral-200 outline-none transition-colors border border-transparent dark:border-white/10 focus-visible:ring-2 focus-visible:ring-neutral-200">
-                <span className="truncate">{FONTS.find(f => f.value === fontFamily)?.label || 'System'}</span>
-                <ChevronDown className="size-4 text-neutral-400 shrink-0" />
+              <button className="flex items-center justify-between w-full bg-neutral-50/80 hover:bg-neutral-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] rounded-lg h-9 px-3.5 text-[13px] text-neutral-700 dark:text-neutral-300 outline-none transition-all duration-200 border border-neutral-200/50 dark:border-white/[0.08] focus-visible:ring-2 focus-visible:ring-neutral-300">
+                <span className="truncate font-medium">{FONTS.find(f => f.value === fontFamily)?.label || 'System'}</span>
+                <ChevronDown className="size-3.5 text-neutral-400 shrink-0" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent 
@@ -297,25 +309,25 @@ function EditorSidebarText() {
         )}
 
         {/* Size and Toggles Row */}
-        <div className={cn(isCollapsed ? 'flex flex-col gap-2' : 'flex flex-row items-center gap-2')}>
-          <div className="flex items-center justify-between bg-neutral-100 dark:bg-white/5 rounded-md h-8 px-2 flex-1 min-w-0 transition-colors">
-            <button onClick={() => changeFontSize(-4)} className="size-6 flex items-center justify-center text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors">
+        <div className={cn(isCollapsed ? 'flex flex-col gap-2' : 'flex flex-row items-center gap-3')}>
+          <div className="flex items-center justify-between bg-neutral-50/80 dark:bg-white/[0.04] rounded-lg h-9 px-2 flex-1 min-w-0 transition-all duration-200 border border-neutral-200/50 dark:border-white/[0.08]">
+            <button onClick={() => changeFontSize(-4)} className="size-7 flex items-center justify-center text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors">
               <Minus className="size-3" />
             </button>
-            {!isCollapsed && <span className="text-[12px] font-medium text-neutral-700 dark:text-neutral-300">{fontSize}px</span>}
-            <button onClick={() => changeFontSize(4)} className="size-6 flex items-center justify-center text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded transition-colors">
+            {!isCollapsed && <span className="text-[13px] font-medium text-neutral-700 dark:text-neutral-300 tabular-nums">{fontSize}px</span>}
+            <button onClick={() => changeFontSize(4)} className="size-7 flex items-center justify-center text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors">
               <Plus className="size-3" />
             </button>
           </div>
 
-          <div className="flex items-center gap-0.5 bg-neutral-100 dark:bg-white/5 p-0.5 rounded-md transition-colors">
-            <button onClick={toggleBold} className={cn("size-7 flex items-center justify-center rounded text-[13px] font-bold transition-colors", isBold ? "bg-black/10 dark:bg-white/20 text-black dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
+          <div className="flex items-center gap-0.5 bg-neutral-50/80 dark:bg-white/[0.04] p-1 rounded-lg transition-all duration-200 border border-neutral-200/50 dark:border-white/[0.08] shrink-0">
+            <button onClick={toggleBold} className={cn("size-7 flex items-center justify-center rounded-md text-[13px] font-bold transition-colors", isBold ? "bg-neutral-200/80 dark:bg-white/20 text-neutral-900 dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
               B
             </button>
-            <button onClick={toggleItalic} className={cn("size-7 flex items-center justify-center rounded text-[13px] italic font-serif transition-colors", isItalic ? "bg-black/10 dark:bg-white/20 text-black dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
+            <button onClick={toggleItalic} className={cn("size-7 flex items-center justify-center rounded-md text-[13px] italic font-serif transition-colors", isItalic ? "bg-neutral-200/80 dark:bg-white/20 text-neutral-900 dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
               I
             </button>
-            <button onClick={toggleUnderline} className={cn("size-7 flex items-center justify-center rounded text-[13px] underline transition-colors", isUnderline ? "bg-black/10 dark:bg-white/20 text-black dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
+            <button onClick={toggleUnderline} className={cn("size-7 flex items-center justify-center rounded-md text-[13px] underline transition-colors", isUnderline ? "bg-neutral-200/80 dark:bg-white/20 text-neutral-900 dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
               U
             </button>
           </div>
@@ -325,6 +337,8 @@ function EditorSidebarText() {
     </SidebarGroup>
   )
 }
+
+/* ─── Appearance ───────────────────────────────────────────────────────── */
 
 function EditorSidebarAppearance() {
   const { state } = useSidebar()
@@ -366,8 +380,8 @@ function EditorSidebarAppearance() {
       <SidebarGroupLabel className={sidebarGroupLabelClass}>Appearance</SidebarGroupLabel>
 
       <div
-        className={cn(isCollapsed ? 'flex flex-col items-center gap-1.5' : 'flex flex-wrap gap-2')}
-        style={{ paddingTop: 10, paddingBottom: 16, paddingLeft: 10, paddingRight: 10 }}
+        className={cn(isCollapsed ? 'flex flex-col items-center gap-2' : 'flex flex-wrap items-center gap-2.5')}
+        style={isCollapsed ? { paddingTop: 6, paddingBottom: 6, paddingLeft: 8, paddingRight: 8 } : { paddingTop: 6, paddingBottom: 10, paddingLeft: 20, paddingRight: 20 }}
       >
         {COLORS.filter(color => !isCollapsed || color.value === '#111111' || color.value === '#ef4444')
           .sort((a, b) => {
@@ -383,9 +397,9 @@ function EditorSidebarAppearance() {
             onClick={() => selectColor(color.value)}
             title={color.label}
             className={cn(
-              'size-[22px] shrink-0 rounded-full border-[1.5px] transition-all duration-500 hover:scale-110 hover:shadow-sm shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]',
+              cn('shrink-0 rounded-full border-[1.5px] transition-all duration-300 hover:scale-110 hover:shadow-sm shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]', isCollapsed ? 'size-[22px]' : 'size-[26px]'),
               activeColor === color.value
-                ? 'scale-110 border-neutral-900 ring-2 ring-neutral-200/60'
+                ? 'scale-110 border-neutral-800 ring-2 ring-neutral-200/60'
                 : 'border-transparent hover:border-neutral-200'
             )}
             style={{ backgroundColor: color.value }}
@@ -397,9 +411,9 @@ function EditorSidebarAppearance() {
           onClick={() => customColorInputRef.current?.click()}
           title="Custom color"
           className={cn(
-            'relative flex size-[22px] shrink-0 items-center justify-center rounded-full border-[1.5px] transition-all duration-500 hover:scale-110',
+            cn('relative flex shrink-0 items-center justify-center rounded-full border-[1.5px] transition-all duration-300 hover:scale-110', isCollapsed ? 'size-[22px]' : 'size-[26px]'),
             customColor && activeColor === customColor
-              ? 'scale-110 border-neutral-900 ring-2 ring-neutral-200/60'
+              ? 'scale-110 border-neutral-800 ring-2 ring-neutral-200/60'
               : 'border-dashed border-neutral-300 hover:border-neutral-400'
           )}
           style={customColor ? { backgroundColor: customColor, borderStyle: 'solid' } : undefined}
@@ -417,35 +431,39 @@ function EditorSidebarAppearance() {
       </div>
 
       {!isCollapsed && (
-        <div
-          className="text-[11px] font-medium text-[#111] dark:text-neutral-300 animate-in fade-in duration-500"
-          style={{ paddingTop: 18, paddingBottom: 8, paddingLeft: 20 }}
-        >
-          Stroke
-        </div>
-      )}
-      <div
-        className={cn('flex', isCollapsed ? 'flex-col items-center pt-1 gap-0.5 px-0' : 'flex-col gap-0.5')}
-        style={isCollapsed ? undefined : { paddingLeft: 10, paddingRight: 10 }}
-      >
-        {STROKES.map((stroke) => (
-          <button
-            key={stroke.value}
-            onClick={() => selectStroke(stroke.value)}
-            title={stroke.label}
-            className={cn(
-              'flex h-8 w-full items-center !rounded-none transition-all duration-500 hover:bg-neutral-50 dark:hover:bg-white/10 dark:text-white/80',
-              'justify-center',
-              activeStroke === stroke.value ? 'bg-neutral-100/80 text-neutral-900 dark:bg-white/10 dark:text-white' : 'text-neutral-400 dark:text-white/60'
-            )}
+        <>
+          <div
+            className="text-[11px] font-medium tracking-wide uppercase text-neutral-400 dark:text-neutral-500 animate-in fade-in duration-300"
+            style={{ paddingTop: 4, paddingBottom: 6, paddingLeft: 20 }}
           >
-            <span className="rounded-full bg-current transition-all duration-500" style={{ width: !isCollapsed ? '24px' : '14px', height: stroke.height }} />
-          </button>
-        ))}
-      </div>
+            Stroke
+          </div>
+          <div
+            className="flex flex-col gap-0.5"
+            style={{ paddingLeft: 12, paddingRight: 12 }}
+          >
+            {STROKES.map((stroke) => (
+              <button
+                key={stroke.value}
+                onClick={() => selectStroke(stroke.value)}
+                title={stroke.label}
+                className={cn(
+                  'flex h-8 w-full items-center rounded-md transition-all duration-200 hover:bg-neutral-100/70 dark:hover:bg-white/10 dark:text-white/80',
+                  'justify-center',
+                  activeStroke === stroke.value ? 'bg-neutral-100/80 text-neutral-900 dark:bg-white/10 dark:text-white' : 'text-neutral-400 dark:text-white/60'
+                )}
+              >
+                <span className="rounded-full bg-current transition-all duration-300" style={{ width: '28px', height: stroke.height }} />
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </SidebarGroup>
   )
 }
+
+/* ─── History ──────────────────────────────────────────────────────────── */
 
 function EditorSidebarHistory() {
   const { state } = useSidebar()
@@ -496,6 +514,8 @@ function EditorSidebarHistory() {
   )
 }
 
+/* ─── Footer ──────────────────────────────────────────────────────────── */
+
 function EditorSidebarFooter() {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
@@ -505,16 +525,16 @@ function EditorSidebarFooter() {
       <button
         onClick={() => window.open('https://github.com/prathm-k/inki', '_blank')}
         className={cn(
-          'group flex h-14 w-full items-center gap-2 !rounded-none text-left transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-neutral-50 dark:hover:bg-white/10',
+          'group flex h-[52px] w-full items-center gap-2.5 !rounded-none text-left transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-neutral-50 dark:hover:bg-white/10',
           isCollapsed ? 'justify-center px-0' : ''
         )}
-        style={isCollapsed ? undefined : { paddingLeft: 16, paddingRight: 16 }}
+        style={isCollapsed ? undefined : { paddingLeft: 20, paddingRight: 20 }}
         title="Shortcuts & Info"
         type="button"
       >
         {!isCollapsed && (
-          <div className="flex min-w-0 flex-1 items-center gap-2 animate-in fade-in duration-500">
-            <img src="/inki.png" alt="Icodraw" className="size-[25px] shrink-0 object-contain object-left drop-shadow-sm" />
+          <div className="flex min-w-0 flex-1 items-center gap-2.5 animate-in fade-in duration-500">
+            <img src="/inki.png" alt="Icodraw" className="size-[24px] shrink-0 object-contain object-left drop-shadow-sm" />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[13px] font-semibold leading-5 text-neutral-900 dark:text-white">Icodraw</span>
               <span className="block truncate text-[11px] font-normal leading-4 text-neutral-400 dark:text-white/60">Free</span>
@@ -530,25 +550,34 @@ function EditorSidebarFooter() {
   )
 }
 
+/* ─── Main Sidebar ─────────────────────────────────────────────────────── */
+
 export function EditorSidebar() {
   return (
     <Sidebar
-      variant="inset"
+      variant="sidebar"
       collapsible="icon"
-      className="[&_[data-sidebar=sidebar]]:border-r-neutral-200/30 dark:[&_[data-sidebar=sidebar]]:border-r-white/10 [&_[data-sidebar=sidebar]]:bg-white dark:[&_[data-sidebar=sidebar]]:bg-[#050505] [&_[data-sidebar=sidebar]]:shadow-[0_0_0_1px_rgba(0,0,0,0.04),0_1px_6px_rgba(0,0,0,0.04)] dark:[&_[data-sidebar=sidebar]]:shadow-none"
+      className={cn(
+        "!fixed !inset-y-0 !left-0 !h-full z-[100]",
+        "[&>div]:!h-full",
+        "[&_[data-sidebar=sidebar]]:!h-full",
+        "[&_[data-sidebar=sidebar]]:rounded-none",
+        "[&_[data-sidebar=sidebar]]:border-r [&_[data-sidebar=sidebar]]:border-l-0 [&_[data-sidebar=sidebar]]:border-t-0 [&_[data-sidebar=sidebar]]:border-b-0 [&_[data-sidebar=sidebar]]:border-black/[0.06] dark:[&_[data-sidebar=sidebar]]:border-white/[0.08]",
+        "[&_[data-sidebar=sidebar]]:bg-white dark:[&_[data-sidebar=sidebar]]:bg-[#0a0a0a]",
+        "[&_[data-sidebar=sidebar]]:py-2"
+      )}
     >
       <SidebarBrand />
-      <SidebarContent className="gap-0 pb-2 pt-2 group-data-[collapsible=icon]:pt-2 group-data-[collapsible=icon]:gap-0">
+      <SidebarContent className="gap-0 pb-4 pt-3 group-data-[collapsible=icon]:pt-2 group-data-[collapsible=icon]:gap-0 overflow-y-auto overflow-x-hidden">
         <EditorSidebarTools />
-        <SidebarSeparator className="my-1" />
+        <SidebarSeparator className="my-2 mx-4 opacity-50" />
         <EditorSidebarText />
-        <SidebarSeparator className="my-1" />
+        <SidebarSeparator className="my-2 mx-4 opacity-50" />
         <EditorSidebarAppearance />
-        <SidebarSeparator className="my-1" />
+        <SidebarSeparator className="my-2 mx-4 opacity-50" />
         <EditorSidebarHistory />
       </SidebarContent>
       <EditorSidebarFooter />
-      <SidebarRail />
     </Sidebar>
   )
 }

@@ -246,7 +246,7 @@ function init() {
   if (elements.sizeCurrentLabel) {
     elements.sizeCurrentLabel.textContent = String(state.textFontSize);
   }
-  loadRecordingSettings();
+  // loadRecordingSettings();
   refreshLicenseState();
   selectStrokeWidth(state.strokeWidth);
   bindFontPicker();
@@ -592,7 +592,7 @@ function bindIPC() {
   window.projectApi.onAppWindowCloseRequested?.(() => {
     prepareForAppWindowClose();
   });
-  window.projectApi.onSettingsChanged?.(() => { loadRecordingSettings(); scheduleAutoHideFn(); });
+  window.projectApi.onSettingsChanged?.(() => { scheduleAutoHideFn(); });
   window.projectApi.onSaveRecordingStarted?.(() => setRecordingSaveProgress(true));
   window.projectApi.onLicenseStatusChanged?.(() => refreshLicenseState());
 }
