@@ -107,6 +107,7 @@ export const Features = () => {
       <div className="landing-feature-shell">
         <div className="landing-feature-intro fade-in-view">
           <h2 className="landing-feature-heading">Capture. Design. Deliver.</h2>
+          <p className="landing-feature-subhead">Everything you need to capture, annotate, and share — in seconds.</p>
           <div className="landing-feature-grid">
             {items.map((item, i) => {
               const Illust = item.Illustration;

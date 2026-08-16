@@ -29,12 +29,21 @@
   --radius: 0.5rem;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html, body {
   background-color: #ffffff;
   color: #111827;
   font-family: "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(17, 17, 17, 0.08);
+  color: #0d0d0d;
 }
 
 /* ── Ambient star / particle float ── */
@@ -102,9 +111,9 @@ html, body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(circle at 1px 1px, rgba(17, 17, 17, 0.055) 0.8px, transparent 0);
-  background-size: 13px 13px;
-  mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.9) 62%, rgba(0, 0, 0, 0.35) 100%);
+  background-image: radial-gradient(circle at 1px 1px, rgba(17, 17, 17, 0.038) 0.9px, transparent 0);
+  background-size: 24px 24px;
+  mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.7) 55%, rgba(0, 0, 0, 0.15) 100%);
 }
 
 .landing-hero {
@@ -205,18 +214,64 @@ html, body {
   transform: translateY(2px);
 }
 
+/* ── Top-right social pill cluster ── */
+.landing-top-social {
+  position: absolute;
+  top: 30px;
+  right: max(20px, calc((100% - 1200px) / 2));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+}
+
+.landing-social-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: rgba(17, 17, 17, 0.72);
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  border-radius: 9999px;
+  text-decoration: none;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.22s ease, border-color 0.22s ease, color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.landing-social-pill svg {
+  flex-shrink: 0;
+  color: rgba(17, 17, 17, 0.55);
+  transition: color 0.22s ease;
+}
+
+.landing-social-pill:hover {
+  transform: translateY(-1px);
+  color: rgba(17, 17, 17, 0.9);
+  border-color: rgba(17, 17, 17, 0.22);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.landing-social-pill:hover svg {
+  color: rgba(17, 17, 17, 0.75);
+}
+
 .landing-hero-layout {
   position: relative;
   z-index: 5;
   display: grid;
   grid-template-columns: minmax(580px, 1.05fr) minmax(320px, 0.95fr);
   gap: clamp(20px, 3vw, 44px);
-  align-items: flex-start;
+  align-items: center;
   width: min(100% - 48px, 1160px);
   flex: 1;
   min-height: calc(100vh - 80px);
   margin: 0 auto;
-  padding: clamp(170px, 22vh, 240px) 0 74px;
+  padding: clamp(200px, 26vh, 280px) 0 120px;
 }
 
 .landing-hero-copy {
@@ -228,10 +283,12 @@ html, body {
 }
 
 .landing-eyebrow {
-  margin-bottom: 18px;
-  color: rgba(17, 17, 17, 0.58);
-  font-size: 0.86rem;
-  font-weight: 520;
+  margin-bottom: 22px;
+  color: rgba(17, 17, 17, 0.48);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .landing-hero-copy h1 {
@@ -239,31 +296,32 @@ html, body {
   font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   font-size: clamp(3rem, 4.55vw, 4.55rem);
   font-weight: 500;
-  line-height: 0.98;
-  letter-spacing: 0;
+  line-height: 1.06;
+  letter-spacing: -0.01em;
   color: #0d0d0d;
 }
 
 .landing-hero-copy h1 span {
-  color: #5c5c5c;
+  color: #888;
 }
 
 .landing-hero-copy p {
-  max-width: 470px;
-  margin-top: 26px;
-  color: rgba(17, 17, 17, 0.62);
-  font-size: 1.02rem;
-  line-height: 1.52;
+  max-width: 440px;
+  margin-top: 32px;
+  color: rgba(17, 17, 17, 0.56);
+  font-size: 1rem;
+  line-height: 1.68;
   font-weight: 400;
+  letter-spacing: 0.005em;
 }
 
 .landing-hero-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 14px;
-  margin-top: 36px;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-top: 48px;
 }
 
 .landing-primary-cta,
@@ -370,10 +428,11 @@ html, body {
 .landing-features {
   position: relative;
   z-index: 10;
-  margin-top: -60px;
+  margin-top: 0;
   overflow: visible;
   background: #ffffff;
   padding: 0;
+  border-top: 1px solid rgba(17, 17, 17, 0.06);
 }
 
 .landing-feature-shell {
@@ -390,27 +449,35 @@ html, body {
 .landing-feature-intro {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 48px;
-  padding: 80px 0 80px;
+  align-items: flex-start;
+  text-align: left;
+  gap: 56px;
+  padding: 120px 0 60px;
 }
 
 .landing-feature-heading {
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2.4rem, 4vw, 3.2rem);
+  font-size: clamp(2rem, 3.2vw, 2.8rem);
   font-weight: 500;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
   color: #111;
-  max-width: 800px;
+  max-width: 560px;
+}
+
+.landing-feature-subhead {
+  font-size: 0.9rem;
+  color: rgba(17, 17, 17, 0.48);
+  line-height: 1.6;
+  max-width: 400px;
+  margin-top: -20px;
 }
 
 .landing-feature-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   justify-content: center;
-  gap: 20px;
+  gap: 32px;
   width: 100%;
 }
 
@@ -589,6 +656,57 @@ html, body {
 
 .landing-footer {
   background: #ffffff;
+  position: relative;
+}
+
+.landing-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(to bottom, #ffffff, transparent);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.landing-footer-meta {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px max(24px, calc((100% - 1120px) / 2));
+  border-top: 1px solid rgba(17, 17, 17, 0.06);
+  background: #ffffff;
+}
+
+.landing-footer-copy {
+  font-size: 0.78rem;
+  color: rgba(17, 17, 17, 0.4);
+  letter-spacing: 0.01em;
+}
+
+.landing-footer-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.landing-footer-links a {
+  font-size: 0.78rem;
+  color: rgba(17, 17, 17, 0.4);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: color 0.2s ease;
+}
+
+.landing-footer-links a:hover {
+  color: rgba(17, 17, 17, 0.75);
 }
 
 
