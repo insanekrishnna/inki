@@ -199,19 +199,21 @@ html, body {
 }
 
 .landing-top-logo img {
-  width: 70px;
-  height: 70px;
+  width: 25px;
+  height: 25px;
   object-fit: contain;
-  margin-right: -18px;
+  margin-right: 1px;
+  margin-top: 1px;
 }
 
 .landing-top-logo span {
   font-family: var(--font-sans);
   font-size: 1.15rem;
-  font-weight: 600;
+  font-weight: 500;
   color: #0d0d0d;
   letter-spacing: -0.02em;
   transform: translateY(2px);
+  margin-top: 6px;
 }
 
 /* ── Top-right social pill cluster ── */
