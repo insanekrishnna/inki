@@ -213,6 +213,7 @@ function EditorSidebarText() {
   const [isBold, setIsBold] = useState(false)
   const [isItalic, setIsItalic] = useState(false)
   const [isUnderline, setIsUnderline] = useState(false)
+  const [isFontDropdownOpen, setIsFontDropdownOpen] = useState(false)
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -275,37 +276,44 @@ function EditorSidebarText() {
         
         {/* Font Family Dropdown */}
         {!isCollapsed && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center justify-between w-full bg-neutral-50/80 hover:bg-neutral-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] rounded-lg h-9 px-3.5 text-[13px] text-neutral-700 dark:text-neutral-300 outline-none transition-all duration-200 border border-neutral-200/50 dark:border-white/[0.08] focus-visible:ring-2 focus-visible:ring-neutral-300">
-                <span className="truncate font-medium">{FONTS.find(f => f.value === fontFamily)?.label || 'System'}</span>
-                <ChevronDown className="size-3.5 text-neutral-400 shrink-0" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              style={{ width: 'var(--radix-dropdown-menu-trigger-width)' }} 
-              className="min-w-[180px] bg-white dark:bg-[#1e1e1e] border border-black/10 dark:border-white/10 rounded-md py-1 shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.5)] z-50 font-['Inter',system-ui,sans-serif] text-[12px] text-[#333] dark:text-[#e5e5e5]"
+          <div className={cn("rs-custom-select", isFontDropdownOpen && "open")} style={{ width: '100%', marginBottom: 4 }}>
+            <div 
+              className="rs-select-value" 
+              onClick={() => setIsFontDropdownOpen(!isFontDropdownOpen)}
             >
-              {FONTS.map(f => (
-                <DropdownMenuItem
-                  key={f.value}
-                  onClick={() => {
-                    setFontFamily(f.value)
-                    const w = window as any
-                    if (typeof w.editorSelectFontFamily === 'function') w.editorSelectFontFamily(f.value)
-                  }}
-                  className={cn(
-                    "cursor-pointer py-[6px] px-[10px] transition-colors rounded-none outline-none",
-                    fontFamily === f.value 
-                      ? "bg-blue-500 text-white dark:bg-blue-500" 
-                      : "hover:bg-black/5 dark:hover:bg-white/10 focus:bg-black/5 dark:focus:bg-white/10"
-                  )}
-                >
-                  {f.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+              <span>{FONTS.find(f => f.value === fontFamily)?.label || 'System'}</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+            
+            {isFontDropdownOpen && (
+              <div 
+                className="fixed mt-1 bg-white dark:bg-[#1e1e1e] border border-black/10 dark:border-white/10 rounded-md py-1 shadow-lg z-[200] overflow-hidden flex flex-col w-[200px]"
+                style={{ top: 'auto' }}
+              >
+                {FONTS.map(f => (
+                  <div
+                    key={f.value}
+                    onClick={() => {
+                      selectFontFamily(f.value)
+                      setIsFontDropdownOpen(false)
+                    }}
+                    className={cn(
+                      "cursor-pointer py-1.5 px-3 transition-colors hover:bg-neutral-100 dark:hover:bg-white/10 text-xs text-neutral-800 dark:text-neutral-200",
+                      fontFamily === f.value && "bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 font-medium"
+                    )}
+                  >
+                    {f.label}
+                  </div>
+                ))}
+              </div>
+            )}
+            {isFontDropdownOpen && (
+              <div 
+                className="fixed inset-0 z-[199]" 
+                onClick={() => setIsFontDropdownOpen(false)} 
+              />
+            )}
+          </div>
         )}
 
         {/* Size and Toggles Row */}

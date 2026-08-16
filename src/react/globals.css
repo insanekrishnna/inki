@@ -822,3 +822,14 @@ html, body {
     width: min(100% - 28px, 1120px);
   }
 }
+
+/* Hide all scrollbars globally */
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
