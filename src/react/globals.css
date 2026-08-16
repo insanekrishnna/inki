@@ -451,8 +451,8 @@ html, body {
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
-  gap: 56px;
-  padding: 120px 0 60px;
+  gap: 16px;
+  padding: 60px 0 60px;
 }
 
 .landing-feature-heading {
@@ -470,7 +470,7 @@ html, body {
   color: rgba(17, 17, 17, 0.48);
   line-height: 1.6;
   max-width: 400px;
-  margin-top: -20px;
+  margin-top: 0;
 }
 
 .landing-feature-grid {
@@ -479,6 +479,7 @@ html, body {
   justify-content: center;
   gap: 32px;
   width: 100%;
+  margin-top: 24px;
 }
 
 /* ─── Card ─── */
