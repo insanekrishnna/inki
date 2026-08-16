@@ -19,7 +19,7 @@ const STROKES = [
 
 export function EditorSidebarAppearance() {
   const { open } = useSidebar()
-  const [activeColor, setActiveColor] = useState('#f97316')
+  const [activeColor, setActiveColor] = useState('#111111')
   const [activeStroke, setActiveStroke] = useState(4)
 
   useEffect(() => {

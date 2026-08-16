@@ -57,12 +57,12 @@ const TOOLS = [
 ] as const
 
 const COLORS = [
-  { value: '#f97316', label: 'Orange' },
+  { value: '#111111', label: 'Black' },
+  { value: '#ffffff', label: 'White' },
   { value: '#ef4444', label: 'Red' },
   { value: '#22c55e', label: 'Green' },
   { value: '#3b82f6', label: 'Blue' },
   { value: '#a855f7', label: 'Purple' },
-  { value: '#111111', label: 'Black' },
 ]
 
 const STROKES = [
@@ -329,7 +329,7 @@ function EditorSidebarText() {
 function EditorSidebarAppearance() {
   const { state } = useSidebar()
   const isCollapsed = state === 'collapsed'
-  const [activeColor, setActiveColor] = useState('#f97316')
+  const [activeColor, setActiveColor] = useState('#111111')
   const [activeStroke, setActiveStroke] = useState(4)
   const customColorInputRef = useRef<HTMLInputElement>(null)
   const [customColor, setCustomColor] = useState<string | null>(null)
@@ -383,7 +383,7 @@ function EditorSidebarAppearance() {
             onClick={() => selectColor(color.value)}
             title={color.label}
             className={cn(
-              'size-[22px] shrink-0 rounded-full border-[1.5px] transition-all duration-500 hover:scale-110 hover:shadow-sm',
+              'size-[22px] shrink-0 rounded-full border-[1.5px] transition-all duration-500 hover:scale-110 hover:shadow-sm shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]',
               activeColor === color.value
                 ? 'scale-110 border-neutral-900 ring-2 ring-neutral-200/60'
                 : 'border-transparent hover:border-neutral-200'

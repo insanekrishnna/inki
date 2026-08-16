@@ -29,7 +29,7 @@ const state = {
   imageHeight: 0,
   zoom: 1,
   currentTool: null,
-  currentColor: '#f97316',
+  currentColor: '#111111',
   strokeWidth: 4,
   textFontSize: 24,
   textFontFamily: '-apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif',
@@ -1040,7 +1040,7 @@ function selectTool(tool) {
   updateToolbarState();
 
   if (DRAWING_TOOLS.includes(tool)) {
-    selectColor(state.currentColor || '#f97316');
+    selectColor(state.currentColor || '#111111');
   }
   toggleTextStyleControls();
   updateStatus();
