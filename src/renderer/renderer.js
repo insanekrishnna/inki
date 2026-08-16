@@ -871,35 +871,6 @@ function clearCanvas() {
     return;
   }
 
-  // Restore original image if a background style (window container) was applied
-  if (state.windowContainerApplied && state.originalImageBeforeContainer) {
-    state.image = state.originalImageBeforeContainer;
-    state.windowContainerApplied = false;
-    state.originalImageBeforeContainer = null;
-    elements.canvas.width = state.image.width;
-    elements.canvas.height = state.image.height;
-    state.imageWidth = state.image.width;
-    state.imageHeight = state.image.height;
-  }
-
-  // Reset container background settings
-  state.containerGradient = 'none';
-  state.containerBgBlur = 'none';
-  
-  // Update sidebar active states
-  const rsGradientSwatches = document.querySelectorAll('.rs-gradient-swatch');
-  rsGradientSwatches.forEach(s => s.classList.remove('active'));
-  const gradientSwatches = document.querySelectorAll('.gradient-swatch');
-  gradientSwatches.forEach(s => s.classList.remove('active'));
-  const frameSwatches = document.querySelectorAll('.rs-frame-swatch');
-  frameSwatches.forEach(s => s.classList.toggle('active', s.dataset.theme === 'default'));
-
-  // Clear annotations and reset history
-  state.annotations = [];
-  state.history = [];
-  state.historyIndex = -1;
-  state.selectedAnnotationIndex = -1;
-
   // Cancel any active text input
   if (state.isEditingText) {
     cancelInlineText();
@@ -908,11 +879,38 @@ function clearCanvas() {
   // Deselect current tool to reset to a clean state
   selectTool(null);
 
-  // Redraw the original base image
-  render();
+  // Restore original image if a background style (window container) was applied
+  if (state.windowContainerApplied && state.originalImageBeforeContainer) {
+    const originalSrc = state.originalImageBeforeContainer;
+    state.windowContainerApplied = false;
+    state.originalImageBeforeContainer = null;
+    
+    // Reset container background settings
+    state.containerGradient = 'none';
+    state.containerBgBlur = 'none';
+    
+    // Update sidebar active states
+    const rsGradientSwatches = document.querySelectorAll('.rs-gradient-swatch');
+    rsGradientSwatches.forEach(s => s.classList.remove('active'));
+    const gradientSwatches = document.querySelectorAll('.gradient-swatch');
+    gradientSwatches.forEach(s => s.classList.remove('active'));
+    const frameSwatches = document.querySelectorAll('.rs-frame-swatch');
+    frameSwatches.forEach(s => s.classList.toggle('active', s.dataset.theme === 'default'));
+    const btnWindowContainer = document.getElementById('btn-window-container');
+    if (btnWindowContainer) btnWindowContainer.classList.remove('active');
 
-  // Save this clean slate to history
-  saveHistoryState();
+    // loadImage will handle resetting canvas dimensions, annotations, and history
+    loadImage(originalSrc);
+  } else {
+    // If no window container was applied, just wipe annotations and redraw
+    state.annotations = [];
+    state.history = [];
+    state.historyIndex = -1;
+    state.selectedAnnotationIndex = -1;
+    
+    // Redraw the original base image
+    render();
+  }
 
   updateStatus();
   updateToolbarState();
