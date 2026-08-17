@@ -502,7 +502,7 @@ body.theme-dark .theme-toggle-thumb {
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: #111;
+  color: inherit;
   display: flex;
   align-items: center;
   justify-content: center;
