@@ -188,6 +188,7 @@ const elements = {
   emptyCapture: $('#empty-capture'),
   emptyOpen: $('#empty-open'),
   toolBtns: $$('.toolbar-group.tools .tool-btn'),
+  bottomToolBtns: $$('.bt-btn'),
   colorSwatches: $$('.color-swatch'),
   strokePicker: $('#stroke-picker'),
   strokeCurrentLine: $('#stroke-current-line'),
@@ -351,6 +352,11 @@ function bindToolbar() {
   elements.toolBtns.forEach(btn => {
     btn.addEventListener('click', () => selectTool(btn.dataset.tool));
   });
+  if (elements.bottomToolBtns) {
+    elements.bottomToolBtns.forEach(btn => {
+      btn.addEventListener('click', () => selectTool(btn.dataset.tool));
+    });
+  }
   elements.colorSwatches.forEach(swatch => {
     swatch.addEventListener('click', () => selectColor(swatch.dataset.color));
   });
@@ -1118,6 +1124,8 @@ function selectTool(tool) {
     if (!state.cropActive) startCrop();
     else cancelCrop();
     state.currentTool = tool;
+    if (elements.toolBtns) elements.toolBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
+    if (elements.bottomToolBtns) elements.bottomToolBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
     updateToolbarState();
     return;
   }
@@ -1130,6 +1138,9 @@ function selectTool(tool) {
   
   if (elements.toolBtns) {
     elements.toolBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
+  }
+  if (elements.bottomToolBtns) {
+    elements.bottomToolBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
   }
   elements.container.className = tool ? `canvas-container tool-${tool}` : 'canvas-container';
   elements.canvas.style.cursor = !tool ? 'default' : (tool === 'text' ? 'text' : (tool === 'select' ? 'default' : 'crosshair'));
@@ -2362,6 +2373,7 @@ function bindContextMenu() {
     swatch.addEventListener('click', () => {
       const gradient = swatch.dataset.gradient;
       state.containerGradient = gradient;
+      state.containerBgImage = null;
       gradientSwatches.forEach(s => s.classList.remove('active'));
       swatch.classList.add('active');
 
@@ -2380,6 +2392,9 @@ function bindContextMenu() {
           applyWindowContainer();
         };
         tempImg.src = originalImg;
+      } else if (!state.windowContainerApplied && state.image) {
+        // Auto-apply window container when background is clicked without prior activation
+        applyWindowContainer();
       }
       menu.classList.remove('visible');
     });
@@ -2434,6 +2449,7 @@ function bindRightSidebar() {
           state.windowContainerApplied = false;
         }
         applyWindowContainer();
+        rsContainer.classList.toggle('active', state.windowContainerApplied);
       };
       reader.readAsDataURL(file);
       // Reset input value so same file can be selected again
@@ -2552,6 +2568,10 @@ function bindRightSidebar() {
           applyWindowContainer();
         };
         tempImg.src = originalImg;
+      } else if (state.image) {
+        // Auto-apply window container when frame theme is clicked without prior activation
+        applyWindowContainer();
+        rsContainer.classList.toggle('active', state.windowContainerApplied);
       }
     });
   });
@@ -2577,6 +2597,7 @@ function bindRightSidebar() {
       swatch.classList.add('active');
 
       if (state.windowContainerApplied && state.originalImageBeforeContainer) {
+        // Re-apply with new background
         state.windowContainerApplied = false;
         const originalImg = state.originalImageBeforeContainer;
         const tempImg = new Image();
@@ -2591,6 +2612,10 @@ function bindRightSidebar() {
           applyWindowContainer();
         };
         tempImg.src = originalImg;
+      } else if (!state.windowContainerApplied && state.image) {
+        // Auto-apply window container when background is clicked without prior activation
+        applyWindowContainer();
+        rsContainer.classList.toggle('active', state.windowContainerApplied);
       }
     });
   });
