@@ -1099,7 +1099,7 @@ body.theme-dark .empty-state-wrapper:not(.hidden) {
 /* Bottom Toolbar */
 .bottom-toolbar {
   position: fixed;
-  bottom: 24px;
+  bottom: 44px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
