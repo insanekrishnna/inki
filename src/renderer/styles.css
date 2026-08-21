@@ -2224,14 +2224,25 @@ body.theme-dark .rs-item-pill svg {
   opacity: 1;
 }
 
-.right-sidebar:not(.expanded) .rs-item-pill {
+.right-sidebar:not(.expanded) .rs-item-pill,
+body.theme-dark .right-sidebar:not(.expanded) .rs-item-pill {
   background: transparent;
+  border: none;
+  box-shadow: none;
   margin: 0;
   width: 100%;
   border-radius: 8px;
   height: 32px;
   justify-content: flex-start;
   padding: 0 16px;
+}
+
+.right-sidebar:not(.expanded) .rs-item-pill:hover,
+body.theme-dark .right-sidebar:not(.expanded) .rs-item-pill:hover,
+.right-sidebar:not(.expanded) .rs-item-pill.active,
+body.theme-dark .right-sidebar:not(.expanded) .rs-item-pill.active {
+  border: none;
+  box-shadow: none;
 }
 
 .right-sidebar:not(.expanded) .rs-item-pill .rs-label {
