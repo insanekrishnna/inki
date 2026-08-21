@@ -886,13 +886,13 @@ body.has-content .toolbar.editor-sidebar .toolbar-group.capture-modes + .toolbar
   display: flex !important;
   background-color: var(--card-wrapper-bg);
   border: 1px solid var(--card-wrapper-border);
-  border-radius: 18px;
-  padding: 24px 32px;
+  border-radius: 6px;
+  padding: 16px 24px;
   box-shadow: var(--card-wrapper-shadow);
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 15px;
   position: relative;
   z-index: 1;
   backdrop-filter: blur(20px);
@@ -934,8 +934,8 @@ body.theme-dark .empty-state-wrapper:not(.hidden) {
 /* ─── 2. Stacked Skeleton Cards ─── */
 .cards-stack {
   position: relative;
-  width: 200px;
-  height: 120px;
+  width: 170px;
+  height: 106px;
   margin-bottom: 0px; /* Reduced to make wrapper slimmer */
 }
 
@@ -943,16 +943,16 @@ body.theme-dark .empty-state-wrapper:not(.hidden) {
   position: absolute;
   background-color: var(--skel-card-bg);
   border: 1px solid var(--skel-card-border);
-  border-radius: 12px;
-  padding: 12px;
+  border-radius: 8px;
+  padding: 10px;
   overflow: hidden; /* IMPORTANT: Prevents child elements from leaking */
   transition: all 0.3s ease;
 }
 
 /* Card variations */
 .skel-card.back {
-  width: 160px;
-  height: 90px;
+  width: 128px;
+  height: 72px;
   top: 0;
   right: 8px;
   transform: rotate(-6deg);
@@ -961,33 +961,33 @@ body.theme-dark .empty-state-wrapper:not(.hidden) {
 }
 
 .skel-card.mid {
-  width: 160px;
-  height: 90px;
-  top: 14px;
-  right: 30px;
+  width: 128px;
+  height: 72px;
+  top: 11px;
+  right: 24px;
   transform: rotate(5deg);
   opacity: 0.6;
   box-shadow: 0 6px 16px rgba(0,0,0,0.03);
 }
 
 .skel-card.front {
-  width: 170px;
-  height: 96px; /* explicitly tall enough for contents */
-  top: 24px;
-  left: 8px;
+  width: 136px;
+  height: 77px; /* explicitly tall enough for contents */
+  top: 19px;
+  left: 6px;
   transform: rotate(-2deg);
   opacity: 1;
   box-shadow: 0 12px 24px var(--skel-card-shadow);
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 /* Internal Skeleton Bars */
 .skel-square {
-  width: 44px;
+  width: 35px;
   height: 100%;
   background-color: var(--skel-block-light);
-  border-radius: 6px;
+  border-radius: 5px;
   flex-shrink: 0;
 }
 
@@ -995,52 +995,52 @@ body.theme-dark .empty-state-wrapper:not(.hidden) {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .skel-line {
   background-color: var(--skel-block-mid);
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 /* Front card specific lines */
-.front .line-1 { height: 12px; width: 40%; background-color: var(--skel-block-light); align-self: flex-end; }
-.front .line-2 { height: 14px; width: 100%; }
-.front .line-3 { height: 22px; width: 100%; background-color: var(--skel-block-dark); }
+.front .line-1 { height: 10px; width: 40%; background-color: var(--skel-block-light); align-self: flex-end; }
+.front .line-2 { height: 11px; width: 100%; }
+.front .line-3 { height: 18px; width: 100%; background-color: var(--skel-block-dark); }
 
 /* Back/Mid card specific lines */
 .simple-lines {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
 }
 .simple-square {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   background-color: var(--skel-block-light);
-  border-radius: 6px;
+  border-radius: 5px;
   flex-shrink: 0;
 }
 .skel-card.back .simple-layout, .skel-card.mid .simple-layout {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   height: 100%;
 }
-.simple-lines .line-a { height: 10px; width: 100%; background-color: var(--skel-block-mid); border-radius: 4px;}
-.simple-lines .line-b { height: 10px; width: 60%; background-color: var(--skel-block-light); border-radius: 4px;}
+.simple-lines .line-a { height: 8px; width: 100%; background-color: var(--skel-block-mid); border-radius: 3px;}
+.simple-lines .line-b { height: 8px; width: 60%; background-color: var(--skel-block-light); border-radius: 3px;}
 
 /* ─── 3. Text + Buttons ─── */
 .text-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px; /* Tight gap between text and buttons */
+  gap: 15px; /* Tight gap between text and buttons */
 }
 
 .heading-text {
   color: var(--text-heading);
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 400;
   letter-spacing: -0.01em;
   text-align: center;
