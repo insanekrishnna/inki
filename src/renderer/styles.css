@@ -2234,7 +2234,12 @@ body.theme-dark .right-sidebar:not(.expanded) .rs-item-pill {
   border-radius: 8px;
   height: 32px;
   justify-content: flex-start;
-  padding: 0 0 0 14px;
+  padding: 0 0 0 13px;
+}
+
+.right-sidebar:not(.expanded) .rs-item-pill svg {
+  width: 22px;
+  height: 22px;
 }
 
 .right-sidebar:not(.expanded) .rs-item-pill:hover,
