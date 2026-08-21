@@ -318,17 +318,17 @@ function EditorSidebarText() {
 
         {/* Size and Toggles Row */}
         <div className={cn(isCollapsed ? 'flex flex-col gap-2' : 'flex flex-row items-center gap-3')}>
-          <div className="flex items-center justify-between bg-neutral-50/80 dark:bg-white/[0.04] rounded-lg h-9 px-2 flex-1 min-w-0 transition-all duration-200 border border-neutral-200/50 dark:border-white/[0.08]">
+          <div className="flex items-center justify-between bg-neutral-80/80 dark:bg-white/[0.04] rounded-sm h-8 p-1 flex-1 min-w-0 transition-all duration-200 border border-neutral-200/50 dark:border-white/[0.08]">
             <button onClick={() => changeFontSize(-4)} className="size-7 flex items-center justify-center text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors">
               <Minus className="size-3" />
             </button>
-            {!isCollapsed && <span className="text-[13px] font-medium text-neutral-700 dark:text-neutral-300 tabular-nums">{fontSize}px</span>}
+            {!isCollapsed && <span className="text-[13px] font-medium text-neutral-700 dark:text-neutral-300 tabular-nums text-center flex-1">{fontSize}px</span>}
             <button onClick={() => changeFontSize(4)} className="size-7 flex items-center justify-center text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors">
               <Plus className="size-3" />
             </button>
           </div>
 
-          <div className="flex items-center gap-0.5 bg-neutral-50/80 dark:bg-white/[0.04] p-1 rounded-lg transition-all duration-200 border border-neutral-200/50 dark:border-white/[0.08] shrink-0">
+          <div className="flex items-center gap-0.5 bg-neutral-80/80 dark:bg-white/[0.04] h-8 p-1 rounded-sm transition-all duration-200 border border-neutral-200/50 dark:border-white/[0.08] shrink-0">
             <button onClick={toggleBold} className={cn("size-7 flex items-center justify-center rounded-md text-[13px] font-bold transition-colors", isBold ? "bg-neutral-200/80 dark:bg-white/20 text-neutral-900 dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
               B
             </button>
