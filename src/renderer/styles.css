@@ -2234,7 +2234,7 @@ body.theme-dark .right-sidebar:not(.expanded) .rs-item-pill {
   border-radius: 8px;
   height: 32px;
   justify-content: flex-start;
-  padding: 0 16px;
+  padding: 0 0 0 14px;
 }
 
 .right-sidebar:not(.expanded) .rs-item-pill:hover,
@@ -2473,6 +2473,10 @@ body.theme-dark .rs-select-option.active {
 }
 
 .right-sidebar:not(.expanded) .rs-aspect-ratio-wrapper {
+  display: none;
+}
+
+.right-sidebar:not(.expanded) .rs-frame-themes {
   display: none;
 }
 
