@@ -1146,7 +1146,7 @@ body.theme-dark .bottom-toolbar {
 }
 
 .bt-btn.active {
-  background: #3b82f6; /* Blue highlight */
+  background: #0d99ff; /* Figma blue highlight */
   color: #ffffff;
 }
 
@@ -1159,7 +1159,7 @@ body.theme-dark .bt-btn:hover {
 }
 
 body.theme-dark .bt-btn.active {
-  background: #3b82f6;
+  background: #0d99ff;
   color: #ffffff;
 }
 
