@@ -49,19 +49,58 @@
       <div class="crop-hint" id="crop-hint"><kbd>Enter</kbd> to crop &middot; <kbd>Esc</kbd> to cancel</div>
     </div>
 
-    <div class="empty-state hidden" id="empty-state">
-      <div class="empty-icon">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1.5">
-          <rect x="2" y="3" width="20" height="14" rx="2"/>
-          <path d="M8 21h8M12 17v4"/>
-        </svg>
+    <div class="empty-state-wrapper" id="empty-state">
+      
+      <!-- Stacked Skeleton Cards -->
+      <div class="cards-stack">
+        <!-- Back Card -->
+        <div class="skel-card back">
+          <div class="simple-layout">
+            <div class="simple-square"></div>
+            <div class="simple-lines">
+              <div class="line-a"></div>
+              <div class="line-b"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Middle Card -->
+        <div class="skel-card mid">
+          <div class="simple-layout">
+            <div class="simple-square"></div>
+            <div class="simple-lines">
+              <div class="line-a"></div>
+              <div class="line-b" style="width: 80%;"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Front Card -->
+        <div class="skel-card front">
+          <div class="skel-square"></div>
+          <div class="skel-lines">
+            <div class="skel-line line-1"></div>
+            <div class="skel-line line-2"></div>
+            <div class="skel-line line-3"></div>
+          </div>
+        </div>
       </div>
-      <h2>No image loaded</h2>
-      <p>Capture your screen or open an image to begin</p>
-      <div class="empty-actions">
-        <button class="btn btn-primary" id="empty-capture"><span class="camera-dot"></span>Capture screen</button>
-        <button class="btn btn-secondary" id="empty-open">Open image</button>
+
+      <!-- Text and Buttons -->
+      <div class="text-content">
+        <h2 class="heading-text">Capture your screen or open an image to begin</h2>
+        
+        <div class="button-group">
+          <button class="btn btn-primary" id="empty-capture">
+            <span class="dot"></span>
+            Capture screen
+          </button>
+          <button class="btn btn-secondary" id="empty-open">
+            Open image
+          </button>
+        </div>
       </div>
+
     </div>
     <canvas id="canvas"></canvas>
     <div class="text-input-wrapper" id="text-input-wrapper">
