@@ -138,6 +138,8 @@ const state = {
   studioShadowOffsetY: 0,
   studioTitlebar: true,
   studioBorder: true,
+  windowFrameTheme: 'macos',
+  studioBrowserUrl: 'example.com',
   studioPitch: 0,
   studioYaw: 0,
   studioRoll: 0,
@@ -2291,7 +2293,11 @@ function applyWindowContainer() {
     return;
   }
 
-  const titleBarHeight = state.studioTitlebar ? 48 : 0;
+  const windowChrome = state.windowFrameTheme || 'macos';
+  const isBrowserChrome = windowChrome === 'browser';
+  const isFramelessChrome = windowChrome === 'frameless';
+  const isGlassChrome = windowChrome === 'glass';
+  const titleBarHeight = !isFramelessChrome && state.studioTitlebar ? 48 : 0;
   const cornerRadius = Math.max(0, Number(state.studioCornerRadius || 16));
   const padding = Math.max(0, Number(state.studioPadding || 64));
   const shadowBlur = Math.max(0, Number(state.studioShadowBlur ?? state.studioShadow ?? 45));
@@ -2301,14 +2307,18 @@ function applyWindowContainer() {
   const shadowOffsetY = Number(state.studioShadowOffsetY || 0);
   const shadowColor = `rgba(24, 18, 12, ${shadowOpacity})`;
   const frameThemes = {
-    dark: { titleBar: '#3a3a3c', windowBg: '#1e1e1e' },
-    light: { titleBar: '#e5e5e5', windowBg: '#ffffff' },
-    midnight: { titleBar: '#1e293b', windowBg: '#0f172a' },
-    minimal: { titleBar: '#f8f9fa', windowBg: '#ffffff' },
-    contrast: { titleBar: '#111111', windowBg: '#000000' }
+    macos: { titleBar: '#1f1f23', windowBg: '#ffffff', divider: 'rgba(0, 0, 0, 0.12)' },
+    browser: { titleBar: '#141418', windowBg: '#ffffff', divider: 'rgba(0, 0, 0, 0.1)' },
+    frameless: { titleBar: '#ffffff', windowBg: '#ffffff', divider: 'transparent' },
+    glass: { titleBar: 'rgba(245, 248, 255, 0.34)', windowBg: 'rgba(255, 255, 255, 0.45)', divider: 'rgba(255, 255, 255, 0.42)' },
+    dark: { titleBar: '#1f1f23', windowBg: '#ffffff', divider: 'rgba(0, 0, 0, 0.12)' },
+    light: { titleBar: '#1f1f23', windowBg: '#ffffff', divider: 'rgba(0, 0, 0, 0.12)' },
+    midnight: { titleBar: '#141418', windowBg: '#ffffff', divider: 'rgba(0, 0, 0, 0.1)' },
+    minimal: { titleBar: '#ffffff', windowBg: '#ffffff', divider: 'transparent' },
+    contrast: { titleBar: '#111111', windowBg: '#000000', divider: 'rgba(255, 255, 255, 0.12)' }
   };
 
-  const selectedTheme = frameThemes[state.windowFrameTheme || 'dark'] || frameThemes.dark;
+  const selectedTheme = frameThemes[windowChrome] || frameThemes.macos;
   const titleBarColor = selectedTheme.titleBar;
   const windowBgColor = selectedTheme.windowBg;
 
@@ -2381,13 +2391,22 @@ function applyWindowContainer() {
       frameCtx.beginPath();
       roundRect(frameCtx, 0, 0, windowW, windowH, cornerRadius);
       frameCtx.clip();
-      frameCtx.fillStyle = windowBgColor;
-      frameCtx.fillRect(0, 0, windowW, windowH);
+      if (isGlassChrome) {
+        const glassGradient = frameCtx.createLinearGradient(0, 0, windowW, windowH);
+        glassGradient.addColorStop(0, 'rgba(255, 255, 255, 0.74)');
+        glassGradient.addColorStop(0.46, 'rgba(234, 246, 255, 0.48)');
+        glassGradient.addColorStop(1, 'rgba(255, 255, 255, 0.34)');
+        frameCtx.fillStyle = glassGradient;
+        frameCtx.fillRect(0, 0, windowW, windowH);
+      } else {
+        frameCtx.fillStyle = windowBgColor;
+        frameCtx.fillRect(0, 0, windowW, windowH);
+      }
 
-      if (state.studioTitlebar) {
+      if (titleBarHeight > 0) {
         frameCtx.fillStyle = titleBarColor;
         frameCtx.fillRect(0, 0, windowW, titleBarHeight);
-        frameCtx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+        frameCtx.strokeStyle = selectedTheme.divider;
         frameCtx.lineWidth = 1;
         frameCtx.beginPath();
         frameCtx.moveTo(0, titleBarHeight);
@@ -2401,6 +2420,36 @@ function applyWindowContainer() {
           frameCtx.fillStyle = light.color;
           frameCtx.fill();
         });
+
+        if (isBrowserChrome) {
+          const urlText = normalizeBrowserUrlLabel(state.studioBrowserUrl);
+          const pillW = Math.min(Math.max(190, windowW * 0.46), Math.max(120, windowW - 120));
+          const pillH = 26;
+          const pillX = Math.max(76, (windowW - pillW) / 2);
+          const pillY = (titleBarHeight - pillH) / 2;
+          frameCtx.save();
+          frameCtx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+          frameCtx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+          frameCtx.lineWidth = 1;
+          frameCtx.beginPath();
+          roundRect(frameCtx, pillX, pillY, pillW, pillH, 5);
+          frameCtx.fill();
+          frameCtx.stroke();
+          frameCtx.fillStyle = 'rgba(255, 255, 255, 0.72)';
+          frameCtx.font = '600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          frameCtx.textAlign = 'center';
+          frameCtx.textBaseline = 'middle';
+          frameCtx.fillText(urlText, pillX + pillW / 2 + 8, pillY + pillH / 2, pillW - 42);
+          frameCtx.strokeStyle = 'rgba(255, 255, 255, 0.66)';
+          frameCtx.lineWidth = 1.4;
+          const lockX = pillX + Math.max(14, pillW / 2 - frameCtx.measureText(urlText).width / 2 - 12);
+          const lockY = pillY + pillH / 2;
+          frameCtx.strokeRect(lockX - 3.5, lockY - 1, 7, 6);
+          frameCtx.beginPath();
+          frameCtx.arc(lockX, lockY - 1, 3.5, Math.PI, 0);
+          frameCtx.stroke();
+          frameCtx.restore();
+        }
       }
 
       frameCtx.filter = getStudioFilter();
@@ -2410,10 +2459,10 @@ function applyWindowContainer() {
       drawAsciiPattern(frameCtx, frameCanvas.width, frameCanvas.height, 'image');
       frameCtx.restore();
 
-      if (state.studioBorder) {
+      if ((state.studioBorder && !isFramelessChrome) || isGlassChrome) {
         frameCtx.save();
-        frameCtx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-        frameCtx.lineWidth = 1;
+        frameCtx.strokeStyle = isGlassChrome ? 'rgba(255, 255, 255, 0.62)' : 'rgba(255, 255, 255, 0.35)';
+        frameCtx.lineWidth = isGlassChrome ? 1.4 : 1;
         frameCtx.beginPath();
         roundRect(frameCtx, 0.5, 0.5, windowW - 1, windowH - 1, Math.max(0, cornerRadius - 0.5));
         frameCtx.stroke();
@@ -2487,6 +2536,14 @@ function applyWindowContainer() {
     }
   };
   compositeImg.src = compositeDataUrl;
+}
+
+function normalizeBrowserUrlLabel(value) {
+  const clean = String(value || '').trim()
+    .replace(/^https?:\/\//i, '')
+    .replace(/^www\./i, '')
+    .replace(/\/.*$/, '');
+  return clean || 'example.com';
 }
 
 function roundRect(ctx, x, y, width, height, radius) {
@@ -2645,6 +2702,35 @@ function updateStudioValueLabels() {
   });
 }
 
+function updateBrowserUrlVisibility() {
+  const row = document.getElementById('rs-browser-url-row');
+  if (row) row.classList.toggle('hidden', state.windowFrameTheme !== 'browser');
+}
+
+function syncStudioInput(key) {
+  const input = document.querySelector(`.studio-input[data-state-key="${key}"]`);
+  if (!input) return;
+  input[input.type === 'checkbox' ? 'checked' : 'value'] = state[key];
+}
+
+function applyWindowChromeDefaults(chrome) {
+  if (chrome === 'browser' || chrome === 'macos') {
+    state.studioTitlebar = true;
+  } else if (chrome === 'frameless') {
+    state.studioTitlebar = false;
+  } else if (chrome === 'glass') {
+    Object.assign(state, {
+      studioTitlebar: true,
+      studioBorder: true,
+      studioPitch: 8,
+      studioYaw: -24,
+      studioRoll: -4,
+    });
+  }
+  ['studioTitlebar', 'studioBorder', 'studioPitch', 'studioYaw', 'studioRoll'].forEach(syncStudioInput);
+  updateStudioValueLabels();
+}
+
 function bindStudioControls() {
   const tabs = document.querySelectorAll('.rs-studio-tab');
   const panels = document.querySelectorAll('.rs-studio-panel');
@@ -2715,12 +2801,21 @@ function bindStudioControls() {
     button.addEventListener('click', () => {
       document.querySelectorAll('[data-window-chrome]').forEach((item) => item.classList.toggle('active', item === button));
       state.windowFrameTheme = button.dataset.windowChrome;
+      applyWindowChromeDefaults(state.windowFrameTheme);
+      updateBrowserUrlVisibility();
       document.querySelectorAll('.rs-frame-swatch').forEach((swatch) => {
         swatch.classList.toggle('active', swatch.dataset.theme === state.windowFrameTheme);
       });
       if (state.image) reapplyStudioContainer();
     });
   });
+
+  const browserUrlInput = document.getElementById('studio-browser-url');
+  browserUrlInput?.addEventListener('input', (event) => {
+    state.studioBrowserUrl = event.target.value;
+    if (state.windowContainerApplied) reapplyStudioContainer();
+  });
+  updateBrowserUrlVisibility();
 
   document.querySelectorAll('[data-watermark-mode]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -2926,6 +3021,7 @@ function bindRightSidebar() {
       rsFrameSwatches.forEach(s => s.classList.remove('active'));
       swatch.classList.add('active');
       state.windowFrameTheme = swatch.dataset.theme;
+      updateBrowserUrlVisibility();
       document.querySelectorAll('[data-window-chrome]').forEach((button) => {
         button.classList.toggle('active', button.dataset.windowChrome === state.windowFrameTheme);
       });

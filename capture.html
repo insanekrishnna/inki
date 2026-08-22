@@ -176,11 +176,12 @@
       <label class="rs-control-row">Corner radius <output id="studio-radius-value">16px</output><input class="rs-range studio-input" id="studio-corner-radius" data-state-key="studioCornerRadius" type="range" min="0" max="48" value="16"></label>
       <div class="rs-section-title">Window chrome</div>
       <div class="rs-choice-grid rs-choice-grid-2" id="rs-window-chrome">
-        <button class="rs-choice active" data-window-chrome="dark">Dark</button>
-        <button class="rs-choice" data-window-chrome="light">Light</button>
-        <button class="rs-choice" data-window-chrome="midnight">Midnight</button>
-        <button class="rs-choice" data-window-chrome="minimal">Minimal</button>
+        <button class="rs-choice active" data-window-chrome="macos">Default macOS</button>
+        <button class="rs-choice" data-window-chrome="browser">Web Browser</button>
+        <button class="rs-choice" data-window-chrome="frameless">Minimal Frameless</button>
+        <button class="rs-choice" data-window-chrome="glass">3D Glass Frosted</button>
       </div>
+      <label class="rs-text-row rs-browser-url-row hidden" id="rs-browser-url-row">Browser URL<input class="studio-text-input" id="studio-browser-url" type="text" value="example.com" placeholder="sample.com"></label>
       <div class="rs-section-title rs-section-title-inline">Drop shadow <button class="rs-mini-action" id="studio-shadow-reset" type="button">Reset</button></div>
       <label class="rs-control-row">Distance <output id="studio-shadow-distance-value">25px</output><input class="rs-range studio-input" id="studio-shadow-distance" data-state-key="studioShadowDistance" type="range" min="0" max="80" value="25"></label>
       <label class="rs-control-row">Blur <output id="studio-shadow-blur-value">45px</output><input class="rs-range studio-input" id="studio-shadow-blur" data-state-key="studioShadowBlur" type="range" min="0" max="120" value="45"></label>
@@ -192,14 +193,6 @@
         <button class="active" data-watermark-mode="off">Off</button>
         <button data-watermark-mode="badge">Badge</button>
         <button data-watermark-mode="text">Text</button>
-      </div>
-      <div class="rs-choice-grid rs-choice-grid-3" id="rs-watermark-platform">
-        <button class="rs-choice active" data-watermark-platform="x">X</button>
-        <button class="rs-choice" data-watermark-platform="gh">GH</button>
-        <button class="rs-choice" data-watermark-platform="ig">IG</button>
-        <button class="rs-choice" data-watermark-platform="in">IN</button>
-        <button class="rs-choice" data-watermark-platform="web">Web</button>
-        <button class="rs-choice" data-watermark-platform="text">Text</button>
       </div>
       <label class="rs-text-row">Handle / text<input class="studio-text-input" id="studio-watermark-text" type="text" value="@icodraw" placeholder="e.g. @yourname"></label>
     </div>
