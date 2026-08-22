@@ -98,7 +98,7 @@ const state = {
   currentTool: null,
   currentColor: '#111111',
   strokeWidth: 4,
-  textFontSize: 24,
+  textFontSize: 30,
   textFontFamily: '-apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif',
   textBold: false,
   textItalic: false,
@@ -1464,7 +1464,7 @@ function buildFontString(annotation) {
   const italic = annotation.fontItalic !== undefined ? annotation.fontItalic : state.textItalic;
   const weight = bold ? 'bold' : 'normal';
   const style = italic ? 'italic' : 'normal';
-  const size = annotation.fontSize || state.textFontSize || 24;
+  const size = annotation.fontSize || state.textFontSize || 30;
   const family = annotation.fontFamily || state.textFontFamily || '-apple-system, BlinkMacSystemFont, \'Segoe UI\', sans-serif';
   return `${style} ${weight} ${size}px ${family}`;
 }
@@ -2583,6 +2583,37 @@ function drawAsciiPattern(ctx, width, height, layer = 'image') {
   ctx.restore();
 }
 
+function measureLetterSpacedText(ctx, text, spacing = 0) {
+  const chars = Array.from(String(text || ''));
+  if (!chars.length) return 0;
+  return chars.reduce((width, char) => width + ctx.measureText(char).width, 0) + spacing * (chars.length - 1);
+}
+
+function drawLetterSpacedText(ctx, text, x, y, spacing = 0, maxWidth = Infinity) {
+  const chars = Array.from(String(text || ''));
+  if (!chars.length) return;
+
+  let effectiveSpacing = spacing;
+  let totalWidth = measureLetterSpacedText(ctx, text, effectiveSpacing);
+  if (Number.isFinite(maxWidth) && totalWidth > maxWidth && chars.length > 1) {
+    effectiveSpacing = Math.min(spacing, Math.max(0, (maxWidth - measureLetterSpacedText(ctx, text, 0)) / (chars.length - 1)));
+    totalWidth = measureLetterSpacedText(ctx, text, effectiveSpacing);
+  }
+
+  const align = ctx.textAlign;
+  let drawX = x;
+  if (align === 'center') drawX = x - totalWidth / 2;
+  if (align === 'right' || align === 'end') drawX = x - totalWidth;
+
+  const previousAlign = ctx.textAlign;
+  ctx.textAlign = 'left';
+  chars.forEach((char) => {
+    ctx.fillText(char, drawX, y);
+    drawX += ctx.measureText(char).width + effectiveSpacing;
+  });
+  ctx.textAlign = previousAlign;
+}
+
 function drawStudioWatermark(ctx, canvasW, canvasH, options = {}) {
   if ((state.studioWatermarkMode || 'off') === 'off') return;
   const text = (state.studioWatermarkText || '').trim();
@@ -2599,9 +2630,9 @@ function drawStudioWatermark(ctx, canvasW, canvasH, options = {}) {
   const padY = fontSize * (state.studioWatermarkSize === 'small' ? 0.4 : state.studioWatermarkSize === 'large' ? 0.64 : 0.52);
 
   ctx.save();
-  ctx.font = `600 ${fontSize}px Inter, system-ui, -apple-system, sans-serif`;
-  const metrics = ctx.measureText(label);
-  const badgeW = metrics.width + padX * 2;
+  const textSpacing = Math.max(0.25, fontSize * 0.025);
+  ctx.font = `700 ${fontSize}px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif`;
+  const badgeW = measureLetterSpacedText(ctx, label, textSpacing) + padX * 2;
   const badgeH = fontSize + padY * 2;
   const margin = Math.max(10, Math.min(area.width, area.height) * 0.035);
   const position = state.studioWatermarkPosition || 'bottom-right';
@@ -2618,15 +2649,16 @@ function drawStudioWatermark(ctx, canvasW, canvasH, options = {}) {
   const radius = Math.min(18 * sizeScale, badgeH / 2);
   const blur = Math.max(0, Number(state.studioWatermarkBlur || 0));
   drawFrostedWatermarkPill(ctx, x, y, badgeW, badgeH, radius, blur);
-  ctx.fillStyle = state.studioWatermarkMode === 'badge' ? 'rgba(255, 255, 255, 0.72)' : 'rgba(255, 255, 255, 0.58)';
+  ctx.fillStyle = state.studioWatermarkMode === 'badge' ? 'rgba(255, 255, 255, 0.84)' : 'rgba(255, 255, 255, 0.66)';
   ctx.beginPath();
   roundRect(ctx, x, y, badgeW, badgeH, radius);
   ctx.fill();
   ctx.shadowBlur = 0;
   ctx.shadowOffsetY = 0;
-  ctx.fillStyle = '#171717';
+  ctx.fillStyle = '#0b0b0b';
   ctx.textBaseline = 'middle';
-  ctx.fillText(label, x + padX, y + badgeH / 2 + 0.5);
+  ctx.textAlign = 'left';
+  drawLetterSpacedText(ctx, label, x + padX, y + badgeH / 2 + 0.5, textSpacing);
   ctx.restore();
 }
 
@@ -2888,22 +2920,31 @@ function applyWindowContainer() {
           const pillH = 26;
           const pillX = Math.max(76, (windowW - pillW) / 2);
           const pillY = (titleBarHeight - pillH) / 2;
+          const urlFontSize = 13;
+          const urlLetterSpacing = 0.45;
+          const urlMaxWidth = pillW - 48;
           frameCtx.save();
-          frameCtx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-          frameCtx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+          frameCtx.fillStyle = 'rgba(255, 255, 255, 0.13)';
+          frameCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
           frameCtx.lineWidth = 1;
           frameCtx.beginPath();
           roundRect(frameCtx, pillX, pillY, pillW, pillH, 5);
           frameCtx.fill();
           frameCtx.stroke();
-          frameCtx.fillStyle = 'rgba(255, 255, 255, 0.72)';
-          frameCtx.font = '600 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+          frameCtx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+          frameCtx.font = `700 ${urlFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif`;
           frameCtx.textAlign = 'center';
           frameCtx.textBaseline = 'middle';
-          frameCtx.fillText(urlText, pillX + pillW / 2 + 8, pillY + pillH / 2, pillW - 42);
-          frameCtx.strokeStyle = 'rgba(255, 255, 255, 0.66)';
-          frameCtx.lineWidth = 1.4;
-          const lockX = pillX + Math.max(14, pillW / 2 - frameCtx.measureText(urlText).width / 2 - 12);
+          frameCtx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+          frameCtx.shadowBlur = 1.5;
+          frameCtx.shadowOffsetY = 0.5;
+          drawLetterSpacedText(frameCtx, urlText, pillX + pillW / 2 + 8, pillY + pillH / 2, urlLetterSpacing, urlMaxWidth);
+          frameCtx.shadowBlur = 0;
+          frameCtx.shadowOffsetY = 0;
+          frameCtx.strokeStyle = 'rgba(255, 255, 255, 0.82)';
+          frameCtx.lineWidth = 1.5;
+          const urlWidth = Math.min(measureLetterSpacedText(frameCtx, urlText, urlLetterSpacing), urlMaxWidth);
+          const lockX = pillX + Math.max(14, pillW / 2 - urlWidth / 2 - 12);
           const lockY = pillY + pillH / 2;
           frameCtx.strokeRect(lockX - 3.5, lockY - 1, 7, 6);
           frameCtx.beginPath();

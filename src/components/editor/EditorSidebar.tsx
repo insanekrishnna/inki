@@ -209,7 +209,7 @@ function EditorSidebarText() {
   
   const [activeTool, setActiveTool] = useState<string | null>(null)
   const [fontFamily, setFontFamily] = useState(FONTS[0].value)
-  const [fontSize, setFontSize] = useState(44)
+  const [fontSize, setFontSize] = useState(30)
   const [isBold, setIsBold] = useState(false)
   const [isItalic, setIsItalic] = useState(false)
   const [isUnderline, setIsUnderline] = useState(false)

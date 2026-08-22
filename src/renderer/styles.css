@@ -1401,9 +1401,9 @@ body.theme-dark .zoom-level {
   background: transparent;
   border: 1.5px dashed rgba(240, 125, 32, 0.6);
   border-radius: 4px;
-  color: inherit;
+  color: #111111;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 16px;
+  font-size: 30px;
   font-weight: bold;
   padding: 4px 6px;
   resize: none;
