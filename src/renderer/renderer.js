@@ -2227,11 +2227,7 @@ function drawAsciiPattern(ctx, width, height, layer = 'image') {
 function drawStudioWatermark(ctx, canvasW, canvasH) {
   if ((state.studioWatermarkMode || 'off') === 'off') return;
   const text = (state.studioWatermarkText || '').trim();
-  const platformLabels = { x: 'X', gh: 'GH', ig: 'IG', in: 'IN', web: 'Web', text: '' };
-  const platform = platformLabels[state.studioWatermarkPlatform || 'x'] ?? 'X';
-  const label = state.studioWatermarkMode === 'text' || state.studioWatermarkPlatform === 'text'
-    ? (text || '@icodraw')
-    : `${platform}${text ? `  ${text}` : ''}`;
+  const label = text || '@icodraw';
   const fontSize = Math.max(14, Math.round(Math.min(canvasW, canvasH) * 0.022));
   const padX = fontSize * 0.8;
   const padY = fontSize * 0.52;
