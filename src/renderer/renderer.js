@@ -120,6 +120,10 @@ const state = {
   dragStartX: 0,
   dragStartY: 0,
   selectedAnnotationIndex: -1,
+  selectedImage: false,
+  isResizingImage: false,
+  imageResizeHandle: null,
+  imageResizeOrig: null,
   isResizingAnnotation: false,
   resizeHandle: null,
   windowContainerApplied: false,
@@ -781,6 +785,7 @@ function applyCrop() {
     state.history = [];
     state.historyIndex = -1;
     state.selectedAnnotationIndex = -1;
+    state.selectedImage = false;
     state.windowContainerApplied = false;
     state.originalImageBeforeContainer = null;
     cancelCrop();
@@ -987,6 +992,7 @@ function clearCanvas() {
   state.history = [];
   state.historyIndex = -1;
   state.selectedAnnotationIndex = -1;
+  state.selectedImage = false;
 
   // Reset container background settings
   state.windowContainerApplied = false;
@@ -1205,6 +1211,7 @@ function selectTool(tool) {
 function clearToolSelection() {
   selectTool(null);
   state.selectedAnnotationIndex = -1;
+  state.selectedImage = false;
   render();
 }
 
@@ -1435,6 +1442,31 @@ function getCanvasCoords(e) {
   };
 }
 
+function cloneAnnotations() {
+  return state.annotations.map(a => ({ ...a }));
+}
+
+function setImageCanvasSize(width, height) {
+  state.imageWidth = Math.max(1, Math.round(width));
+  state.imageHeight = Math.max(1, Math.round(height));
+  elements.canvas.width = state.imageWidth;
+  elements.canvas.height = state.imageHeight;
+  applyZoom();
+}
+
+function makeImageHistoryEntry(imageDataUrl = getImageDataUrl(), annotations = cloneAnnotations()) {
+  return {
+    image: imageDataUrl,
+    width: state.imageWidth,
+    height: state.imageHeight,
+    annotations,
+  };
+}
+
+function isPointInImage(coords) {
+  return coords.x >= 0 && coords.x <= state.imageWidth && coords.y >= 0 && coords.y <= state.imageHeight;
+}
+
 function findTextAnnotationAt(coords) {
   for (let i = state.annotations.length - 1; i >= 0; i--) {
     const ann = state.annotations[i];
@@ -1479,15 +1511,38 @@ function moveAnnotation(annotation, dx, dy) {
 function onCanvasMouseDown(e) {
   if (!state.image || state.cropActive) return;
   if (state.isEditingText) { commitInlineText(); return; }
-  if (!state.currentTool) return;
   
   const coords = getCanvasCoords(e);
 
+  if (!state.currentTool && isPointInImage(coords)) {
+    selectTool('select');
+  }
+
   if (state.currentTool === 'select') {
+    const imageHandle = findImageResizeHandleAt(coords);
+    if (imageHandle) {
+      state.isResizingImage = true;
+      state.imageResizeHandle = imageHandle;
+      state.selectedImage = true;
+      state.selectedAnnotationIndex = -1;
+      state.imageResizeOrig = {
+        x: coords.x,
+        y: coords.y,
+        width: state.imageWidth,
+        height: state.imageHeight,
+        image: getImageDataUrl(),
+        annotations: cloneAnnotations(),
+      };
+      elements.canvas.style.cursor = imageHandle.cursor;
+      render();
+      return;
+    }
+
     const handle = findResizeHandleAt(coords);
     if (handle) {
       state.isResizingAnnotation = true;
       state.resizeHandle = handle;
+      state.selectedImage = false;
       state.dragStartX = coords.x;
       state.dragStartY = coords.y;
       elements.canvas.style.cursor = handle.cursor;
@@ -1496,6 +1551,7 @@ function onCanvasMouseDown(e) {
 
     const idx = findAnnotationAt(coords);
     state.selectedAnnotationIndex = idx;
+    state.selectedImage = idx < 0 && isPointInImage(coords);
     if (idx >= 0) {
       state.isDraggingAnnotation = true;
       state.dragAnnotationIndex = idx;
@@ -1512,6 +1568,7 @@ function onCanvasMouseDown(e) {
     const textIdx = findTextAnnotationAt(coords);
     if (textIdx >= 0) {
       state.selectedAnnotationIndex = textIdx;
+      state.selectedImage = false;
       state.isDraggingText = true;
       state.dragTextIndex = textIdx;
       state.dragOffsetX = coords.x - state.annotations[textIdx].x;
@@ -1522,6 +1579,7 @@ function onCanvasMouseDown(e) {
       return;
     }
     state.selectedAnnotationIndex = -1;
+    state.selectedImage = false;
     updateToolbarState();
     openInlineText(coords);
     e.stopPropagation();
@@ -1534,6 +1592,7 @@ function onCanvasMouseDown(e) {
   }
 
   if (state.currentTool === 'badge') {
+    state.selectedImage = false;
     const maxBadge = state.annotations.reduce((max, a) => (a.type === 'badge' && a.number > max) ? a.number : max, 0);
     state.annotations.push({
       type: 'badge',
@@ -1549,6 +1608,7 @@ function onCanvasMouseDown(e) {
     return;
   }
 
+  state.selectedImage = false;
   state.isDrawing = true;
   state.startX = coords.x;
   state.startY = coords.y;
@@ -1557,6 +1617,13 @@ function onCanvasMouseDown(e) {
 function onCanvasMouseMove(e) {
   if (!state.image || state.cropActive) return;
   
+  if (state.isResizingImage) {
+    const coords = getCanvasCoords(e);
+    resizeSelectedImage(coords);
+    render();
+    return;
+  }
+
   if (state.isDraggingAnnotation) {
     const coords = getCanvasCoords(e);
     const dx = coords.x - state.dragStartX;
@@ -1583,9 +1650,9 @@ function onCanvasMouseMove(e) {
   
   if (state.currentTool === 'select' && !state.isDrawing && !state.isDraggingAnnotation) {
     const coords = getCanvasCoords(e);
-    const handle = findResizeHandleAt(coords);
+    const handle = findImageResizeHandleAt(coords) || findResizeHandleAt(coords);
     if (handle) elements.canvas.style.cursor = handle.cursor;
-    else elements.canvas.style.cursor = findAnnotationAt(coords) >= 0 ? 'grab' : 'default';
+    else elements.canvas.style.cursor = findAnnotationAt(coords) >= 0 ? 'grab' : (isPointInImage(coords) ? 'pointer' : 'default');
   }
 
   if (state.currentTool === 'text' && !state.isDrawing) {
@@ -1600,6 +1667,29 @@ function onCanvasMouseMove(e) {
 }
 
 function onCanvasMouseUp(e) {
+  if (state.isResizingImage) {
+    const changed = state.imageResizeOrig &&
+      (state.imageWidth !== state.imageResizeOrig.width || state.imageHeight !== state.imageResizeOrig.height);
+    if (changed) {
+      state.history = state.history.slice(0, state.historyIndex + 1);
+      state.history.push({
+        image: state.imageResizeOrig.image,
+        width: state.imageResizeOrig.width,
+        height: state.imageResizeOrig.height,
+        annotations: state.imageResizeOrig.annotations,
+      });
+      state.historyIndex = state.history.length - 1;
+    }
+    state.isResizingImage = false;
+    state.imageResizeHandle = null;
+    state.imageResizeOrig = null;
+    elements.canvas.style.cursor = state.currentTool === 'select' ? 'default' : elements.canvas.style.cursor;
+    updateStatus();
+    updateToolbarState();
+    render();
+    return;
+  }
+
   if (state.isDraggingAnnotation) {
     state.isDraggingAnnotation = false;
     state.dragAnnotationIndex = -1;
@@ -1746,13 +1836,15 @@ function undo() {
   const entry = state.history[state.historyIndex];
 
   if (entry && entry.image) {
-    state.history[state.historyIndex] = { image: getImageDataUrl(), annotations: [...state.annotations.map(a => ({...a}))] };
+    state.history[state.historyIndex] = makeImageHistoryEntry();
     state.historyIndex--;
     const img = new Image();
     img.onload = () => {
       state.image = img;
+      setImageCanvasSize(entry.width || img.width, entry.height || img.height);
       state.annotations = entry.annotations ? [...entry.annotations.map(a => ({...a}))] : [];
       state.selectedAnnotationIndex = -1;
+      state.selectedImage = false;
       render();
       updateStatus();
       updateToolbarState();
@@ -1776,12 +1868,14 @@ function redo() {
   const entry = state.history[state.historyIndex];
 
   if (entry && entry.image) {
-    state.history[state.historyIndex] = { image: getImageDataUrl(), annotations: [...state.annotations.map(a => ({...a}))] };
+    state.history[state.historyIndex] = makeImageHistoryEntry();
     const img = new Image();
     img.onload = () => {
       state.image = img;
+      setImageCanvasSize(entry.width || img.width, entry.height || img.height);
       state.annotations = entry.annotations ? [...entry.annotations.map(a => ({...a}))] : [];
       state.selectedAnnotationIndex = -1;
+      state.selectedImage = false;
       render();
       updateStatus();
       updateToolbarState();
@@ -1804,7 +1898,7 @@ function render() {
   if (!state.image) return;
   const ctx = elements.ctx;
   ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
-  ctx.drawImage(state.image, 0, 0);
+  ctx.drawImage(state.image, 0, 0, state.imageWidth, state.imageHeight);
   state.annotations.forEach(drawAnnotation);
   drawSelectionHandles();
 }
@@ -2009,6 +2103,70 @@ function findResizeHandleAt(coords) {
   return handles.find(h => Math.abs(coords.x - h.x) <= size && Math.abs(coords.y - h.y) <= size) || null;
 }
 
+function getImageResizeHandles() {
+  const w = state.imageWidth;
+  const h = state.imageHeight;
+  return [
+    { kind: 'nw', x: 0, y: 0, cursor: 'nwse-resize' },
+    { kind: 'n', x: w / 2, y: 0, cursor: 'ns-resize' },
+    { kind: 'ne', x: w, y: 0, cursor: 'nesw-resize' },
+    { kind: 'e', x: w, y: h / 2, cursor: 'ew-resize' },
+    { kind: 'se', x: w, y: h, cursor: 'nwse-resize' },
+    { kind: 's', x: w / 2, y: h, cursor: 'ns-resize' },
+    { kind: 'sw', x: 0, y: h, cursor: 'nesw-resize' },
+    { kind: 'w', x: 0, y: h / 2, cursor: 'ew-resize' },
+  ];
+}
+
+function findImageResizeHandleAt(coords) {
+  if (!state.selectedImage || state.selectedAnnotationIndex >= 0) return null;
+  const size = Math.max(10, 12 / Math.max(state.zoom, 0.1));
+  return getImageResizeHandles().find(h => Math.abs(coords.x - h.x) <= size && Math.abs(coords.y - h.y) <= size) || null;
+}
+
+function scaleAnnotation(annotation, scaleX, scaleY) {
+  if ('x' in annotation) annotation.x *= scaleX;
+  if ('y' in annotation) annotation.y *= scaleY;
+  if ('width' in annotation) annotation.width *= scaleX;
+  if ('height' in annotation) annotation.height *= scaleY;
+  if ('x1' in annotation) annotation.x1 *= scaleX;
+  if ('x2' in annotation) annotation.x2 *= scaleX;
+  if ('y1' in annotation) annotation.y1 *= scaleY;
+  if ('y2' in annotation) annotation.y2 *= scaleY;
+  if (annotation.type === 'text' && annotation.fontSize) {
+    annotation.fontSize = Math.max(8, Math.round(annotation.fontSize * Math.max(scaleX, scaleY)));
+  }
+}
+
+function resizeSelectedImage(coords) {
+  const orig = state.imageResizeOrig;
+  const handle = state.imageResizeHandle?.kind;
+  if (!orig || !handle) return;
+
+  const dx = coords.x - orig.x;
+  const dy = coords.y - orig.y;
+  let width = orig.width;
+  let height = orig.height;
+
+  if (handle.includes('e')) width = orig.width + dx;
+  if (handle.includes('w')) width = orig.width - dx;
+  if (handle.includes('s')) height = orig.height + dy;
+  if (handle.includes('n')) height = orig.height - dy;
+
+  width = Math.max(20, width);
+  height = Math.max(20, height);
+
+  setImageCanvasSize(width, height);
+
+  const scaleX = state.imageWidth / orig.width;
+  const scaleY = state.imageHeight / orig.height;
+  state.annotations = orig.annotations.map((annotation) => {
+    const scaled = { ...annotation };
+    scaleAnnotation(scaled, scaleX, scaleY);
+    return scaled;
+  });
+}
+
 function resizeSelectedAnnotation(coords) {
   const ann = state.annotations[state.selectedAnnotationIndex];
   if (!ann || !state.resizeHandle) return;
@@ -2041,7 +2199,12 @@ function resizeSelectedAnnotation(coords) {
 }
 
 function drawSelectionHandles() {
-  if (state.currentTool !== 'select' || state.selectedAnnotationIndex < 0) return;
+  if (state.currentTool !== 'select') return;
+  if (state.selectedImage && state.selectedAnnotationIndex < 0) {
+    drawImageSelectionHandles();
+    return;
+  }
+  if (state.selectedAnnotationIndex < 0) return;
   const ann = state.annotations[state.selectedAnnotationIndex];
   const bounds = getAnnotationBounds(ann);
   if (!bounds) return;
@@ -2075,6 +2238,32 @@ function drawSelectionHandles() {
   }
 }
 
+function drawImageSelectionHandles() {
+  const ctx = elements.ctx;
+  ctx.save();
+  ctx.strokeStyle = '#3b82f6';
+  ctx.fillStyle = '#ffffff';
+  ctx.lineWidth = Math.max(2, 2 / Math.max(state.zoom, 0.1));
+  ctx.setLineDash([6, 5]);
+  ctx.strokeRect(0, 0, state.imageWidth, state.imageHeight);
+  ctx.setLineDash([]);
+
+  getImageResizeHandles().forEach((handle) => {
+    drawHandle(handle.x, handle.y);
+  });
+  ctx.restore();
+
+  function drawHandle(x, y) {
+    const s = Math.max(8, 8 / Math.max(state.zoom, 0.1));
+    const hx = Math.max(s / 2, Math.min(state.imageWidth - s / 2, x));
+    const hy = Math.max(s / 2, Math.min(state.imageHeight - s / 2, y));
+    ctx.beginPath();
+    ctx.rect(hx - s / 2, hy - s / 2, s, s);
+    ctx.fill();
+    ctx.stroke();
+  }
+}
+
 // ------------------------------------------------------------------------------
 // Composite & UI
 // ------------------------------------------------------------------------------
@@ -2084,7 +2273,7 @@ function getCompositeImage() {
   tempCanvas.width = state.imageWidth;
   tempCanvas.height = state.imageHeight;
   const tempCtx = tempCanvas.getContext('2d');
-  tempCtx.drawImage(state.image, 0, 0);
+  tempCtx.drawImage(state.image, 0, 0, state.imageWidth, state.imageHeight);
   const orig = elements.ctx;
   elements.ctx = tempCtx;
   state.annotations.forEach(drawAnnotation);
@@ -2152,7 +2341,7 @@ function getImageDataUrl() {
   c.width = state.imageWidth;
   c.height = state.imageHeight;
   const ctx = c.getContext('2d');
-  ctx.drawImage(state.image, 0, 0);
+  ctx.drawImage(state.image, 0, 0, state.imageWidth, state.imageHeight);
   return c.toDataURL('image/png');
 }
 
@@ -2160,6 +2349,7 @@ function replaceImage(dataUrl, cb) {
   const img = new Image();
   img.onload = () => {
     state.image = img;
+    setImageCanvasSize(img.width, img.height);
     if (cb) cb();
     render();
     updateStatus();
