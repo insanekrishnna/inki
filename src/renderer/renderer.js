@@ -1027,28 +1027,26 @@ function clearCanvas() {
   const btnWindowContainer = document.getElementById('btn-window-container');
   if (btnWindowContainer) btnWindowContainer.classList.remove('active');
 
-  // Immediately clear the canvas visually while the image loads
+  // Return to the empty start screen instead of reloading the previous image.
   elements.ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
-
-  // Reload the very first original image if available
-  if (state.baseOriginalImage) {
-    loadImage(state.baseOriginalImage, { isInternal: true });
-  } else {
-    // If there is no base original image, we just wipe the canvas (already done above)
-    // but we need to remove the image from state as well.
-    state.image = null;
-    state.imageWidth = 0;
-    state.imageHeight = 0;
-    elements.canvas.classList.remove('visible');
-    elements.emptyState.classList.remove('hidden');
-    document.body.classList.remove('has-image');
-    document.body.classList.add('has-content');
-    updateStatus();
-    updateToolbarState();
-    window.dispatchEvent(new CustomEvent('editor-state-change', {
-      detail: { hasSelection: false }
-    }));
-  }
+  state.image = null;
+  state.imageWidth = 0;
+  state.imageHeight = 0;
+  state.baseOriginalImage = null;
+  state.imageModified = false;
+  elements.canvas.width = 1;
+  elements.canvas.height = 1;
+  elements.canvas.style.width = '';
+  elements.canvas.style.height = '';
+  elements.canvas.classList.remove('visible');
+  elements.emptyState.classList.remove('hidden');
+  document.body.classList.remove('has-image');
+  document.body.classList.add('has-content');
+  updateStatus();
+  updateToolbarState();
+  window.dispatchEvent(new CustomEvent('editor-state-change', {
+    detail: { hasSelection: false, hasImage: false }
+  }));
 }
 
 // ------------------------------------------------------------------------------

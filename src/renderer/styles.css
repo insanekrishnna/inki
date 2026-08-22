@@ -930,7 +930,7 @@ body.has-content .toolbar.editor-sidebar .toolbar-group.capture-modes + .toolbar
 /* ── Canvas ── */
 #canvas {
   display: none;
-  image-rendering: crisp-edges;
+  image-rendering: auto;
   position: absolute;
   z-index: 1;
   left: 0;
@@ -2589,17 +2589,25 @@ body.theme-dark .right-sidebar:not(.expanded) .rs-item-pill {
   border: none;
   box-shadow: none;
   margin: 0;
-  width: 100%;
+  width: 32px;
   border-radius: 8px;
   height: 32px;
+  display: flex;
+  align-items: center;
   justify-content: center;
   padding: 0;
+  gap: 0;
+  align-self: center;
 }
 
 .right-sidebar:not(.expanded) > .rs-item {
+  width: 32px;
   height: 32px;
+  display: flex;
+  align-items: center;
   justify-content: center;
   padding: 0;
+  align-self: center;
 }
 
 .right-sidebar:not(.expanded) .rs-item-pill svg,
@@ -2607,6 +2615,8 @@ body.theme-dark .right-sidebar:not(.expanded) .rs-item-pill {
 .right-sidebar:not(.expanded) #rs-save-png svg {
   width: 18px;
   height: 18px;
+  flex: 0 0 18px;
+  display: block;
 }
 
 .right-sidebar:not(.expanded) .rs-item-pill:hover,
