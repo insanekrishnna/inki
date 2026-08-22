@@ -2327,6 +2327,8 @@ function applyWindowContainer() {
     purple: ['#8b5cf6', '#ec4899'],
     midnight: ['#1e1b4b', '#312e81'],
     warm: ['#fbbf24', '#f97316'],
+    aurora: ['#34d399', '#818cf8'],
+    coral: ['#fb7185', '#facc15'],
   };
 
   const lights = [

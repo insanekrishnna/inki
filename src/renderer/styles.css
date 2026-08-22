@@ -2458,13 +2458,15 @@ body.theme-dark .rs-separator {
 .right-sidebar.expanded .rs-gradients {
   flex-direction: row;
   flex-wrap: wrap;
+  gap: 4px;
   justify-content: flex-start;
   padding: 0 16px 1px 16px;
 }
 
 .rs-gradient-swatch {
-  width: 24px;
-  height: 24px;
+  box-sizing: border-box;
+  width: 23px;
+  height: 23px;
   border-radius: 6px;
   border: 1px solid transparent;
   padding: 0;
