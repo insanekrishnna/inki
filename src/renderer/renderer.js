@@ -129,6 +129,7 @@ const state = {
   windowContainerApplied: false,
   containerGradient: 'none',
   containerBgBlur: 'none',
+  containerColorPreset: 'normal',
   studioPadding: 64,
   studioImageScale: 100,
   studioRotation: 0,
@@ -1003,10 +1004,12 @@ function clearCanvas() {
   state.originalImageBeforeContainer = null;
   state.containerGradient = 'none';
   state.containerBgBlur = 'none';
+  state.containerColorPreset = 'normal';
   
   // Update sidebar active states
   const rsGradientSwatches = document.querySelectorAll('.rs-gradient-swatch');
   rsGradientSwatches.forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.rs-color-preset').forEach(s => s.classList.toggle('active', s.dataset.colorPreset === 'normal'));
   const gradientSwatches = document.querySelectorAll('.gradient-swatch');
   gradientSwatches.forEach(s => s.classList.remove('active'));
   const frameSwatches = document.querySelectorAll('.rs-frame-swatch');
@@ -2465,6 +2468,79 @@ function drawStudioWatermark(ctx, canvasW, canvasH, options = {}) {
   ctx.restore();
 }
 
+function applyBackdropColorPreset(ctx, width, height) {
+  const preset = state.containerColorPreset || 'normal';
+  if (preset === 'normal') return;
+
+  let imageData;
+  try {
+    imageData = ctx.getImageData(0, 0, width, height);
+  } catch (error) {
+    return;
+  }
+
+  const data = imageData.data;
+  const clamp = (value) => Math.max(0, Math.min(255, value));
+  const contrast = (value, amount) => (value - 128) * amount + 128;
+  const applySaturation = (r, g, b, amount) => {
+    const luma = r * 0.2126 + g * 0.7152 + b * 0.0722;
+    return [
+      luma + (r - luma) * amount,
+      luma + (g - luma) * amount,
+      luma + (b - luma) * amount,
+    ];
+  };
+
+  for (let i = 0; i < data.length; i += 4) {
+    let r = data[i];
+    let g = data[i + 1];
+    let b = data[i + 2];
+    const luma = r * 0.299 + g * 0.587 + b * 0.114;
+
+    if (preset === 'mono') {
+      r = g = b = contrast(luma, 1.08);
+    } else if (preset === 'contrast') {
+      [r, g, b] = applySaturation(r, g, b, 1.22);
+      r = contrast(r, 1.28);
+      g = contrast(g, 1.28);
+      b = contrast(b, 1.28);
+    } else if (preset === 'sunset') {
+      [r, g, b] = applySaturation(r, g, b, 1.12);
+      r = contrast(r * 1.12 + 10, 1.08);
+      g = contrast(g * 1.03 + 4, 1.04);
+      b = contrast(b * 0.86 - 4, 1.02);
+    } else if (preset === 'sepia') {
+      const nr = r * 0.393 + g * 0.769 + b * 0.189;
+      const ng = r * 0.349 + g * 0.686 + b * 0.168;
+      const nb = r * 0.272 + g * 0.534 + b * 0.131;
+      r = contrast(nr, 1.06);
+      g = contrast(ng, 1.02);
+      b = contrast(nb, 0.96);
+    } else if (preset === 'mint') {
+      [r, g, b] = applySaturation(r, g, b, 0.9);
+      r = contrast(r * 0.9 + 4, 1.03);
+      g = contrast(g * 1.08 + 12, 1.06);
+      b = contrast(b * 1.1 + 10, 1.04);
+    } else if (preset === 'neon') {
+      [r, g, b] = applySaturation(r, g, b, 1.55);
+      r = contrast(r * 1.06 + 14, 1.22);
+      g = contrast(g * 0.98 + 2, 1.14);
+      b = contrast(b * 1.18 + 18, 1.24);
+    } else if (preset === 'noir') {
+      [r, g, b] = applySaturation(r, g, b, 0.35);
+      r = contrast(luma * 0.85 + 6, 1.26);
+      g = contrast(luma * 0.91 + 9, 1.22);
+      b = contrast(luma * 1.08 + 18, 1.28);
+    }
+
+    data[i] = clamp(r);
+    data[i + 1] = clamp(g);
+    data[i + 2] = clamp(b);
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+}
+
 function drawFrostedWatermarkPill(ctx, x, y, width, height, radius, blur) {
   if (!blur) return;
   ctx.save();
@@ -2739,6 +2815,7 @@ function applyWindowContainer() {
       if ((state.studioWatermarkLayer || 'image') === 'canvas') {
         drawStudioWatermark(ctx, canvasW, canvasH);
       }
+      applyBackdropColorPreset(ctx, tempCanvas.width, tempCanvas.height);
 
       const resultDataUrl = tempCanvas.toDataURL('image/png');
       state.annotations = [];
@@ -3212,6 +3289,7 @@ function bindRightSidebar() {
   const rsCustomBg = document.getElementById('rs-custom-bg');
   const customBgInput = document.getElementById('custom-bg-input');
   const rsGradientSwatches = document.querySelectorAll('.rs-gradient-swatch');
+  const rsColorPresets = document.querySelectorAll('.rs-color-preset');
   const rightSidebar = document.getElementById('right-sidebar');
   const rsCloseBtn = document.getElementById('rs-close-btn');
 
@@ -3423,6 +3501,33 @@ function bindRightSidebar() {
         tempImg.src = originalImg;
       } else if (!state.windowContainerApplied && state.image) {
         // Auto-apply window container when background is clicked without prior activation
+        applyWindowContainer();
+        rsContainer.classList.toggle('active', state.windowContainerApplied);
+      }
+    });
+  });
+
+  rsColorPresets.forEach((button) => {
+    button.addEventListener('click', () => {
+      state.containerColorPreset = button.dataset.colorPreset || 'normal';
+      rsColorPresets.forEach((item) => item.classList.toggle('active', item === button));
+
+      if (state.windowContainerApplied && state.originalImageBeforeContainer) {
+        state.windowContainerApplied = false;
+        const originalImg = state.originalImageBeforeContainer;
+        const tempImg = new Image();
+        tempImg.onload = () => {
+          state.image = tempImg;
+          state.imageWidth = tempImg.width;
+          state.imageHeight = tempImg.height;
+          state.annotations = [];
+          state.history = [];
+          state.historyIndex = -1;
+          state.originalImageBeforeContainer = originalImg;
+          applyWindowContainer();
+        };
+        tempImg.src = originalImg;
+      } else if (!state.windowContainerApplied && state.image) {
         applyWindowContainer();
         rsContainer.classList.toggle('active', state.windowContainerApplied);
       }
