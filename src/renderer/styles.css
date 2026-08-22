@@ -2593,6 +2593,64 @@ body.theme-dark .rs-item.active {
   flex-shrink: 0;
 }
 
+#rs-custom-bg {
+  width: auto;
+  height: 28px;
+  margin: 8px 16px 10px;
+  padding: 0 10px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.46);
+  color: rgba(17, 17, 17, 0.78);
+  gap: 6px;
+  justify-content: center;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+#rs-custom-bg svg {
+  width: 13px;
+  height: 13px;
+}
+
+#rs-custom-bg .rs-label {
+  margin-left: 0;
+  opacity: 1;
+}
+
+#rs-custom-bg:hover {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(0, 0, 0, 0.11);
+  color: rgba(17, 17, 17, 0.92);
+}
+
+.right-sidebar:not(.expanded) #rs-custom-bg {
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+}
+
+.right-sidebar:not(.expanded) #rs-custom-bg .rs-label {
+  display: none;
+}
+
+body.theme-dark #rs-custom-bg {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.86);
+}
+
+body.theme-dark #rs-custom-bg:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
 .rs-separator {
   height: 1px;
   background: rgba(0, 0, 0, 0.04);

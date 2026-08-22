@@ -161,13 +161,13 @@
     </button>
 
     <div class="rs-studio-tabs" role="tablist" aria-label="Studio controls">
-      <button class="rs-studio-tab" data-studio-tab="backdrop">Backdrop</button>
-      <button class="rs-studio-tab active" data-studio-tab="layout">Layout</button>
+      <button class="rs-studio-tab active" data-studio-tab="backdrop">Backdrop</button>
+      <button class="rs-studio-tab" data-studio-tab="layout">Layout</button>
       <button class="rs-studio-tab" data-studio-tab="effects">Effects</button>
       <button class="rs-studio-tab" data-studio-tab="camera">Camera</button>
     </div>
 
-    <div class="rs-studio-panel active" data-studio-panel="layout">
+    <div class="rs-studio-panel" data-studio-panel="layout">
       <div class="rs-section-title">Canvas setup</div>
       <label class="rs-control-row">Padding <output id="studio-padding-value">64px</output><input class="rs-range studio-input" id="studio-padding" data-state-key="studioPadding" type="range" min="0" max="180" value="64"></label>
       <label class="rs-control-row">Image scale <output id="studio-scale-value">100%</output><input class="rs-range studio-input" id="studio-image-scale" data-state-key="studioImageScale" type="range" min="40" max="160" value="100"></label>
@@ -286,7 +286,7 @@
       </div>
     </div>
 
-    <div class="rs-studio-panel" data-studio-panel="backdrop">
+    <div class="rs-studio-panel active" data-studio-panel="backdrop">
     <div class="rs-aspect-ratio-wrapper" title="Aspect Ratio">
       <span class="rs-aspect-ratio-label">Aspect ratio</span>
       <div class="rs-custom-select" id="rs-aspect-select">
@@ -381,7 +381,12 @@
       <button class="rs-gradient-swatch" data-bg="mac8.png" title="Mac 8"><span style="background-image:url('mac8.png'); background-size: cover; background-position: center;"></span></button>
       <button class="rs-gradient-swatch" data-bg="mac9.png" title="Mac 9"><span style="background-image:url('mac9.png'); background-size: cover; background-position: center;"></span></button>
     </div>
-    <div class="rs-section-title rs-section-title-inline">Color presets <span class="rs-section-count">8 filters</span></div>
+    <button class="rs-item" id="rs-custom-bg" title="Upload custom background">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+﻿      <span class="rs-label">Custom background</span>
+    </button>
+    <input type="file" id="custom-bg-input" accept="image/*" style="display: none;" />
+    <div class="rs-section-title rs-section-title-inline">Color presets</div>
     <div class="rs-color-presets">
       <button class="rs-color-preset active" data-color-preset="normal"><span>Original</span><small>Natural color</small></button>
       <button class="rs-color-preset" data-color-preset="mono"><span>Mono Ink</span><small>Black & white</small></button>
@@ -393,11 +398,6 @@
       <button class="rs-color-preset" data-color-preset="noir"><span>Noir Blue</span><small>Moody shadows</small></button>
     </div>
     <div class="rs-separator"></div>
-    <button class="rs-item" id="rs-custom-bg" title="Upload custom background">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-﻿      <span class="rs-label">Custom background</span>
-    </button>
-    <input type="file" id="custom-bg-input" accept="image/*" style="display: none;" />
     </div>
     <button class="rs-item" id="rs-copy" title="Copy to clipboard (Ctrl+C)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M5 15V5h10"/></svg>
