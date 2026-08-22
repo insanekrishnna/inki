@@ -2719,6 +2719,47 @@ function updateStudioValueLabels() {
     const node = document.getElementById(id);
     if (node) node.textContent = value;
   });
+  updateRangeProgress();
+}
+
+function updateRangeProgress(target) {
+  const ranges = target ? [target] : document.querySelectorAll('.rs-range');
+  ranges.forEach((input) => {
+    const min = Number(input.min || 0);
+    const max = Number(input.max || 100);
+    const value = Number(input.value || 0);
+    const progress = max > min ? ((value - min) / (max - min)) * 100 : 0;
+    input.style.setProperty('--range-progress', `${Math.max(0, Math.min(100, progress))}%`);
+  });
+}
+
+function ensureRangeResetButtons() {
+  document.querySelectorAll('.rs-control-row .rs-range').forEach((input) => {
+    const row = input.closest('.rs-control-row');
+    if (!row || row.querySelector('.rs-range-reset')) return;
+    const output = row.querySelector('output');
+    if (!output) return;
+
+    const button = document.createElement('button');
+    const labelText = (row.firstChild?.textContent || input.id || 'slider').trim();
+    button.type = 'button';
+    button.className = 'rs-range-reset';
+    button.title = 'Reset';
+    button.setAttribute('aria-label', `Reset ${labelText}`);
+    button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>';
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const key = input.dataset.stateKey;
+      const fallback = input.getAttribute('value') ?? input.defaultValue ?? input.min ?? '0';
+      input.value = fallback;
+      if (key) state[key] = input.type === 'checkbox' ? input.checked : Number(input.value);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    row.insertBefore(button, output);
+  });
 }
 
 function updateBrowserUrlVisibility() {
@@ -2730,6 +2771,7 @@ function syncStudioInput(key) {
   const input = document.querySelector(`.studio-input[data-state-key="${key}"]`);
   if (!input) return;
   input[input.type === 'checkbox' ? 'checked' : 'value'] = state[key];
+  if (input.classList.contains('rs-range')) updateRangeProgress(input);
 }
 
 function applyWindowChromeDefaults(chrome) {
@@ -2759,12 +2801,15 @@ function bindStudioControls() {
     });
   });
 
+  ensureRangeResetButtons();
+
   document.querySelectorAll('.studio-input').forEach((input) => {
     input.addEventListener('input', () => {
       const key = input.dataset.stateKey;
       if (!key) return;
       state[key] = input.type === 'checkbox' ? input.checked : Number(input.value);
       updateStudioValueLabels();
+      if (input.classList.contains('rs-range')) updateRangeProgress(input);
       if (state.windowContainerApplied) reapplyStudioContainer();
     });
     input.addEventListener('change', () => {
@@ -2772,9 +2817,11 @@ function bindStudioControls() {
       if (!key) return;
       state[key] = input.type === 'checkbox' ? input.checked : Number(input.value);
       updateStudioValueLabels();
+      if (input.classList.contains('rs-range')) updateRangeProgress(input);
       if (state.image) reapplyStudioContainer();
     });
   });
+  updateStudioValueLabels();
 
   const presets = {
     flat: { studioPitch: 0, studioYaw: 0, studioRoll: 0 },

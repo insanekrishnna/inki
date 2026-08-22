@@ -72,10 +72,6 @@
     <div class="statusbar">
       <span class="status-tool" id="status-tool">Ready</span>
       <div class="statusbar-spacer"></div>
-      <button class="statusbar-btn" id="btn-zoom-out" title="Zoom out">-</button>
-      <span class="zoom-level" id="status-zoom">100%</span>
-      <button class="statusbar-btn" id="btn-zoom-in" title="Zoom in">+</button>
-      <button class="statusbar-btn statusbar-reset" id="btn-zoom-reset" title="Reset zoom">Reset</button>
     </div>
   </div>
 
@@ -378,6 +374,12 @@
     <button class="bt-btn" data-tool="pixelate" title="Pixelate">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><path d="M9 3v18"/><path d="M15 3v18"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>
     </button>
+    <div class="bt-zoom-group" aria-label="Zoom controls">
+      <button class="statusbar-btn bt-zoom-btn" id="btn-zoom-out" title="Zoom out">-</button>
+      <span class="zoom-level bt-zoom-level" id="status-zoom">100%</span>
+      <button class="statusbar-btn bt-zoom-btn" id="btn-zoom-in" title="Zoom in">+</button>
+      <button class="statusbar-btn statusbar-reset bt-zoom-reset" id="btn-zoom-reset" title="Reset zoom">Reset</button>
+    </div>
   </div>
 
   <script type="module" src="/src/renderer/web-preview.js"></script>
