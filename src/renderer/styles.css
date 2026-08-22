@@ -1399,7 +1399,7 @@ body.theme-dark .zoom-level {
 
 .text-input-wrapper textarea {
   background: transparent;
-  border: 1.5px dashed rgba(240, 125, 32, 0.6);
+  border: 1.5px dashed rgba(17, 17, 17, 0.75);
   border-radius: 4px;
   color: #111111;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;

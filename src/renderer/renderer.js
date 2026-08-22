@@ -2917,11 +2917,11 @@ function applyWindowContainer() {
         if (isBrowserChrome) {
           const urlText = normalizeBrowserUrlLabel(state.studioBrowserUrl);
           const pillW = Math.min(Math.max(190, windowW * 0.46), Math.max(120, windowW - 120));
-          const pillH = 26;
+          const pillH = 28;
           const pillX = Math.max(76, (windowW - pillW) / 2);
           const pillY = (titleBarHeight - pillH) / 2;
-          const urlFontSize = 13;
-          const urlLetterSpacing = 0.45;
+          const urlFontSize = 15;
+          const urlLetterSpacing = 0.32;
           const urlMaxWidth = pillW - 48;
           frameCtx.save();
           frameCtx.fillStyle = 'rgba(255, 255, 255, 0.13)';
@@ -2932,7 +2932,7 @@ function applyWindowContainer() {
           frameCtx.fill();
           frameCtx.stroke();
           frameCtx.fillStyle = 'rgba(255, 255, 255, 0.92)';
-          frameCtx.font = `700 ${urlFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif`;
+          frameCtx.font = `500 ${urlFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif`;
           frameCtx.textAlign = 'center';
           frameCtx.textBaseline = 'middle';
           frameCtx.shadowColor = 'rgba(0, 0, 0, 0.45)';
