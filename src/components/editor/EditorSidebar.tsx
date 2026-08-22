@@ -71,14 +71,14 @@ const STROKES = [
 /* ─── Shared class tokens ─────────────────────────────────────────────── */
 
 const sidebarButtonClass =
-  'h-8 !rounded-md text-neutral-600 dark:text-neutral-400 transition-all duration-200 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:bg-neutral-100/70 dark:hover:bg-white/[0.06] hover:text-neutral-900 dark:hover:text-white'
+  'h-8 !rounded-md text-neutral-600 dark:text-neutral-400 transition-all duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:bg-neutral-100/70 dark:hover:bg-white/[0.06] hover:text-neutral-900 dark:hover:text-white active:translate-y-0 active:scale-[0.98]'
 
 const sidebarIconClass = 'size-[16px] shrink-0 text-neutral-500 dark:text-neutral-400'
 
 const sidebarMenuClass = 'gap-0.5 px-3'
 
 const sidebarGroupLabelClass =
-  'px-5 py-1.5 text-[11px] font-medium tracking-wide text-neutral-400 dark:text-neutral-500 uppercase transition-opacity duration-300'
+  'px-5 py-1.5 text-[11px] font-medium tracking-wide text-neutral-400 dark:text-neutral-500 uppercase transition-[opacity,transform] duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)]'
 
 function getSidebarButtonStyle(isCollapsed: boolean): React.CSSProperties | undefined {
   if (isCollapsed) return undefined
@@ -126,7 +126,7 @@ function SidebarBrand() {
       style={isCollapsed ? { paddingTop: 12 } : { paddingLeft: 20, paddingRight: 20 }}
     >
       <a className="group flex min-w-0 items-center gap-2.5 outline-none" href="#">
-        <img src="/inki.png" alt="Icodraw" className={cn('shrink-0 object-contain object-left drop-shadow-sm transition-transform duration-200 group-hover:scale-105', isCollapsed ? 'size-[22px]' : 'size-[26px]')} />
+        <img src="/inki.png" alt="Icodraw" className={cn('shrink-0 object-contain object-left drop-shadow-sm transition-transform duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105', isCollapsed ? 'size-[22px]' : 'size-[26px]')} />
       </a>
 
       <motion.div
@@ -134,9 +134,9 @@ function SidebarBrand() {
         className={cn('flex items-center', isCollapsed ? 'flex-row md:flex-col-reverse' : 'flex-row')}
         initial={{ opacity: 0 }}
         key={isCollapsed ? 'editor-header-collapsed' : 'editor-header-expanded'}
-        transition={{ duration: 0.25 }}
+        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
       >
-        <SidebarTrigger className="shrink-0 size-7 rounded-md border border-transparent bg-transparent text-neutral-400 transition-all duration-500 hover:bg-neutral-50 hover:text-neutral-700 dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white" />
+        <SidebarTrigger className="shrink-0 size-7 rounded-md border border-transparent bg-transparent text-neutral-400 transition-all duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:bg-neutral-50 hover:text-neutral-700 active:translate-y-0 active:scale-[0.96] dark:text-white/70 dark:hover:bg-white/10 dark:hover:text-white" />
       </motion.div>
     </SidebarHeader>
   )
@@ -181,8 +181,8 @@ function EditorSidebarTools() {
               tooltip={tool.label}
             >
               <tool.icon className={cn(sidebarIconClass, activeTool === tool.id && 'text-neutral-800 dark:text-white')} />
-              {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in duration-500">{tool.label}</span>}
-              {!isCollapsed && tool.shortcut && <span className="animate-in fade-in duration-500"><ShortcutKey>{tool.shortcut}</ShortcutKey></span>}
+              {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in slide-in-from-left-1 duration-[220ms]">{tool.label}</span>}
+              {!isCollapsed && tool.shortcut && <span className="animate-in fade-in slide-in-from-left-1 duration-[220ms]"><ShortcutKey>{tool.shortcut}</ShortcutKey></span>}
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}
@@ -318,24 +318,24 @@ function EditorSidebarText() {
 
         {/* Size and Toggles Row */}
         <div className={cn(isCollapsed ? 'flex flex-col gap-2' : 'flex flex-row items-center gap-3')}>
-          <div className="flex items-center justify-between bg-neutral-80/80 dark:bg-white/[0.04] rounded-sm h-8 p-1 flex-1 min-w-0 transition-all duration-200 border border-neutral-200/50 dark:border-white/[0.08]">
-            <button onClick={() => changeFontSize(-4)} className="size-7 flex items-center justify-center text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors">
+          <div className="flex items-center justify-between bg-neutral-80/80 dark:bg-white/[0.04] rounded-sm h-8 p-1 flex-1 min-w-0 transition-all duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)] border border-neutral-200/50 dark:border-white/[0.08]">
+            <button onClick={() => changeFontSize(-4)} className="size-7 flex items-center justify-center text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-all duration-[160ms] ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.94]">
               <Minus className="size-3" />
             </button>
             {!isCollapsed && <span className="text-[13px] font-medium text-neutral-700 dark:text-neutral-300 tabular-nums text-center flex-1">{fontSize}px</span>}
-            <button onClick={() => changeFontSize(4)} className="size-7 flex items-center justify-center text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-colors">
+            <button onClick={() => changeFontSize(4)} className="size-7 flex items-center justify-center text-neutral-400 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-md transition-all duration-[160ms] ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.94]">
               <Plus className="size-3" />
             </button>
           </div>
 
-          <div className="flex items-center gap-0.5 bg-neutral-80/80 dark:bg-white/[0.04] h-8 p-1 rounded-sm transition-all duration-200 border border-neutral-200/50 dark:border-white/[0.08] shrink-0">
-            <button onClick={toggleBold} className={cn("size-7 flex items-center justify-center rounded-md text-[13px] font-bold transition-colors", isBold ? "bg-neutral-200/80 dark:bg-white/20 text-neutral-900 dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
+          <div className="flex items-center gap-0.5 bg-neutral-80/80 dark:bg-white/[0.04] h-8 p-1 rounded-sm transition-all duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)] border border-neutral-200/50 dark:border-white/[0.08] shrink-0">
+            <button onClick={toggleBold} className={cn("size-7 flex items-center justify-center rounded-md text-[13px] font-bold transition-all duration-[160ms] ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.94]", isBold ? "bg-neutral-200/80 dark:bg-white/20 text-neutral-900 dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
               B
             </button>
-            <button onClick={toggleItalic} className={cn("size-7 flex items-center justify-center rounded-md text-[13px] italic font-serif transition-colors", isItalic ? "bg-neutral-200/80 dark:bg-white/20 text-neutral-900 dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
+            <button onClick={toggleItalic} className={cn("size-7 flex items-center justify-center rounded-md text-[13px] italic font-serif transition-all duration-[160ms] ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.94]", isItalic ? "bg-neutral-200/80 dark:bg-white/20 text-neutral-900 dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
               I
             </button>
-            <button onClick={toggleUnderline} className={cn("size-7 flex items-center justify-center rounded-md text-[13px] underline transition-colors", isUnderline ? "bg-neutral-200/80 dark:bg-white/20 text-neutral-900 dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
+            <button onClick={toggleUnderline} className={cn("size-7 flex items-center justify-center rounded-md text-[13px] underline transition-all duration-[160ms] ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.94]", isUnderline ? "bg-neutral-200/80 dark:bg-white/20 text-neutral-900 dark:text-white" : "text-neutral-500 hover:text-neutral-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10")}>
               U
             </button>
           </div>
@@ -405,7 +405,7 @@ function EditorSidebarAppearance() {
             onClick={() => selectColor(color.value)}
             title={color.label}
             className={cn(
-              cn('shrink-0 rounded-full border-[1.5px] transition-all duration-300 hover:scale-110 hover:shadow-sm shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]', isCollapsed ? 'size-[22px]' : 'size-[26px]'),
+              cn('shrink-0 rounded-full border-[1.5px] transition-all duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-110 hover:shadow-sm active:scale-95 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]', isCollapsed ? 'size-[22px]' : 'size-[26px]'),
               activeColor === color.value
                 ? 'scale-110 border-neutral-800 ring-2 ring-neutral-200/60'
                 : 'border-transparent hover:border-neutral-200'
@@ -419,7 +419,7 @@ function EditorSidebarAppearance() {
           onClick={() => customColorInputRef.current?.click()}
           title="Custom color"
           className={cn(
-            cn('relative flex shrink-0 items-center justify-center rounded-full border-[1.5px] transition-all duration-300 hover:scale-110', isCollapsed ? 'size-[22px]' : 'size-[26px]'),
+            cn('relative flex shrink-0 items-center justify-center rounded-full border-[1.5px] transition-all duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-110 active:scale-95', isCollapsed ? 'size-[22px]' : 'size-[26px]'),
             customColor && activeColor === customColor
               ? 'scale-110 border-neutral-800 ring-2 ring-neutral-200/60'
               : 'border-dashed border-neutral-300 hover:border-neutral-400'
@@ -441,7 +441,7 @@ function EditorSidebarAppearance() {
       {!isCollapsed && (
         <>
           <div
-            className="text-[11px] font-medium tracking-wide uppercase text-neutral-400 dark:text-neutral-500 animate-in fade-in duration-300"
+            className="text-[11px] font-medium tracking-wide uppercase text-neutral-400 dark:text-neutral-500 animate-in fade-in slide-in-from-left-1 duration-[220ms]"
             style={{ paddingTop: 4, paddingBottom: 6, paddingLeft: 20 }}
           >
             Stroke
@@ -456,12 +456,12 @@ function EditorSidebarAppearance() {
                 onClick={() => selectStroke(stroke.value)}
                 title={stroke.label}
                 className={cn(
-                  'flex h-8 w-full items-center rounded-md transition-all duration-200 hover:bg-neutral-100/70 dark:hover:bg-white/10 dark:text-white/80',
+                  'flex h-8 w-full items-center rounded-md transition-all duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-px hover:bg-neutral-100/70 active:translate-y-0 active:scale-[0.98] dark:hover:bg-white/10 dark:text-white/80',
                   'justify-center',
                   activeStroke === stroke.value ? 'bg-neutral-100/80 text-neutral-900 dark:bg-white/10 dark:text-white' : 'text-neutral-400 dark:text-white/60'
                 )}
               >
-                <span className="rounded-full bg-current transition-all duration-300" style={{ width: '28px', height: stroke.height }} />
+                <span className="rounded-full bg-current transition-all duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)]" style={{ width: '28px', height: stroke.height }} />
               </button>
             ))}
           </div>
@@ -490,8 +490,8 @@ function EditorSidebarHistory() {
             tooltip="Undo"
           >
             <Undo2 className={sidebarIconClass} />
-            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in duration-500">Undo</span>}
-            {!isCollapsed && <span className="animate-in fade-in duration-500"><ShortcutKey>Ctrl Z</ShortcutKey></span>}
+            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in slide-in-from-left-1 duration-[220ms]">Undo</span>}
+            {!isCollapsed && <span className="animate-in fade-in slide-in-from-left-1 duration-[220ms]"><ShortcutKey>Ctrl Z</ShortcutKey></span>}
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
@@ -502,8 +502,8 @@ function EditorSidebarHistory() {
             tooltip="Redo"
           >
             <Redo2 className={sidebarIconClass} />
-            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in duration-500">Redo</span>}
-            {!isCollapsed && <span className="animate-in fade-in duration-500"><ShortcutKey>Ctrl Shift Z</ShortcutKey></span>}
+            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in slide-in-from-left-1 duration-[220ms]">Redo</span>}
+            {!isCollapsed && <span className="animate-in fade-in slide-in-from-left-1 duration-[220ms]"><ShortcutKey>Ctrl Shift Z</ShortcutKey></span>}
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
@@ -514,7 +514,7 @@ function EditorSidebarHistory() {
             tooltip="Clear canvas"
           >
             <Trash2 className={sidebarIconClass} />
-            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in duration-500">Clear Canvas</span>}
+            {!isCollapsed && <span className="flex-1 truncate text-[13px] font-medium animate-in fade-in slide-in-from-left-1 duration-[220ms]">Clear Canvas</span>}
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
@@ -533,7 +533,7 @@ function EditorSidebarFooter() {
       <button
         onClick={() => window.open('https://github.com/prathm-k/inki', '_blank')}
         className={cn(
-          'group flex h-[52px] w-full items-center gap-2.5 !rounded-none text-left transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-neutral-50 dark:hover:bg-white/10',
+          'group flex h-[52px] w-full items-center gap-2.5 !rounded-none text-left transition-all duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-neutral-50 dark:hover:bg-white/10',
           isCollapsed ? 'justify-center px-0' : ''
         )}
         style={isCollapsed ? undefined : { paddingLeft: 20, paddingRight: 20 }}
@@ -541,7 +541,7 @@ function EditorSidebarFooter() {
         type="button"
       >
         {!isCollapsed && (
-          <div className="flex min-w-0 flex-1 items-center gap-2.5 animate-in fade-in duration-500">
+          <div className="flex min-w-0 flex-1 items-center gap-2.5 animate-in fade-in slide-in-from-left-1 duration-[220ms]">
             <img src="/inki.png" alt="Icodraw" className="size-[24px] shrink-0 object-contain object-left drop-shadow-sm" />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-[13px] font-semibold leading-5 text-neutral-900 dark:text-white">Icodraw</span>

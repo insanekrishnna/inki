@@ -16,6 +16,12 @@
   --ui-radius-island: 24px;
   --ui-radius-swatch: 6px;
   --ui-radius-swatch-inner: 5px;
+  --motion-fast: 120ms;
+  --motion-control: 180ms;
+  --motion-panel: 260ms;
+  --motion-theme: 220ms;
+  --motion-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-press: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,7 +33,7 @@ body {
   display: flex;
   flex-direction: row;
   background: transparent;
-  transition: none;
+  transition: background-color var(--motion-theme) var(--motion-smooth), color var(--motion-theme) var(--motion-smooth);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
   color: var(--text);
 }
@@ -3599,4 +3605,214 @@ body:not(.has-image) .toolbar .toolbar-btn,
 
 .rs-segmented:not(.rs-segmented-grid) button:last-child {
   border-radius: 0 var(--ui-radius-control) var(--ui-radius-control) 0;
+}
+
+/* Unified editor motion */
+.editor-main,
+.canvas-container,
+.liquidGlass-wrapper,
+.right-sidebar,
+.bottom-toolbar,
+#editor-sidebar-root [data-sidebar="sidebar"] {
+  transition:
+    background-color var(--motion-theme) var(--motion-smooth),
+    border-color var(--motion-theme) var(--motion-smooth),
+    box-shadow var(--motion-panel) var(--motion-smooth),
+    color var(--motion-theme) var(--motion-smooth);
+}
+
+.toolbar {
+  will-change: transform, opacity;
+  transition:
+    transform var(--motion-panel) var(--motion-smooth),
+    opacity var(--motion-panel) var(--motion-smooth),
+    border-color var(--motion-theme) var(--motion-smooth),
+    box-shadow var(--motion-panel) var(--motion-smooth),
+    background-color var(--motion-theme) var(--motion-smooth);
+}
+
+.right-sidebar {
+  will-change: width, transform;
+  transition:
+    width var(--motion-panel) var(--motion-smooth),
+    transform var(--motion-panel) var(--motion-smooth),
+    background-color var(--motion-theme) var(--motion-smooth),
+    border-color var(--motion-theme) var(--motion-smooth),
+    box-shadow var(--motion-panel) var(--motion-smooth);
+}
+
+.right-sidebar.expanded {
+  box-shadow: 0 16px 46px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+body.theme-dark .right-sidebar.expanded {
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.42);
+}
+
+.rs-close-btn {
+  transform: translateX(4px) scale(0.94);
+  transition:
+    opacity var(--motion-control) var(--motion-smooth),
+    transform var(--motion-control) var(--motion-smooth),
+    background-color var(--motion-control) var(--motion-smooth),
+    color var(--motion-control) var(--motion-smooth);
+}
+
+.right-sidebar.expanded .rs-close-btn {
+  transform: translateX(0) scale(1);
+}
+
+.rs-label {
+  display: inline-flex !important;
+  max-width: 0;
+  transform: translateX(-5px);
+  opacity: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  transition:
+    opacity var(--motion-control) var(--motion-smooth),
+    transform var(--motion-control) var(--motion-smooth),
+    max-width var(--motion-panel) var(--motion-smooth),
+    margin var(--motion-panel) var(--motion-smooth);
+}
+
+.right-sidebar.expanded .rs-label,
+.right-sidebar.expanded .rs-item-pill .rs-label,
+.right-sidebar.expanded #rs-custom-bg .rs-label {
+  max-width: 180px;
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.right-sidebar:not(.expanded) .rs-label,
+.right-sidebar:not(.expanded) .rs-item-pill .rs-label,
+.right-sidebar:not(.expanded) #rs-custom-bg .rs-label {
+  max-width: 0;
+  margin-left: 0;
+  opacity: 0;
+  transform: translateX(-5px);
+}
+
+.right-sidebar.expanded .rs-studio-tabs,
+.right-sidebar.expanded .rs-studio-panel.active,
+.right-sidebar.expanded .rs-gradients,
+.right-sidebar.expanded .rs-color-presets,
+.right-sidebar.expanded .rs-frame-themes,
+.right-sidebar.expanded .rs-aspect-ratio-wrapper {
+  animation: dashboardContentIn var(--motion-control) var(--motion-smooth) both;
+}
+
+@keyframes dashboardContentIn {
+  from {
+    opacity: 0;
+    transform: translateX(6px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.toolbar-action-btn,
+.toolbar-btn,
+.theme-toggle,
+.bt-btn,
+.bottom-toolbar .statusbar-btn,
+.bottom-toolbar .bt-zoom-level,
+.btn,
+.rs-close-btn,
+.rs-item,
+.rs-item-pill,
+#rs-custom-bg,
+.rs-studio-tab,
+.rs-preset-btn,
+.rs-mini-action,
+.rs-choice,
+.rs-pattern,
+.rs-color-preset,
+.rs-frame-swatch,
+.rs-gradient-swatch,
+.rs-select-value,
+.context-menu-item {
+  transition:
+    transform var(--motion-fast) var(--motion-press),
+    background-color var(--motion-control) var(--motion-smooth),
+    border-color var(--motion-control) var(--motion-smooth),
+    box-shadow var(--motion-control) var(--motion-smooth),
+    color var(--motion-control) var(--motion-smooth),
+    opacity var(--motion-control) var(--motion-smooth);
+}
+
+.toolbar-action-btn:hover:not(:disabled),
+.toolbar-btn:hover:not(:disabled),
+.bt-btn:hover,
+.bottom-toolbar .statusbar-btn:hover,
+.btn:hover,
+.rs-item:hover,
+.rs-item-pill:hover,
+#rs-custom-bg:hover,
+.rs-studio-tab:hover,
+.rs-preset-btn:hover,
+.rs-mini-action:hover,
+.rs-choice:hover,
+.rs-pattern:hover,
+.rs-color-preset:hover,
+.rs-frame-swatch:hover,
+.rs-gradient-swatch:hover,
+.rs-select-value:hover,
+.context-menu-item:hover {
+  transform: translateY(-1px);
+}
+
+.toolbar-action-btn:active:not(:disabled),
+.toolbar-btn:active:not(:disabled),
+.bt-btn:active,
+.bottom-toolbar .statusbar-btn:active,
+.btn:active,
+.rs-item:active,
+.rs-item-pill:active,
+#rs-custom-bg:active,
+.rs-studio-tab:active,
+.rs-preset-btn:active,
+.rs-mini-action:active,
+.rs-choice:active,
+.rs-pattern:active,
+.rs-color-preset:active,
+.rs-frame-swatch:active,
+.rs-gradient-swatch:active,
+.rs-select-value:active,
+.context-menu-item:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.toolbar.dragging {
+  transform: translateX(-50%) translateY(var(--toolbar-offset)) scale(1.006);
+  cursor: grabbing;
+  transition:
+    transform var(--motion-fast) var(--motion-press),
+    box-shadow var(--motion-control) var(--motion-smooth);
+}
+
+.toolbar.auto-hidden {
+  transition:
+    transform var(--motion-panel) var(--motion-smooth),
+    opacity var(--motion-panel) var(--motion-smooth);
+}
+
+#editor-sidebar-root [data-sidebar="menu-button"],
+#editor-sidebar-root [data-sidebar="trigger"],
+#editor-sidebar-root button,
+#editor-sidebar-root a {
+  transition-timing-function: var(--motion-smooth);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
 }

@@ -235,7 +235,7 @@ const Sidebar = React.forwardRef<
         {/* This is what handles the sidebar gap on desktop */}
         <div
           className={cn(
-            "relative w-[--sidebar-width] bg-transparent transition-[width] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
+            "relative w-[--sidebar-width] bg-transparent transition-[width] duration-[260ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[width]",
             "group-data-[collapsible=offcanvas]:w-0",
             "group-data-[side=right]:rotate-180",
             variant === "floating" || variant === "inset"
@@ -245,7 +245,7 @@ const Sidebar = React.forwardRef<
         />
         <div
           className={cn(
-            "fixed inset-y-0 z-10 hidden w-[--sidebar-width] transition-[left,right,width] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] md:flex",
+            "fixed inset-y-0 z-10 hidden w-[--sidebar-width] transition-[left,right,width,transform] duration-[260ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[width] md:flex",
             side === "left"
               ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
               : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
@@ -311,7 +311,7 @@ const SidebarRail = React.forwardRef<
       onClick={toggleSidebar}
       title="Toggle Sidebar"
       className={cn(
-        "absolute inset-y-0 z-20 hidden w-3 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-neutral-200 group-data-[side=left]:-right-3 group-data-[side=right]:left-0 sm:flex",
+        "absolute inset-y-0 z-20 hidden w-3 -translate-x-1/2 transition-all duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)] after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-neutral-200 group-data-[side=left]:-right-3 group-data-[side=right]:left-0 sm:flex",
         "[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize",
         "[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize",
         "group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full group-data-[collapsible=offcanvas]:hover:bg-sidebar",
@@ -455,7 +455,7 @@ const SidebarGroupLabel = React.forwardRef<
       ref={ref}
       data-sidebar="group-label"
       className={cn(
-        "flex h-6 shrink-0 items-center rounded-md mb-1 text-[11px] font-medium text-[#111] dark:text-neutral-300 outline-none ring-sidebar-ring transition-[margin,opacity] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
+        "flex h-6 shrink-0 items-center rounded-md mb-1 text-[11px] font-medium text-[#111] dark:text-neutral-300 outline-none ring-sidebar-ring transition-[margin,opacity,transform] duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
         "group-data-[collapsible=icon]:-mt-5 group-data-[collapsible=icon]:opacity-0",
         className
       )}
@@ -529,7 +529,7 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2.5 overflow-hidden rounded-lg px-2.5 py-1.5 text-left text-[13px] font-medium text-neutral-500 outline-none ring-sidebar-ring transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:bg-neutral-50 hover:text-neutral-900 focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-neutral-100/80 data-[active=true]:font-semibold data-[active=true]:text-neutral-900 data-[state=open]:text-neutral-900 group-data-[collapsible=icon]:!size-7 group-data-[collapsible=icon]:!p-1 group-data-[collapsible=icon]:justify-center [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center gap-2.5 overflow-hidden rounded-lg px-2.5 py-1.5 text-left text-[13px] font-medium text-neutral-500 outline-none ring-sidebar-ring transition-all duration-[180ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-neutral-50 hover:text-neutral-900 hover:-translate-y-px active:translate-y-0 active:scale-[0.98] focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-neutral-100/80 data-[active=true]:font-semibold data-[active=true]:text-neutral-900 data-[state=open]:text-neutral-900 group-data-[collapsible=icon]:!size-7 group-data-[collapsible=icon]:!p-1 group-data-[collapsible=icon]:justify-center [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       variant: {
