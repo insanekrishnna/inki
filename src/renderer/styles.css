@@ -2696,18 +2696,18 @@ body.theme-dark .rs-frame-swatch span {
 }
 
 .right-sidebar.expanded .rs-item-pill {
-  min-height: 40px;
-  height: 40px;
-  margin: 12px 48px 10px 14px;
-  padding: 0 14px;
+  min-height: 32px;
+  height: 32px;
+  margin: 8px 96px 8px 14px;
+  padding: 0 10px;
   justify-content: flex-start;
-  gap: 8px;
-  border-radius: 10px;
+  gap: 6px;
+  border-radius: 8px;
 }
 
 .right-sidebar.expanded .rs-item-pill svg {
-  width: 19px;
-  height: 19px;
+  width: 17px;
+  height: 17px;
   flex: 0 0 auto;
 }
 
@@ -2715,7 +2715,7 @@ body.theme-dark .rs-frame-swatch span {
   display: none;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
-  padding: 0  14px 6px;
+  padding: 0 14px 6px;
 }
 
 .right-sidebar.expanded .rs-studio-tabs {
