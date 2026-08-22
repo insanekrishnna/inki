@@ -401,7 +401,7 @@ html, body {
 .landing-stroke-svg {
   position: absolute;
   top: -50px;
-  right: -200px;
+  right: -260px;
   width: min(118vw, 980px);
   height: auto;
   max-height: clamp(620px, 72vh, 800px);
@@ -761,7 +761,7 @@ html, body {
 
   .landing-stroke-svg {
     top: 10px;
-    left: 50%;
+    left: 54%;
     width: 840px;
     transform: translateX(-50%) rotate(-6deg);
   }
@@ -831,7 +831,7 @@ html, body {
 
   .landing-stroke-svg {
     top: 10px;
-    left: 50%;
+    left: 54%;
     width: 740px;
   }
 
@@ -909,7 +909,7 @@ html, body {
 
   .landing-stroke-svg {
     top: 0;
-    left: 50%;
+    left: 54%;
     right: auto;
     width: min(146vw, 760px);
     max-height: none;
@@ -1011,6 +1011,7 @@ html, body {
   }
 
   .landing-stroke-svg {
+    left: 55%;
     width: min(172vw, 620px);
   }
 
