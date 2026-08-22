@@ -5,7 +5,7 @@ export function json(body: unknown, status = 200) {
       "content-type": "application/json",
       "access-control-allow-origin": "*",
       "access-control-allow-headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
-      "access-control-allow-methods": "POST, OPTIONS",
+      "access-control-allow-methods": "GET, POST, OPTIONS",
     },
   });
 }

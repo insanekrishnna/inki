@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: data:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: data:; connect-src 'self' https://*.supabase.co;">
   <title>Icodraw</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
@@ -29,6 +29,22 @@
       <button class="toolbar-action-btn" id="btn-copy" type="button" data-tooltip="Copy" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M5 15V5h10"/></svg><span>Copy</span></button>
       <button class="toolbar-action-btn" id="btn-save" type="button" data-tooltip="Download" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span>Download</span></button>
       <button class="toolbar-action-btn toolbar-action-danger" id="btn-clear" type="button" data-tooltip="Delete" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg><span>Delete</span></button>
+    </div>
+    <div class="toolbar-group toolbar-stats" aria-label="Public activity and social links">
+      <button class="toolbar-stat-btn" type="button" data-tooltip="Total captures">
+        <strong id="rs-capture-count">0</strong>
+        <span>Captures</span>
+      </button>
+      <button class="toolbar-stat-btn" type="button" data-tooltip="Total images">
+        <strong id="rs-image-count">0</strong>
+        <span>Images</span>
+      </button>
+      <a class="toolbar-social-link toolbar-social-github" href="https://github.com/insanekrishnna" target="_blank" rel="noopener noreferrer" aria-label="GitHub" data-tooltip="GitHub">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0.25A7.75 7.75 0 0 0 5.55 15.35c0.39 0.07 0.53-0.17 0.53-0.38v-1.35c-2.18 0.47-2.64-0.94-2.64-0.94-0.36-0.91-0.87-1.15-0.87-1.15-0.71-0.49 0.05-0.48 0.05-0.48 0.79 0.06 1.2 0.81 1.2 0.81 0.7 1.19 1.83 0.85 2.28 0.65 0.07-0.5 0.27-0.85 0.5-1.04-1.74-0.2-3.57-0.87-3.57-3.87 0-0.86 0.31-1.56 0.81-2.11-0.08-0.2-0.35-1 0.08-2.08 0 0 0.66-0.21 2.16 0.81A7.45 7.45 0 0 1 8 3.98c0.67 0 1.33 0.09 1.96 0.26 1.49-1.02 2.15-0.81 2.15-0.81 0.43 1.08 0.16 1.88 0.08 2.08 0.51 0.55 0.81 1.25 0.81 2.11 0 3.01-1.83 3.67-3.58 3.87 0.28 0.24 0.53 0.72 0.53 1.45v2.03c0 0.21 0.14 0.45 0.54 0.38A7.75 7.75 0 0 0 8 0.25Z"/></svg>
+      </a>
+      <a class="toolbar-social-link" href="https://x.com/insanekrishnaa" target="_blank" rel="noopener noreferrer" aria-label="X" data-tooltip="X">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2h3.3l-7.2 8.2L23.5 22h-6.7l-5.2-6.8L5.6 22H2.3l7.7-8.8L1.8 2h6.8l4.7 6.2L18.9 2Zm-1.2 17.9h1.8L7.6 4H5.7l12 15.9Z"/></svg>
+      </a>
     </div>
     <div id="react-theme-toggle-root"></div>
   </div>
