@@ -2783,9 +2783,13 @@ function applyWindowChromeDefaults(chrome) {
     Object.assign(state, {
       studioTitlebar: true,
       studioBorder: true,
+      studioRotation: 0,
+      studioPitch: 0,
+      studioYaw: 0,
+      studioRoll: 0,
     });
   }
-  ['studioTitlebar', 'studioBorder', 'studioPitch', 'studioYaw', 'studioRoll'].forEach(syncStudioInput);
+  ['studioTitlebar', 'studioBorder', 'studioRotation', 'studioPitch', 'studioYaw', 'studioRoll'].forEach(syncStudioInput);
   updateStudioValueLabels();
 }
 
@@ -2976,12 +2980,13 @@ function bindRightSidebar() {
         // Remove active state from other swatches
         rsGradientSwatches.forEach(s => s.classList.remove('active'));
 
-        // If window container is already applied, temporarily disable it to force a full recalculation
-        if (state.windowContainerApplied) {
+        if (state.windowContainerApplied && state.originalImageBeforeContainer) {
+          reapplyStudioContainer();
+        } else {
           state.windowContainerApplied = false;
+          applyWindowContainer();
+          rsContainer.classList.toggle('active', state.windowContainerApplied);
         }
-        applyWindowContainer();
-        rsContainer.classList.toggle('active', state.windowContainerApplied);
       };
       reader.readAsDataURL(file);
       // Reset input value so same file can be selected again
