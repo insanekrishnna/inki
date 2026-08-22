@@ -10,6 +10,12 @@
   --accent-soft: #df9f62;
   --border: rgba(255,255,255,0.62);
   --border-subtle: rgba(255,255,255,0.44);
+  --ui-radius-control: 9px;
+  --ui-radius-card: 9px;
+  --ui-radius-panel: 14px;
+  --ui-radius-island: 24px;
+  --ui-radius-swatch: 6px;
+  --ui-radius-swatch-inner: 5px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -3520,4 +3526,77 @@ body.theme-dark .studio-text-input:focus {
 
 .rs-browser-url-row.hidden {
   display: none;
+}
+
+/* Unified editor radii */
+.toolbar,
+.liquidGlass-wrapper,
+body:not(.has-image) .toolbar,
+body.theme-dark:not(.has-image) .toolbar {
+  border-radius: 0 0 var(--ui-radius-island) var(--ui-radius-island);
+}
+
+.liquidGlass-shine {
+  border-radius: inherit;
+}
+
+.right-sidebar,
+.bottom-toolbar,
+.context-menu {
+  border-radius: var(--ui-radius-panel);
+}
+
+.toolbar-action-btn,
+.toolbar-btn,
+body:not(.has-image) .toolbar .toolbar-btn,
+.btn,
+.bt-btn,
+.bottom-toolbar .statusbar-btn,
+.bottom-toolbar .bt-zoom-level,
+.context-menu-item,
+.rs-close-btn,
+.rs-item,
+.rs-item-pill,
+.right-sidebar:not(.expanded) .rs-item-pill,
+.right-sidebar.expanded .rs-item-pill,
+#rs-custom-bg,
+.rs-studio-tab,
+.rs-preset-btn,
+.statusbar-btn,
+.rs-control-row output,
+.rs-mini-action,
+.rs-segmented-grid button,
+.rs-segmented-grid button:first-child,
+.rs-segmented-grid button:last-child,
+.rs-choice,
+.rs-pattern,
+.studio-text-input,
+.rs-color-row input[type="color"],
+.rs-select-value,
+.rs-select-options,
+.skel-card,
+.video-frame-wrapper {
+  border-radius: var(--ui-radius-control);
+}
+
+.rs-frame-swatch,
+.rs-gradient-swatch {
+  border-radius: var(--ui-radius-swatch);
+}
+
+.rs-frame-swatch span,
+.rs-gradient-swatch span {
+  border-radius: var(--ui-radius-swatch-inner);
+}
+
+.rs-color-preset {
+  border-radius: var(--ui-radius-card);
+}
+
+.rs-segmented:not(.rs-segmented-grid) button:first-child {
+  border-radius: var(--ui-radius-control) 0 0 var(--ui-radius-control);
+}
+
+.rs-segmented:not(.rs-segmented-grid) button:last-child {
+  border-radius: 0 var(--ui-radius-control) var(--ui-radius-control) 0;
 }
