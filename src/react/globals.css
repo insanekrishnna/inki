@@ -392,7 +392,7 @@ html, body {
   z-index: 1;
   align-self: stretch;
   justify-self: start;
-  width: min(54vw, 720px);
+  width: min(60vw, 790px);
   min-width: 420px;
   height: 100%;
   pointer-events: none;
@@ -402,13 +402,13 @@ html, body {
   position: absolute;
   top: -50px;
   right: -200px;
-  width: min(110vw, 900px);
+  width: min(118vw, 980px);
   height: auto;
-  max-height: clamp(600px, 70vh, 760px);
+  max-height: clamp(620px, 72vh, 800px);
   overflow: hidden;
   mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 92%);
   -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 92%);
-  transform: scale(1.75) rotate(-6deg);
+  transform: scale(1.86) rotate(-6deg);
   transform-origin: top right;
 }
 
@@ -762,7 +762,7 @@ html, body {
   .landing-stroke-svg {
     top: 10px;
     left: 50%;
-    width: 760px;
+    width: 840px;
     transform: translateX(-50%) rotate(-6deg);
   }
 
@@ -832,7 +832,7 @@ html, body {
   .landing-stroke-svg {
     top: 10px;
     left: 50%;
-    width: 680px;
+    width: 740px;
   }
 
   .landing-feature-shell {
@@ -911,7 +911,7 @@ html, body {
     top: 0;
     left: 50%;
     right: auto;
-    width: min(132vw, 680px);
+    width: min(146vw, 760px);
     max-height: none;
     transform: translateX(-50%) rotate(-6deg);
     transform-origin: top center;
@@ -1011,7 +1011,7 @@ html, body {
   }
 
   .landing-stroke-svg {
-    width: min(158vw, 560px);
+    width: min(172vw, 620px);
   }
 
   .landing-feature-shell {
