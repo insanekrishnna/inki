@@ -2695,11 +2695,27 @@ body.theme-dark .rs-frame-swatch span {
   width: 288px;
 }
 
+.right-sidebar.expanded .rs-item-pill {
+  min-height: 40px;
+  height: 40px;
+  margin: 12px 48px 10px 14px;
+  padding: 0 14px;
+  justify-content: flex-start;
+  gap: 8px;
+  border-radius: 10px;
+}
+
+.right-sidebar.expanded .rs-item-pill svg {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 auto;
+}
+
 .rs-studio-tabs {
   display: none;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
-  padding: 6px 14px 2px;
+  padding: 0  14px 6px;
 }
 
 .right-sidebar.expanded .rs-studio-tabs {
