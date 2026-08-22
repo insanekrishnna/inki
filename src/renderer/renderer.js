@@ -121,6 +121,13 @@ const state = {
   dragStartY: 0,
   selectedAnnotationIndex: -1,
   selectedImage: false,
+  imageOffsetX: 0,
+  imageOffsetY: 0,
+  isDraggingCanvas: false,
+  dragCanvasStartX: 0,
+  dragCanvasStartY: 0,
+  dragCanvasOrigX: 0,
+  dragCanvasOrigY: 0,
   isResizingImage: false,
   imageResizeHandle: null,
   imageResizeOrig: null,
@@ -1139,31 +1146,89 @@ function setZoomPercent(percent) {
 function applyZoom() {
   elements.canvas.style.width = (state.imageWidth * state.zoom) + 'px';
   elements.canvas.style.height = (state.imageHeight * state.zoom) + 'px';
+  applyCanvasPosition();
+}
+
+function applyCanvasPosition() {
+  elements.canvas.style.left = `${state.imageOffsetX}px`;
+  elements.canvas.style.top = `${state.imageOffsetY}px`;
+}
+
+function getVisibleElementRect(selector) {
+  const element = document.querySelector(selector);
+  if (!element) return null;
+  const rect = element.getBoundingClientRect();
+  if (rect.width <= 1 || rect.height <= 1) return null;
+  const style = getComputedStyle(element);
+  if (style.display === 'none' || style.visibility === 'hidden') return null;
+  return rect;
+}
+
+function getVisualWorkspaceRect() {
+  const containerRect = elements.container.getBoundingClientRect();
+  let left = containerRect.left;
+  let right = containerRect.right;
+  let top = containerRect.top;
+  let bottom = containerRect.bottom;
+
+  const leftSidebarRect = getVisibleElementRect('#editor-sidebar-root [data-sidebar="sidebar"]');
+  if (leftSidebarRect) left = Math.max(left, leftSidebarRect.right);
+
+  const rightSidebarRect = getVisibleElementRect('#right-sidebar');
+  if (rightSidebarRect) right = Math.min(right, rightSidebarRect.left);
+
+  const toolbarRect = getVisibleElementRect('.toolbar');
+  if (toolbarRect) top = Math.max(top, toolbarRect.bottom);
+
+  const bottomToolbarRect = getVisibleElementRect('#bottom-toolbar');
+  if (bottomToolbarRect) bottom = Math.min(bottom, bottomToolbarRect.top);
+
+  const statusbarRect = getVisibleElementRect('.statusbar.visible');
+  if (statusbarRect) bottom = Math.min(bottom, statusbarRect.top);
+
+  if (right - left < 240) {
+    left = containerRect.left;
+    right = containerRect.right;
+  }
+  if (bottom - top < 180) {
+    top = containerRect.top;
+    bottom = containerRect.bottom;
+  }
+
+  return { left, right, top, bottom, width: right - left, height: bottom - top };
+}
+
+function centerCanvasInWorkspace() {
+  if (!state.image) return;
+  const workspace = getVisualWorkspaceRect();
+  const containerRect = elements.container.getBoundingClientRect();
+  const displayW = state.imageWidth * state.zoom;
+  const displayH = state.imageHeight * state.zoom;
+
+  state.imageOffsetX = workspace.left - containerRect.left + elements.container.scrollLeft + (workspace.width - displayW) / 2;
+  state.imageOffsetY = workspace.top - containerRect.top + elements.container.scrollTop + (workspace.height - displayH) / 2;
+  applyCanvasPosition();
 }
 
 function fitToWindow() {
   if (!state.image) return;
-  const container = elements.container;
-  const styles = getComputedStyle(container);
-  const horizontalPadding = parseFloat(styles.paddingLeft || '0') + parseFloat(styles.paddingRight || '0');
-  const verticalPadding = parseFloat(styles.paddingTop || '0') + parseFloat(styles.paddingBottom || '0');
-  const availW = container.clientWidth - horizontalPadding - 700; // Account for left and right sidebars
-  const availH = container.clientHeight - verticalPadding - 180;  // Account for top toolbar
+  const workspace = getVisualWorkspaceRect();
   
   // If container hasn't laid out yet, retry on next frame
-  if (container.clientWidth <= 0 || container.clientHeight <= 0) {
+  if (workspace.width <= 0 || workspace.height <= 0) {
     requestAnimationFrame(() => fitToWindow());
     return;
   }
   
   // Ensure we don't get negative or tiny sizes on small screens
-  const safeAvailW = Math.max(availW, container.clientWidth * 0.4);
-  const safeAvailH = Math.max(availH, container.clientHeight * 0.4);
+  const safeAvailW = Math.max(workspace.width - 48, workspace.width * 0.6);
+  const safeAvailH = Math.max(workspace.height - 48, workspace.height * 0.6);
 
   const scaleX = safeAvailW / state.imageWidth;
   const scaleY = safeAvailH / state.imageHeight;
   state.zoom = Math.min(scaleX, scaleY, 1);
   applyZoom();
+  centerCanvasInWorkspace();
   updateStatus();
 }
 
@@ -1171,6 +1236,37 @@ function onWheel(e) {
   if (!state.image || (!e.ctrlKey && !e.metaKey)) return;
   e.preventDefault();
   setZoom(state.zoom * (e.deltaY > 0 ? 0.9 : 1.1));
+}
+
+function bindSubtleSidebarScroll(sidebar) {
+  let targetScroll = sidebar.scrollTop;
+  let frameId = 0;
+
+  const step = () => {
+    const distance = targetScroll - sidebar.scrollTop;
+    if (Math.abs(distance) < 0.5) {
+      sidebar.scrollTop = targetScroll;
+      frameId = 0;
+      return;
+    }
+
+    sidebar.scrollTop += distance * 0.45;
+    frameId = requestAnimationFrame(step);
+  };
+
+  sidebar.addEventListener('wheel', (event) => {
+    if (!sidebar.classList.contains('expanded') || event.ctrlKey || event.metaKey) return;
+
+    const maxScroll = sidebar.scrollHeight - sidebar.clientHeight;
+    if (maxScroll <= 0) return;
+
+    event.preventDefault();
+    targetScroll = Math.max(0, Math.min(maxScroll, targetScroll + event.deltaY * 0.88));
+
+    if (!frameId) {
+      frameId = requestAnimationFrame(step);
+    }
+  }, { passive: false });
 }
 
 function bindZoomControls() {
@@ -1594,6 +1690,13 @@ function onCanvasMouseDown(e) {
       state.dragStartX = coords.x;
       state.dragStartY = coords.y;
       elements.canvas.style.cursor = 'grabbing';
+    } else if (state.selectedImage) {
+      state.isDraggingCanvas = true;
+      state.dragCanvasStartX = e.clientX;
+      state.dragCanvasStartY = e.clientY;
+      state.dragCanvasOrigX = state.imageOffsetX;
+      state.dragCanvasOrigY = state.imageOffsetY;
+      elements.canvas.style.cursor = 'grabbing';
     }
     updateToolbarState();
     render();
@@ -1670,6 +1773,12 @@ function onCanvasMouseMove(e) {
     render();
     return;
   }
+  if (state.isDraggingCanvas) {
+    state.imageOffsetX = state.dragCanvasOrigX + e.clientX - state.dragCanvasStartX;
+    state.imageOffsetY = state.dragCanvasOrigY + e.clientY - state.dragCanvasStartY;
+    applyCanvasPosition();
+    return;
+  }
   if (state.isResizingAnnotation) {
     const coords = getCanvasCoords(e);
     resizeSelectedAnnotation(coords);
@@ -1688,7 +1797,7 @@ function onCanvasMouseMove(e) {
     const coords = getCanvasCoords(e);
     const handle = findImageResizeHandleAt(coords) || findResizeHandleAt(coords);
     if (handle) elements.canvas.style.cursor = handle.cursor;
-    else elements.canvas.style.cursor = findAnnotationAt(coords) >= 0 ? 'grab' : (isPointInImage(coords) ? 'pointer' : 'default');
+    else elements.canvas.style.cursor = findAnnotationAt(coords) >= 0 || isPointInImage(coords) ? 'grab' : 'default';
   }
 
   if (state.currentTool === 'text' && !state.isDrawing) {
@@ -1734,6 +1843,12 @@ function onCanvasMouseUp(e) {
     state.history.push([...state.annotations.map(a => ({...a}))]);
     state.historyIndex = state.history.length - 1;
     updateToolbarState();
+    render();
+    return;
+  }
+  if (state.isDraggingCanvas) {
+    state.isDraggingCanvas = false;
+    elements.canvas.style.cursor = state.currentTool === 'select' ? 'grab' : elements.canvas.style.cursor;
     render();
     return;
   }
@@ -3329,6 +3444,8 @@ function bindRightSidebar() {
   const rsCloseBtn = document.getElementById('rs-close-btn');
 
   if (!rsContainer || !rightSidebar) return;
+
+  bindSubtleSidebarScroll(rightSidebar);
 
   rightSidebar.addEventListener('mouseenter', () => {
     if (!rightSidebar.classList.contains('expanded')) {

@@ -931,8 +931,10 @@ body.has-content .toolbar.editor-sidebar .toolbar-group.capture-modes + .toolbar
 #canvas {
   display: none;
   image-rendering: crisp-edges;
-  position: relative;
+  position: absolute;
   z-index: 1;
+  left: 0;
+  top: 0;
 }
 
 #canvas.visible { display: block; }
