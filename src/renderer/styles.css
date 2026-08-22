@@ -2370,13 +2370,21 @@ body.theme-dark .right-sidebar:not(.expanded) .rs-item-pill {
   width: 100%;
   border-radius: 8px;
   height: 32px;
-  justify-content: flex-start;
-  padding: 0 0 0 13px;
+  justify-content: center;
+  padding: 0;
 }
 
-.right-sidebar:not(.expanded) .rs-item-pill svg {
-  width: 22px;
-  height: 22px;
+.right-sidebar:not(.expanded) > .rs-item {
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+}
+
+.right-sidebar:not(.expanded) .rs-item-pill svg,
+.right-sidebar:not(.expanded) #rs-copy svg,
+.right-sidebar:not(.expanded) #rs-save-png svg {
+  width: 18px;
+  height: 18px;
 }
 
 .right-sidebar:not(.expanded) .rs-item-pill:hover,
@@ -2389,6 +2397,10 @@ body.theme-dark .right-sidebar:not(.expanded) .rs-item-pill.active {
 
 .right-sidebar:not(.expanded) .rs-item-pill .rs-label {
   opacity: 0;
+}
+
+.right-sidebar:not(.expanded) .rs-label {
+  display: none;
 }
 
 .rs-item:hover {
