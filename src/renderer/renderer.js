@@ -3,8 +3,6 @@
  * Canvas drawing, tools, and UI interaction
  */
 
-import { statsApiBaseUrl, statsPublishableKey } from './stats-config.js';
-
 // ------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------
 // App State
@@ -203,12 +201,6 @@ const state = {
 
 const AUTO_HIDE_DELAYS = [500, 1000, 2000, 5000, 10000, 15000, 30000, Infinity];
 const INITIAL_IMAGE_ZOOM = 0.49;
-const ACTIVITY_STATS_STORAGE_KEY = 'inki-activity-stats';
-const ACTIVITY_STATS_ENDPOINT = getActivityStatsEndpoint();
-const activityStats = {
-  captures: 0,
-  images: 0,
-};
 
 // ------------------------------------------------------------------------------
 // DOM Elements
@@ -278,95 +270,6 @@ const elements = {
 
 function on(el, event, handler) { if (el) el.addEventListener(event, handler); }
 
-function getActivityStatsEndpoint() {
-  const baseUrl = String(statsApiBaseUrl || '').trim().replace(/\/+$/, '');
-  const publishableKey = String(statsPublishableKey || '').trim();
-  if (!baseUrl || !publishableKey) return '';
-  if (baseUrl.includes('your-') || publishableKey.includes('YOUR_')) return '';
-  return `${baseUrl}/activity-stats`;
-}
-
-function formatActivityCount(value) {
-  return new Intl.NumberFormat('en-US').format(Math.max(0, Number(value) || 0));
-}
-
-function updateActivityStatsDisplay() {
-  const captureCount = document.getElementById('rs-capture-count');
-  const imageCount = document.getElementById('rs-image-count');
-  if (captureCount) captureCount.textContent = formatActivityCount(activityStats.captures);
-  if (imageCount) imageCount.textContent = formatActivityCount(activityStats.images);
-}
-
-function readLocalActivityStats() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(ACTIVITY_STATS_STORAGE_KEY) || '{}');
-    activityStats.captures = Number(saved.captures) || 0;
-    activityStats.images = Number(saved.images) || 0;
-  } catch {
-    activityStats.captures = 0;
-    activityStats.images = 0;
-  }
-  updateActivityStatsDisplay();
-}
-
-function writeLocalActivityStats() {
-  localStorage.setItem(ACTIVITY_STATS_STORAGE_KEY, JSON.stringify(activityStats));
-}
-
-function applyActivityStats(stats) {
-  if (!stats) return;
-  activityStats.captures = Number(stats.captures) || 0;
-  activityStats.images = Number(stats.images) || 0;
-  updateActivityStatsDisplay();
-}
-
-async function loadActivityStats() {
-  if (!ACTIVITY_STATS_ENDPOINT) {
-    readLocalActivityStats();
-    return;
-  }
-
-  try {
-    const response = await fetch(ACTIVITY_STATS_ENDPOINT, {
-      method: 'GET',
-      headers: {
-        apikey: statsPublishableKey,
-        authorization: `Bearer ${statsPublishableKey}`,
-      },
-    });
-    const payload = await response.json().catch(() => ({}));
-    if (response.ok && payload.ok) applyActivityStats(payload.stats);
-  } catch (error) {
-    console.warn('[stats] failed to load activity stats:', error?.message || error);
-  }
-}
-
-async function incrementActivityStat(metric) {
-  if (!ACTIVITY_STATS_ENDPOINT) {
-    if (metric === 'captures') activityStats.captures += 1;
-    if (metric === 'images') activityStats.images += 1;
-    writeLocalActivityStats();
-    updateActivityStatsDisplay();
-    return;
-  }
-
-  try {
-    const response = await fetch(ACTIVITY_STATS_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        apikey: statsPublishableKey,
-        authorization: `Bearer ${statsPublishableKey}`,
-      },
-      body: JSON.stringify({ metric }),
-    });
-    const payload = await response.json().catch(() => ({}));
-    if (response.ok && payload.ok) applyActivityStats(payload.stats);
-  } catch (error) {
-    console.warn('[stats] failed to increment activity stat:', error?.message || error);
-  }
-}
-
 function setAppWindowMode(mode, options = {}) {
   return window.projectApi?.setWindowMode?.(mode, options)?.catch?.(() => {});
 }
@@ -392,7 +295,6 @@ function init() {
   bindContextMenu();
   bindRightSidebar();
   bindStudioControls();
-  loadActivityStats();
   bindPaste();
   bindCrop();
   bindTooltips();
@@ -1012,8 +914,7 @@ async function startCapture(options = {}) {
       showToolbar: options?.showToolbar,
       captureProject: state.recordingSettings.captureProject,
     });
-    if (result.success) incrementActivityStat('captures');
-    else showToast(result.error || 'Failed to start capture', 'error');
+    if (!result.success) showToast(result.error || 'Failed to start capture', 'error');
   } catch (err) {
     showToast(err?.message || 'Failed to start capture', 'error');
   } finally {
@@ -1028,8 +929,7 @@ async function startCaptureWindow() {
       hideDesktopIcons: state.captureSettings.hideDesktopIcons,
       captureProject: state.recordingSettings.captureProject,
     });
-    if (result.success) incrementActivityStat('captures');
-    else showToast(result.error || 'Failed to capture window', 'error');
+    if (!result.success) showToast(result.error || 'Failed to capture window', 'error');
   } catch (err) {
     showToast(err?.message || 'Failed to capture window', 'error');
   } finally {
@@ -1044,9 +944,7 @@ async function startCaptureFullscreen() {
       hideDesktopIcons: state.captureSettings.hideDesktopIcons,
       captureProject: state.recordingSettings.captureProject,
     });
-    if (result.success) {
-      incrementActivityStat('captures');
-    } else {
+    if (!result.success) {
       showToast(result.error || 'Failed to capture screen', 'error');
     }
   } catch (err) {
@@ -1067,7 +965,6 @@ async function saveFile() {
   const dataUrl = getCompositeImage();
   const result = await window.projectApi.saveFile(dataUrl);
   if (result.success) {
-    incrementActivityStat('images');
     showToast('Image saved successfully', 'success');
   } else {
     showToast('Failed to save image', 'error');

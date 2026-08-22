@@ -149,3 +149,72 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
+
+@media (max-width: 900px) {
+  .landing-island {
+    width: min(calc(100vw - 24px), 520px);
+    min-height: 48px;
+    padding: 6px 12px;
+    gap: 8px;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .landing-island-group.capture-modes {
+    gap: 6px !important;
+  }
+
+  .landing-island-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .landing-island-btn svg {
+    width: 17px;
+    height: 17px;
+  }
+}
+
+@media (max-width: 520px) {
+  .landing-island {
+    width: calc(100vw - 16px);
+    min-height: 42px;
+    padding: 5px 8px;
+    gap: 4px;
+    border-radius: 0 0 18px 18px;
+  }
+
+  .landing-island-logo {
+    height: 16px !important;
+  }
+
+  .landing-island-group.capture-modes {
+    gap: 2px !important;
+  }
+
+  .landing-island-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+
+  .landing-island-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .landing-island {
+    padding-inline: 6px;
+    gap: 2px;
+  }
+
+  .landing-island-brand {
+    padding-inline: 2px;
+  }
+
+  .landing-island-btn {
+    width: 28px;
+    height: 28px;
+  }
+}
