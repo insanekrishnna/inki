@@ -25,6 +25,11 @@
       <button class="toolbar-btn" id="btn-capture-fullscreen" data-tooltip="Capture fullscreen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M6 21h12"/><path d="M12 17v4"/></svg></button>
       <button class="toolbar-btn" id="btn-upload-file" data-tooltip="Upload file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></button>
     </div>
+    <div class="toolbar-group toolbar-actions" aria-label="Image actions">
+      <button class="toolbar-action-btn" id="btn-copy" type="button" data-tooltip="Copy" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M5 15V5h10"/></svg><span>Copy</span></button>
+      <button class="toolbar-action-btn" id="btn-save" type="button" data-tooltip="Download" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg><span>Download</span></button>
+      <button class="toolbar-action-btn toolbar-action-danger" id="btn-clear" type="button" data-tooltip="Delete" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg><span>Delete</span></button>
+    </div>
     <div id="react-theme-toggle-root"></div>
   </div>
 
@@ -447,7 +452,7 @@
     </button>
     <div class="bt-zoom-group" aria-label="Zoom controls">
       <button class="statusbar-btn bt-zoom-btn" id="btn-zoom-out" title="Zoom out">-</button>
-      <span class="zoom-level bt-zoom-level" id="status-zoom">100%</span>
+      <input class="zoom-level bt-zoom-level" id="status-zoom" type="text" value="100%" inputmode="numeric" aria-label="Zoom percentage">
       <button class="statusbar-btn bt-zoom-btn" id="btn-zoom-in" title="Zoom in">+</button>
       <button class="statusbar-btn statusbar-reset bt-zoom-reset" id="btn-zoom-reset" title="Reset zoom">Reset</button>
     </div>

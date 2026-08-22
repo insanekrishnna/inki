@@ -217,6 +217,7 @@ const elements = {
   container: $('#canvas-container'),
   emptyState: $('#empty-state'),
   btnCopy: $('#btn-copy'),
+  btnSave: $('#btn-save'),
   btnCrop: $('#btn-crop'),
   btnUndo: $('#btn-undo'),
   btnRedo: $('#btn-redo'),
@@ -387,6 +388,7 @@ function bindToolbar() {
   on(elements.btnCaptureFullscreen, 'click', () => { elements.btnCaptureFullscreen.blur(); setCaptureModeButton('fullscreen'); startCaptureFullscreen(); });
   
   on(elements.btnCopy, 'click', copyToClipboard);
+  on(elements.btnSave, 'click', saveFile);
   on(elements.btnCrop, 'click', toggleCrop);
   on(elements.btnUndo, 'click', undo);
   on(elements.btnRedo, 'click', redo);
@@ -580,8 +582,8 @@ function bindKeyboard() {
       case 'a': selectTool('arrow'); break;
       case 'l': selectTool('line'); break;
       case 't': selectTool('text'); break;
-      case '=': case '+': setZoom(state.zoom * 1.25); break;
-      case '-': setZoom(state.zoom / 1.25); break;
+      case '=': case '+': setZoomPercent(Math.round(state.zoom * 100) + 3); break;
+      case '-': setZoomPercent(Math.round(state.zoom * 100) - 3); break;
       case '0': fitToWindow(); break;
       case 'w': applyWindowContainer(); break;
       case '[': elements.strokeWidthSlider.value = Math.max(1, parseInt(elements.strokeWidthSlider.value) - 1); state.strokeWidth = parseInt(elements.strokeWidthSlider.value); updateToolbarState(); render(); break;
@@ -1125,6 +1127,15 @@ function setZoom(newZoom) {
   if (state.cropActive) updateCropUI();
 }
 
+function setZoomPercent(percent) {
+  const value = Number(percent);
+  if (!Number.isFinite(value)) {
+    updateStatus();
+    return;
+  }
+  setZoom(value / 100);
+}
+
 function applyZoom() {
   elements.canvas.style.width = (state.imageWidth * state.zoom) + 'px';
   elements.canvas.style.height = (state.imageHeight * state.zoom) + 'px';
@@ -1163,10 +1174,28 @@ function onWheel(e) {
 }
 
 function bindZoomControls() {
-  on(elements.btnZoomOut, 'click', () => setZoom(state.zoom / 1.25));
-  on(elements.btnZoomIn, 'click', () => setZoom(state.zoom * 1.25));
+  on(elements.btnZoomOut, 'click', () => setZoomPercent(Math.round(state.zoom * 100) - 3));
+  on(elements.btnZoomIn, 'click', () => setZoomPercent(Math.round(state.zoom * 100) + 3));
   on(elements.btnZoomReset, 'click', () => {
     if (state.image) fitToWindow();
+  });
+  on(elements.statusZoom, 'focus', () => {
+    elements.statusZoom.select?.();
+  });
+  on(elements.statusZoom, 'keydown', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      elements.statusZoom.blur();
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      updateStatus();
+      elements.statusZoom.blur();
+    }
+  });
+  on(elements.statusZoom, 'blur', () => {
+    const value = String(elements.statusZoom.value || '').replace(/[^\d.]/g, '');
+    setZoomPercent(value);
   });
 }
 
@@ -2291,11 +2320,16 @@ function getCompositeImage() {
 function updateStatus() {
   const names = { select: 'Select', rect: 'Rectangle', ellipse: 'Ellipse', arrow: 'Arrow', line: 'Line', text: 'Text', highlight: 'Highlight', blur: 'Blur', pixelate: 'Pixelate' };
   elements.statusTool.textContent = state.cropActive ? 'Crop' : (names[state.currentTool] || 'Ready');
-  elements.statusZoom.textContent = `${Math.round(state.zoom * 100)}%`;
+  if (elements.statusZoom) {
+    const zoomLabel = `${Math.round(state.zoom * 100)}%`;
+    if ('value' in elements.statusZoom) elements.statusZoom.value = zoomLabel;
+    else elements.statusZoom.textContent = zoomLabel;
+  }
 }
 
 function updateToolbarState() {
   if (elements.btnCopy) elements.btnCopy.disabled = !state.image;
+  if (elements.btnSave) elements.btnSave.disabled = !state.image;
   if (elements.btnCrop) elements.btnCrop.disabled = !state.image;
   if (elements.btnUndo) elements.btnUndo.disabled = state.historyIndex < 0;
   if (elements.btnRedo) elements.btnRedo.disabled = state.historyIndex >= state.history.length - 1;
