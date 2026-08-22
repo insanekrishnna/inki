@@ -2995,13 +2995,14 @@ function applyWindowContainer() {
       const bgImg = new Image();
       bgImg.onload = () => {
         const scale = Math.max(canvasW / bgImg.width, canvasH / bgImg.height);
-        const drawW = bgImg.width * scale;
-        const drawH = bgImg.height * scale;
+        const bgBlur = Math.max(0, Number(state.containerBgBlur || 0));
+        const overscan = bgBlur ? Math.ceil(bgBlur * 2.5) : 0;
+        const drawW = bgImg.width * scale + overscan * 2;
+        const drawH = bgImg.height * scale + overscan * 2;
         const drawX = (canvasW - drawW) / 2;
         const drawY = (canvasH - drawH) / 2;
-        
+
         ctx.save();
-        const bgBlur = Math.max(0, Number(state.containerBgBlur || 0));
         if (bgBlur) {
           ctx.filter = `blur(${bgBlur}px)`;
         }
