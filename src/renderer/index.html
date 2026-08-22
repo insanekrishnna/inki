@@ -270,21 +270,7 @@
         </div>
       </div>
     </div>
-    <div class="rs-aspect-ratio-wrapper" title="Image Blur" style="margin-top: 12px;">
-      <span class="rs-aspect-ratio-label">Image blur</span>
-      <div class="rs-custom-select" id="rs-blur-select">
-        <div class="rs-select-value">
-          <span id="rs-blur-value-text">None</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-        </div>
-        <div class="rs-select-options">
-          <div class="rs-select-option active" data-value="none">None</div>
-          <div class="rs-select-option" data-value="weak">Weak</div>
-          <div class="rs-select-option" data-value="moderate">Moderate</div>
-          <div class="rs-select-option" data-value="strong">Strong</div>
-        </div>
-      </div>
-    </div>
+    <label class="rs-control-row rs-backdrop-blur-row">Image blur <output id="container-bg-blur-value">0px</output><input class="rs-range studio-input" id="container-bg-blur" data-state-key="containerBgBlur" type="range" min="0" max="60" value="0"></label>
     <div class="rs-separator"></div>
     <div class="rs-section-title">Frame theme</div>
     <div class="rs-frame-themes" id="rs-frame-themes">
