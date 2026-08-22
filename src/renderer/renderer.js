@@ -2259,9 +2259,10 @@ function drawStudioWatermark(ctx, canvasW, canvasH) {
 }
 
 function drawStudioWindow(ctx, frameCanvas, centerX, centerY, width, height) {
-  const pitch = (state.studioPitch || 0) * Math.PI / 180;
-  const yaw = (state.studioYaw || 0) * Math.PI / 180;
-  const roll = ((state.studioRotation || 0) + (state.studioRoll || 0)) * Math.PI / 180;
+  const forceFlat = state.windowFrameTheme === 'glass';
+  const pitch = (forceFlat ? 0 : (state.studioPitch || 0)) * Math.PI / 180;
+  const yaw = (forceFlat ? 0 : (state.studioYaw || 0)) * Math.PI / 180;
+  const roll = ((state.studioRotation || 0) + (forceFlat ? 0 : (state.studioRoll || 0))) * Math.PI / 180;
   const depth = Math.max(400, Number(state.studioCameraDepth || 1200));
   const depthInfluence = Math.max(0.76, Math.min(1.18, depth / 1200));
   const scaleX = Math.max(0.42, Math.cos(yaw) * depthInfluence);
@@ -2391,17 +2392,8 @@ function applyWindowContainer() {
       frameCtx.beginPath();
       roundRect(frameCtx, 0, 0, windowW, windowH, cornerRadius);
       frameCtx.clip();
-      if (isGlassChrome) {
-        const glassGradient = frameCtx.createLinearGradient(0, 0, windowW, windowH);
-        glassGradient.addColorStop(0, 'rgba(255, 255, 255, 0.74)');
-        glassGradient.addColorStop(0.46, 'rgba(234, 246, 255, 0.48)');
-        glassGradient.addColorStop(1, 'rgba(255, 255, 255, 0.34)');
-        frameCtx.fillStyle = glassGradient;
-        frameCtx.fillRect(0, 0, windowW, windowH);
-      } else {
-        frameCtx.fillStyle = windowBgColor;
-        frameCtx.fillRect(0, 0, windowW, windowH);
-      }
+      frameCtx.fillStyle = windowBgColor;
+      frameCtx.fillRect(0, 0, windowW, windowH);
 
       if (titleBarHeight > 0) {
         frameCtx.fillStyle = titleBarColor;
@@ -2459,10 +2451,39 @@ function applyWindowContainer() {
       drawAsciiPattern(frameCtx, frameCanvas.width, frameCanvas.height, 'image');
       frameCtx.restore();
 
+      if (isGlassChrome) {
+        frameCtx.save();
+        frameCtx.globalCompositeOperation = 'source-over';
+        frameCtx.beginPath();
+        roundRect(frameCtx, 0, 0, windowW, windowH, cornerRadius);
+        frameCtx.clip();
+        const rim = Math.max(12, Math.min(24, windowW * 0.035));
+        const glassGradient = frameCtx.createLinearGradient(0, 0, windowW, windowH);
+        glassGradient.addColorStop(0, 'rgba(255, 255, 255, 0.55)');
+        glassGradient.addColorStop(0.42, 'rgba(235, 248, 255, 0.2)');
+        glassGradient.addColorStop(1, 'rgba(255, 255, 255, 0.34)');
+        frameCtx.fillStyle = glassGradient;
+        frameCtx.beginPath();
+        roundRect(frameCtx, 0, 0, windowW, windowH, cornerRadius);
+        roundRect(frameCtx, rim, titleBarHeight + rim, Math.max(0, windowW - rim * 2), Math.max(0, windowH - titleBarHeight - rim * 2), Math.max(0, cornerRadius - rim));
+        frameCtx.fill('evenodd');
+        frameCtx.strokeStyle = 'rgba(255, 255, 255, 0.72)';
+        frameCtx.lineWidth = 2;
+        frameCtx.beginPath();
+        roundRect(frameCtx, 1, 1, windowW - 2, windowH - 2, Math.max(0, cornerRadius - 1));
+        frameCtx.stroke();
+        frameCtx.strokeStyle = 'rgba(255, 255, 255, 0.34)';
+        frameCtx.lineWidth = 1;
+        frameCtx.beginPath();
+        roundRect(frameCtx, rim, titleBarHeight + rim, Math.max(0, windowW - rim * 2), Math.max(0, windowH - titleBarHeight - rim * 2), Math.max(0, cornerRadius - rim));
+        frameCtx.stroke();
+        frameCtx.restore();
+      }
+
       if ((state.studioBorder && !isFramelessChrome) || isGlassChrome) {
         frameCtx.save();
-        frameCtx.strokeStyle = isGlassChrome ? 'rgba(255, 255, 255, 0.62)' : 'rgba(255, 255, 255, 0.35)';
-        frameCtx.lineWidth = isGlassChrome ? 1.4 : 1;
+        frameCtx.strokeStyle = isGlassChrome ? 'rgba(255, 255, 255, 0.78)' : 'rgba(255, 255, 255, 0.35)';
+        frameCtx.lineWidth = isGlassChrome ? 2 : 1;
         frameCtx.beginPath();
         roundRect(frameCtx, 0.5, 0.5, windowW - 1, windowH - 1, Math.max(0, cornerRadius - 0.5));
         frameCtx.stroke();
@@ -2722,9 +2743,6 @@ function applyWindowChromeDefaults(chrome) {
     Object.assign(state, {
       studioTitlebar: true,
       studioBorder: true,
-      studioPitch: 8,
-      studioYaw: -24,
-      studioRoll: -4,
     });
   }
   ['studioTitlebar', 'studioBorder', 'studioPitch', 'studioYaw', 'studioRoll'].forEach(syncStudioInput);
