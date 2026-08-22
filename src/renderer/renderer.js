@@ -200,6 +200,7 @@ const state = {
 };
 
 const AUTO_HIDE_DELAYS = [500, 1000, 2000, 5000, 10000, 15000, 30000, Infinity];
+const INITIAL_IMAGE_ZOOM = 0.49;
 
 // ------------------------------------------------------------------------------
 // DOM Elements
@@ -1105,7 +1106,6 @@ function loadImage(dataUrl, options = {}) {
     state.historyIndex = -1;
     state.selectedAnnotationIndex = -1;
     clearToolSelection();
-    state.zoom = 1;
     elements.canvas.width = img.width;
     elements.canvas.height = img.height;
     elements.canvas.classList.add('visible');
@@ -1115,7 +1115,7 @@ function loadImage(dataUrl, options = {}) {
     resetFloatingToolbar();
     setAppWindowMode('editor');
     elements.statusTool?.parentElement?.classList.add('visible');
-    fitToWindow();
+    setInitialImageZoom();
     render();
     updateStatus();
     updateToolbarState();
@@ -1208,6 +1208,19 @@ function centerCanvasInWorkspace() {
   state.imageOffsetX = workspace.left - containerRect.left + elements.container.scrollLeft + (workspace.width - displayW) / 2;
   state.imageOffsetY = workspace.top - containerRect.top + elements.container.scrollTop + (workspace.height - displayH) / 2;
   applyCanvasPosition();
+}
+
+function setInitialImageZoom() {
+  const workspace = getVisualWorkspaceRect();
+  if (workspace.width <= 0 || workspace.height <= 0) {
+    requestAnimationFrame(() => setInitialImageZoom());
+    return;
+  }
+
+  state.zoom = INITIAL_IMAGE_ZOOM;
+  applyZoom();
+  centerCanvasInWorkspace();
+  updateStatus();
 }
 
 function fitToWindow() {
