@@ -193,6 +193,27 @@
         <button data-watermark-mode="text">Text</button>
       </div>
       <label class="rs-text-row">Handle / text<input class="studio-text-input" id="studio-watermark-text" type="text" value="@icodraw" placeholder="e.g. @yourname"></label>
+      <div class="rs-field-label">Overlay placement</div>
+      <div class="rs-segmented" id="rs-watermark-layer">
+        <button class="active" data-watermark-layer="image">On Screenshot</button>
+        <button data-watermark-layer="canvas">On Canvas</button>
+      </div>
+      <div class="rs-field-label">Position</div>
+      <div class="rs-segmented rs-segmented-grid" id="rs-watermark-position">
+        <button class="active" data-watermark-position="bottom-right">B-Right</button>
+        <button data-watermark-position="bottom-center">B-Center</button>
+        <button data-watermark-position="bottom-left">B-Left</button>
+        <button data-watermark-position="top-right">T-Right</button>
+        <button data-watermark-position="top-center">T-Center</button>
+        <button data-watermark-position="top-left">T-Left</button>
+      </div>
+      <div class="rs-field-label">Size</div>
+      <div class="rs-segmented" id="rs-watermark-size">
+        <button data-watermark-size="small">Small</button>
+        <button class="active" data-watermark-size="default">Default</button>
+        <button data-watermark-size="large">Large</button>
+      </div>
+      <label class="rs-control-row">Frosted blur <output id="studio-watermark-blur-value">20px</output><input class="rs-range studio-input" id="studio-watermark-blur" data-state-key="studioWatermarkBlur" type="range" min="0" max="40" value="20"></label>
     </div>
 
     <div class="rs-studio-panel" data-studio-panel="effects">

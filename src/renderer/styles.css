@@ -3038,6 +3038,10 @@ body.theme-dark .rs-range {
   gap: 0;
 }
 
+.rs-segmented-grid {
+  gap: 6px;
+}
+
 .rs-segmented button,
 .rs-choice,
 .rs-pattern {
@@ -3057,6 +3061,11 @@ body.theme-dark .rs-range {
   border-left-width: 0;
 }
 
+.rs-segmented-grid button {
+  border-left-width: 1px;
+  border-radius: 8px;
+}
+
 .rs-segmented button:first-child {
   border-left-width: 1px;
   border-radius: 8px 0 0 8px;
@@ -3064,6 +3073,11 @@ body.theme-dark .rs-range {
 
 .rs-segmented button:last-child {
   border-radius: 0 8px 8px 0;
+}
+
+.rs-segmented-grid button:first-child,
+.rs-segmented-grid button:last-child {
+  border-radius: 8px;
 }
 
 .rs-segmented button.active,

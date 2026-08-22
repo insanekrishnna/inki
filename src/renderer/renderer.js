@@ -164,6 +164,10 @@ const state = {
   studioWatermarkMode: 'off',
   studioWatermarkPlatform: 'x',
   studioWatermarkText: '@icodraw',
+  studioWatermarkLayer: 'image',
+  studioWatermarkPosition: 'bottom-right',
+  studioWatermarkSize: 'default',
+  studioWatermarkBlur: 20,
   originalImageBeforeContainer: null,
   baseOriginalImage: null,
   // Crop state
@@ -2414,33 +2418,72 @@ function drawAsciiPattern(ctx, width, height, layer = 'image') {
   ctx.restore();
 }
 
-function drawStudioWatermark(ctx, canvasW, canvasH) {
+function drawStudioWatermark(ctx, canvasW, canvasH, options = {}) {
   if ((state.studioWatermarkMode || 'off') === 'off') return;
   const text = (state.studioWatermarkText || '').trim();
   const label = text || '@icodraw';
-  const fontSize = Math.max(14, Math.round(Math.min(canvasW, canvasH) * 0.022));
-  const padX = fontSize * 0.8;
-  const padY = fontSize * 0.52;
+  const area = {
+    x: options.x ?? 0,
+    y: options.y ?? 0,
+    width: options.width ?? canvasW,
+    height: options.height ?? canvasH,
+  };
+  const sizeScale = { small: 0.78, default: 1, large: 1.24 }[state.studioWatermarkSize] || 1;
+  const fontSize = Math.max(11, Math.round(Math.min(area.width, area.height) * 0.022 * sizeScale));
+  const padX = fontSize * (state.studioWatermarkSize === 'small' ? 0.68 : state.studioWatermarkSize === 'large' ? 0.98 : 0.8);
+  const padY = fontSize * (state.studioWatermarkSize === 'small' ? 0.4 : state.studioWatermarkSize === 'large' ? 0.64 : 0.52);
 
   ctx.save();
   ctx.font = `600 ${fontSize}px Inter, system-ui, -apple-system, sans-serif`;
   const metrics = ctx.measureText(label);
   const badgeW = metrics.width + padX * 2;
   const badgeH = fontSize + padY * 2;
-  const x = canvasW - badgeW - Math.max(24, canvasW * 0.035);
-  const y = canvasH - badgeH - Math.max(24, canvasH * 0.035);
+  const margin = Math.max(10, Math.min(area.width, area.height) * 0.035);
+  const position = state.studioWatermarkPosition || 'bottom-right';
+  let x = area.x + area.width - badgeW - margin;
+  let y = area.y + area.height - badgeH - margin;
+  if (position.includes('left')) x = area.x + margin;
+  if (position.includes('center')) x = area.x + (area.width - badgeW) / 2;
+  if (position.includes('top')) y = area.y + margin;
+  x = Math.max(area.x + margin, Math.min(area.x + area.width - badgeW - margin, x));
+  y = Math.max(area.y + margin, Math.min(area.y + area.height - badgeH - margin, y));
   ctx.shadowColor = 'rgba(0, 0, 0, 0.18)';
-  ctx.shadowBlur = 18;
-  ctx.shadowOffsetY = 8;
-  ctx.fillStyle = state.studioWatermarkMode === 'badge' ? 'rgba(255, 255, 255, 0.86)' : 'rgba(255, 255, 255, 0.72)';
+  ctx.shadowBlur = Math.max(8, 18 * sizeScale);
+  ctx.shadowOffsetY = Math.max(4, 8 * sizeScale);
+  const radius = Math.min(18 * sizeScale, badgeH / 2);
+  const blur = Math.max(0, Number(state.studioWatermarkBlur || 0));
+  drawFrostedWatermarkPill(ctx, x, y, badgeW, badgeH, radius, blur);
+  ctx.fillStyle = state.studioWatermarkMode === 'badge' ? 'rgba(255, 255, 255, 0.72)' : 'rgba(255, 255, 255, 0.58)';
   ctx.beginPath();
-  roundRect(ctx, x, y, badgeW, badgeH, Math.min(18, badgeH / 2));
+  roundRect(ctx, x, y, badgeW, badgeH, radius);
   ctx.fill();
   ctx.shadowBlur = 0;
   ctx.shadowOffsetY = 0;
   ctx.fillStyle = '#171717';
   ctx.textBaseline = 'middle';
   ctx.fillText(label, x + padX, y + badgeH / 2 + 0.5);
+  ctx.restore();
+}
+
+function drawFrostedWatermarkPill(ctx, x, y, width, height, radius, blur) {
+  if (!blur) return;
+  ctx.save();
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+  ctx.beginPath();
+  roundRect(ctx, x, y, width, height, radius);
+  ctx.clip();
+  const sx = Math.max(0, x - blur);
+  const sy = Math.max(0, y - blur);
+  const ex = Math.min(ctx.canvas.width, x + width + blur);
+  const ey = Math.min(ctx.canvas.height, y + height + blur);
+  const sw = Math.max(1, ex - sx);
+  const sh = Math.max(1, ey - sy);
+  ctx.filter = `blur(${blur}px) saturate(1.18)`;
+  ctx.drawImage(ctx.canvas, sx, sy, sw, sh, sx, sy, sw, sh);
+  ctx.filter = 'none';
   ctx.restore();
 }
 
@@ -2637,6 +2680,14 @@ function applyWindowContainer() {
       frameCtx.filter = 'none';
       addStudioNoise(frameCtx, frameCanvas.width, frameCanvas.height, 'image');
       drawAsciiPattern(frameCtx, frameCanvas.width, frameCanvas.height, 'image');
+      if ((state.studioWatermarkLayer || 'image') === 'image') {
+        drawStudioWatermark(frameCtx, frameCanvas.width, frameCanvas.height, {
+          x: 0,
+          y: titleBarHeight,
+          width: windowW,
+          height: imgH,
+        });
+      }
       frameCtx.restore();
 
       if (isGlassChrome) {
@@ -2685,7 +2736,9 @@ function applyWindowContainer() {
       ctx.shadowOffsetY = shadowDistance + shadowOffsetY;
       drawStudioWindow(ctx, frameCanvas, windowX + windowW / 2, windowY + windowH / 2, windowW, windowH);
       ctx.restore();
-      drawStudioWatermark(ctx, canvasW, canvasH);
+      if ((state.studioWatermarkLayer || 'image') === 'canvas') {
+        drawStudioWatermark(ctx, canvasW, canvasH);
+      }
 
       const resultDataUrl = tempCanvas.toDataURL('image/png');
       state.annotations = [];
@@ -2902,6 +2955,7 @@ function updateStudioValueLabels() {
     'studio-hue-value': `${state.studioHue} deg`,
     'studio-noise-value': `${state.studioNoise}%`,
     'studio-film-grain-value': `${state.studioFilmGrain}%`,
+    'studio-watermark-blur-value': `${state.studioWatermarkBlur}px`,
     'studio-ascii-size-value': `${state.studioAsciiSize}px`,
     'studio-ascii-opacity-value': `${state.studioAsciiOpacity}%`,
   };
@@ -3086,6 +3140,30 @@ function bindStudioControls() {
     button.addEventListener('click', () => {
       document.querySelectorAll('[data-watermark-platform]').forEach((item) => item.classList.toggle('active', item === button));
       state.studioWatermarkPlatform = button.dataset.watermarkPlatform;
+      if (state.image) reapplyStudioContainer();
+    });
+  });
+
+  document.querySelectorAll('[data-watermark-layer]').forEach((button) => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('[data-watermark-layer]').forEach((item) => item.classList.toggle('active', item === button));
+      state.studioWatermarkLayer = button.dataset.watermarkLayer;
+      if (state.image) reapplyStudioContainer();
+    });
+  });
+
+  document.querySelectorAll('[data-watermark-position]').forEach((button) => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('[data-watermark-position]').forEach((item) => item.classList.toggle('active', item === button));
+      state.studioWatermarkPosition = button.dataset.watermarkPosition;
+      if (state.image) reapplyStudioContainer();
+    });
+  });
+
+  document.querySelectorAll('[data-watermark-size]').forEach((button) => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('[data-watermark-size]').forEach((item) => item.classList.toggle('active', item === button));
+      state.studioWatermarkSize = button.dataset.watermarkSize;
       if (state.image) reapplyStudioContainer();
     });
   });
