@@ -2680,3 +2680,338 @@ body.theme-dark .rs-frame-swatch span {
   border-color: #0ea5e9;
   padding: 2px;
 }
+
+/* Studio controls */
+.right-sidebar {
+  left: auto;
+  right: 16px;
+  top: 50%;
+  max-height: calc(100vh - 112px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.right-sidebar.expanded {
+  width: 288px;
+}
+
+.rs-studio-tabs {
+  display: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 6px 14px 2px;
+}
+
+.right-sidebar.expanded .rs-studio-tabs {
+  display: grid;
+}
+
+.rs-studio-tab,
+.rs-preset-btn,
+.statusbar-btn {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  color: #171717;
+  border-radius: 7px;
+  cursor: pointer;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.rs-studio-tab {
+  height: 28px;
+}
+
+.rs-studio-tab:hover,
+.rs-preset-btn:hover,
+.statusbar-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.rs-studio-tab.active {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.14);
+  color: #0a0a0a;
+}
+
+.rs-studio-panel {
+  display: none;
+}
+
+.right-sidebar.expanded .rs-studio-panel.active {
+  display: block;
+}
+
+.rs-control-row,
+.rs-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 16px;
+  color: #333;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.rs-control-row {
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.rs-control-row output {
+  margin-left: auto;
+  color: #737373;
+  font-size: 11px;
+}
+
+.rs-range {
+  width: 100%;
+  accent-color: #111;
+}
+
+.rs-toggle-row input {
+  accent-color: #111;
+}
+
+.rs-angle-presets {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+  padding: 8px 16px 2px;
+}
+
+.rs-section-title-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rs-mini-action {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.66);
+  color: #525252;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  line-height: 1;
+  padding: 4px 8px;
+}
+
+.rs-segmented,
+.rs-choice-grid,
+.rs-pattern-grid {
+  padding: 0 16px 8px;
+}
+
+.rs-segmented {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+}
+
+.rs-segmented button,
+.rs-choice,
+.rs-pattern {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.64);
+  color: #262626;
+  cursor: pointer;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  min-width: 0;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.rs-segmented button {
+  height: 30px;
+  border-left-width: 0;
+}
+
+.rs-segmented button:first-child {
+  border-left-width: 1px;
+  border-radius: 8px 0 0 8px;
+}
+
+.rs-segmented button:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+.rs-segmented button.active,
+.rs-choice.active,
+.rs-pattern.active {
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.2);
+  color: #0a0a0a;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.45) inset;
+}
+
+.rs-choice-grid {
+  display: grid;
+  gap: 6px;
+}
+
+.rs-choice-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.rs-choice-grid-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.rs-choice {
+  height: 30px;
+  border-radius: 8px;
+}
+
+.rs-field-label {
+  color: #525252;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 16px 6px;
+}
+
+.rs-pattern-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.rs-pattern {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+.rs-text-row,
+.rs-color-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 2px 16px 10px;
+  color: #333;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.studio-text-input {
+  width: 100%;
+  height: 32px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #171717;
+  font: inherit;
+  font-size: 12px;
+  outline: none;
+  padding: 0 10px;
+}
+
+.studio-text-input:focus {
+  border-color: rgba(0, 0, 0, 0.24);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.06);
+}
+
+.rs-color-row {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rs-color-row input[type="color"] {
+  width: 34px;
+  height: 34px;
+  padding: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.rs-preset-btn {
+  min-width: 0;
+  height: 28px;
+  padding: 0 6px;
+  font-size: 11px;
+}
+
+.statusbar {
+  gap: 8px;
+}
+
+.statusbar-btn {
+  height: 26px;
+  min-width: 28px;
+  padding: 0 9px;
+}
+
+.statusbar-reset {
+  min-width: 52px;
+}
+
+body.theme-dark .rs-studio-tab,
+body.theme-dark .rs-preset-btn,
+body.theme-dark .statusbar-btn {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.86);
+}
+
+body.theme-dark .rs-studio-tab:hover,
+body.theme-dark .rs-preset-btn:hover,
+body.theme-dark .statusbar-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+body.theme-dark .rs-studio-tab.active {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+body.theme-dark .rs-control-row,
+body.theme-dark .rs-toggle-row,
+body.theme-dark .rs-text-row,
+body.theme-dark .rs-color-row {
+  color: #e5e5e5;
+}
+
+body.theme-dark .rs-control-row output {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+body.theme-dark .rs-field-label {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+body.theme-dark .rs-mini-action,
+body.theme-dark .rs-segmented button,
+body.theme-dark .rs-choice,
+body.theme-dark .rs-pattern,
+body.theme-dark .studio-text-input,
+body.theme-dark .rs-color-row input[type="color"] {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.86);
+}
+
+body.theme-dark .rs-segmented button.active,
+body.theme-dark .rs-choice.active,
+body.theme-dark .rs-pattern.active {
+  background: rgba(255, 255, 255, 0.17);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset;
+}
+
+body.theme-dark .studio-text-input:focus {
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+}

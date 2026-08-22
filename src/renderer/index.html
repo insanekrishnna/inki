@@ -72,7 +72,10 @@
     <div class="statusbar">
       <span class="status-tool" id="status-tool">Ready</span>
       <div class="statusbar-spacer"></div>
+      <button class="statusbar-btn" id="btn-zoom-out" title="Zoom out">-</button>
       <span class="zoom-level" id="status-zoom">100%</span>
+      <button class="statusbar-btn" id="btn-zoom-in" title="Zoom in">+</button>
+      <button class="statusbar-btn statusbar-reset" id="btn-zoom-reset" title="Reset zoom">Reset</button>
     </div>
   </div>
 
@@ -115,6 +118,119 @@
       <span class="rs-label">Window container</span>
     </button>
 
+    <div class="rs-studio-tabs" role="tablist" aria-label="Studio controls">
+      <button class="rs-studio-tab active" data-studio-tab="layout">Layout</button>
+      <button class="rs-studio-tab" data-studio-tab="backdrop">Backdrop</button>
+      <button class="rs-studio-tab" data-studio-tab="effects">Effects</button>
+      <button class="rs-studio-tab" data-studio-tab="camera">Camera</button>
+    </div>
+
+    <div class="rs-studio-panel active" data-studio-panel="layout">
+      <div class="rs-section-title">Canvas setup</div>
+      <label class="rs-control-row">Padding <output id="studio-padding-value">64px</output><input class="rs-range studio-input" id="studio-padding" data-state-key="studioPadding" type="range" min="0" max="180" value="64"></label>
+      <label class="rs-control-row">Image scale <output id="studio-scale-value">100%</output><input class="rs-range studio-input" id="studio-image-scale" data-state-key="studioImageScale" type="range" min="40" max="160" value="100"></label>
+      <label class="rs-control-row">Rotation <output id="studio-rotation-value">0 deg</output><input class="rs-range studio-input" id="studio-rotation" data-state-key="studioRotation" type="range" min="-45" max="45" value="0"></label>
+      <label class="rs-toggle-row"><input class="studio-input" id="studio-lock-position" data-state-key="studioLockPosition" type="checkbox"> Lock position</label>
+      <div class="rs-section-title">Frame & window</div>
+      <label class="rs-toggle-row"><input class="studio-input" id="studio-titlebar" data-state-key="studioTitlebar" type="checkbox" checked> macOS titlebar</label>
+      <label class="rs-toggle-row"><input class="studio-input" id="studio-border" data-state-key="studioBorder" type="checkbox" checked> Frosted glass border</label>
+      <label class="rs-control-row">Corner radius <output id="studio-radius-value">16px</output><input class="rs-range studio-input" id="studio-corner-radius" data-state-key="studioCornerRadius" type="range" min="0" max="48" value="16"></label>
+      <div class="rs-section-title">Window chrome</div>
+      <div class="rs-choice-grid rs-choice-grid-2" id="rs-window-chrome">
+        <button class="rs-choice active" data-window-chrome="dark">Dark</button>
+        <button class="rs-choice" data-window-chrome="light">Light</button>
+        <button class="rs-choice" data-window-chrome="midnight">Midnight</button>
+        <button class="rs-choice" data-window-chrome="minimal">Minimal</button>
+      </div>
+      <div class="rs-section-title rs-section-title-inline">Drop shadow <button class="rs-mini-action" id="studio-shadow-reset" type="button">Reset</button></div>
+      <label class="rs-control-row">Distance <output id="studio-shadow-distance-value">25px</output><input class="rs-range studio-input" id="studio-shadow-distance" data-state-key="studioShadowDistance" type="range" min="0" max="80" value="25"></label>
+      <label class="rs-control-row">Blur <output id="studio-shadow-blur-value">45px</output><input class="rs-range studio-input" id="studio-shadow-blur" data-state-key="studioShadowBlur" type="range" min="0" max="120" value="45"></label>
+      <label class="rs-control-row">Opacity <output id="studio-shadow-opacity-value">35%</output><input class="rs-range studio-input" id="studio-shadow-opacity" data-state-key="studioShadowOpacity" type="range" min="0" max="80" value="35"></label>
+      <label class="rs-control-row">Offset X <output id="studio-shadow-x-value">0px</output><input class="rs-range studio-input" id="studio-shadow-x" data-state-key="studioShadowOffsetX" type="range" min="-80" max="80" value="0"></label>
+      <label class="rs-control-row">Offset Y <output id="studio-shadow-y-value">0px</output><input class="rs-range studio-input" id="studio-shadow-y" data-state-key="studioShadowOffsetY" type="range" min="-80" max="80" value="0"></label>
+      <div class="rs-section-title">Watermark & badge</div>
+      <div class="rs-segmented" id="rs-watermark-mode">
+        <button class="active" data-watermark-mode="off">Off</button>
+        <button data-watermark-mode="badge">Badge</button>
+        <button data-watermark-mode="text">Text</button>
+      </div>
+      <div class="rs-choice-grid rs-choice-grid-3" id="rs-watermark-platform">
+        <button class="rs-choice active" data-watermark-platform="x">X</button>
+        <button class="rs-choice" data-watermark-platform="gh">GH</button>
+        <button class="rs-choice" data-watermark-platform="ig">IG</button>
+        <button class="rs-choice" data-watermark-platform="in">IN</button>
+        <button class="rs-choice" data-watermark-platform="web">Web</button>
+        <button class="rs-choice" data-watermark-platform="text">Text</button>
+      </div>
+      <label class="rs-text-row">Handle / text<input class="studio-text-input" id="studio-watermark-text" type="text" value="@icodraw" placeholder="e.g. @yourname"></label>
+    </div>
+
+    <div class="rs-studio-panel" data-studio-panel="effects">
+      <div class="rs-section-title">Studio lighting</div>
+      <label class="rs-control-row">Brightness <output id="studio-brightness-value">100%</output><input class="rs-range studio-input" id="studio-brightness" data-state-key="studioBrightness" type="range" min="40" max="180" value="100"></label>
+      <label class="rs-control-row">Contrast <output id="studio-contrast-value">100%</output><input class="rs-range studio-input" id="studio-contrast" data-state-key="studioContrast" type="range" min="40" max="180" value="100"></label>
+      <label class="rs-control-row">Saturation <output id="studio-saturation-value">100%</output><input class="rs-range studio-input" id="studio-saturation" data-state-key="studioSaturation" type="range" min="0" max="220" value="100"></label>
+      <label class="rs-control-row">Hue <output id="studio-hue-value">0 deg</output><input class="rs-range studio-input" id="studio-hue" data-state-key="studioHue" type="range" min="-180" max="180" value="0"></label>
+      <label class="rs-control-row">Digital pixel noise <output id="studio-noise-value">0%</output><input class="rs-range studio-input" id="studio-noise" data-state-key="studioNoise" type="range" min="0" max="30" value="0"></label>
+      <label class="rs-control-row">Film grain <output id="studio-film-grain-value">0%</output><input class="rs-range studio-input" id="studio-film-grain" data-state-key="studioFilmGrain" type="range" min="0" max="35" value="0"></label>
+      <div class="rs-field-label">Noise application layer</div>
+      <div class="rs-segmented" id="rs-noise-layer">
+        <button data-noise-layer="canvas">Canvas</button>
+        <button data-noise-layer="image">Image</button>
+        <button class="active" data-noise-layer="both">Both</button>
+      </div>
+      <div class="rs-section-title">ASCII art overlay</div>
+      <label class="rs-toggle-row"><input class="studio-input" id="studio-ascii-enabled" data-state-key="studioAsciiEnabled" type="checkbox"> Enable ASCII pattern</label>
+      <div class="rs-field-label">Pattern</div>
+      <div class="rs-pattern-grid" id="rs-ascii-patterns">
+        <button class="rs-pattern active" data-ascii-pattern=".">.</button>
+        <button class="rs-pattern" data-ascii-pattern="+">+</button>
+        <button class="rs-pattern" data-ascii-pattern="#">#</button>
+        <button class="rs-pattern" data-ascii-pattern="*">*</button>
+        <button class="rs-pattern" data-ascii-pattern="x">x</button>
+        <button class="rs-pattern" data-ascii-pattern="/">/</button>
+        <button class="rs-pattern" data-ascii-pattern="\\">\</button>
+        <button class="rs-pattern" data-ascii-pattern="|">|</button>
+        <button class="rs-pattern" data-ascii-pattern="=">=</button>
+        <button class="rs-pattern" data-ascii-pattern=":">:</button>
+        <button class="rs-pattern" data-ascii-pattern="%">%</button>
+        <button class="rs-pattern" data-ascii-pattern="@">@</button>
+        <button class="rs-pattern" data-ascii-pattern="&amp;">&amp;</button>
+        <button class="rs-pattern" data-ascii-pattern="~">~</button>
+        <button class="rs-pattern" data-ascii-pattern="-">-</button>
+        <button class="rs-pattern" data-ascii-pattern="^">^</button>
+        <button class="rs-pattern" data-ascii-pattern="o">o</button>
+        <button class="rs-pattern" data-ascii-pattern="[]">[]</button>
+        <button class="rs-pattern" data-ascii-pattern="&lt;-">&lt;-</button>
+        <button class="rs-pattern" data-ascii-pattern="->">-&gt;</button>
+      </div>
+      <label class="rs-control-row">Pattern size <output id="studio-ascii-size-value">16px</output><input class="rs-range studio-input" id="studio-ascii-size" data-state-key="studioAsciiSize" type="range" min="8" max="42" value="16"></label>
+      <label class="rs-control-row">Opacity <output id="studio-ascii-opacity-value">25%</output><input class="rs-range studio-input" id="studio-ascii-opacity" data-state-key="studioAsciiOpacity" type="range" min="0" max="80" value="25"></label>
+      <div class="rs-field-label">Application layer</div>
+      <div class="rs-segmented" id="rs-ascii-layer">
+        <button data-ascii-layer="canvas">Canvas</button>
+        <button class="active" data-ascii-layer="image">Image</button>
+        <button data-ascii-layer="both">Both</button>
+      </div>
+      <label class="rs-color-row">Pattern color<input id="studio-ascii-color" type="color" value="#ffffff"></label>
+    </div>
+
+    <div class="rs-studio-panel" data-studio-panel="camera">
+      <div class="rs-section-title">3D orbit & tilt</div>
+      <label class="rs-control-row">Pitch (X-axis) <output id="studio-pitch-value">0 deg</output><input class="rs-range studio-input" id="studio-pitch" data-state-key="studioPitch" type="range" min="-60" max="60" value="0"></label>
+      <label class="rs-control-row">Yaw (Y-axis) <output id="studio-yaw-value">0 deg</output><input class="rs-range studio-input" id="studio-yaw" data-state-key="studioYaw" type="range" min="-60" max="60" value="0"></label>
+      <label class="rs-control-row">Roll (Z-axis) <output id="studio-roll-value">0 deg</output><input class="rs-range studio-input" id="studio-roll" data-state-key="studioRoll" type="range" min="-45" max="45" value="0"></label>
+      <label class="rs-control-row">Camera depth <output id="studio-depth-value">1200px</output><input class="rs-range studio-input" id="studio-depth" data-state-key="studioCameraDepth" type="range" min="400" max="2200" value="1200"></label>
+      <div class="rs-angle-presets">
+        <button class="rs-preset-btn" data-angle-preset="flat">Flat</button>
+        <button class="rs-preset-btn" data-angle-preset="left">Left</button>
+        <button class="rs-preset-btn" data-angle-preset="right">Right</button>
+        <button class="rs-preset-btn" data-angle-preset="top">Top</button>
+        <button class="rs-preset-btn" data-angle-preset="hero">Hero</button>
+      </div>
+    </div>
+
+    <div class="rs-studio-panel" data-studio-panel="backdrop">
     <div class="rs-aspect-ratio-wrapper" title="Aspect Ratio">
       <span class="rs-aspect-ratio-label">Aspect ratio</span>
       <div class="rs-custom-select" id="rs-aspect-select">
@@ -221,6 +337,7 @@
 ﻿      <span class="rs-label">Custom background</span>
     </button>
     <input type="file" id="custom-bg-input" accept="image/*" style="display: none;" />
+    </div>
     <button class="rs-item" id="rs-copy" title="Copy to clipboard (Ctrl+C)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M5 15V5h10"/></svg>
       <span class="rs-label">Copy to clipboard</span>

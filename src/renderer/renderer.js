@@ -125,6 +125,39 @@ const state = {
   windowContainerApplied: false,
   containerGradient: 'none',
   containerBgBlur: 'none',
+  studioPadding: 64,
+  studioImageScale: 100,
+  studioRotation: 0,
+  studioLockPosition: false,
+  studioCornerRadius: 16,
+  studioShadow: 25,
+  studioShadowDistance: 25,
+  studioShadowBlur: 45,
+  studioShadowOpacity: 35,
+  studioShadowOffsetX: 0,
+  studioShadowOffsetY: 0,
+  studioTitlebar: true,
+  studioBorder: true,
+  studioPitch: 0,
+  studioYaw: 0,
+  studioRoll: 0,
+  studioCameraDepth: 1200,
+  studioBrightness: 100,
+  studioContrast: 100,
+  studioSaturation: 100,
+  studioHue: 0,
+  studioNoise: 0,
+  studioNoiseLayer: 'both',
+  studioFilmGrain: 0,
+  studioAsciiEnabled: false,
+  studioAsciiPattern: '.',
+  studioAsciiSize: 16,
+  studioAsciiOpacity: 25,
+  studioAsciiLayer: 'image',
+  studioAsciiColor: '#ffffff',
+  studioWatermarkMode: 'off',
+  studioWatermarkPlatform: 'x',
+  studioWatermarkText: '@icodraw',
   originalImageBeforeContainer: null,
   baseOriginalImage: null,
   // Crop state
@@ -196,6 +229,9 @@ const elements = {
   strokeBtns: $$('.stroke-option'),
   statusTool: $('#status-tool'),
   statusZoom: $('#status-zoom'),
+  btnZoomOut: $('#btn-zoom-out'),
+  btnZoomIn: $('#btn-zoom-in'),
+  btnZoomReset: $('#btn-zoom-reset'),
   textWrapper: $('#text-input-wrapper'),
   textInput: $('#inline-text-input'),
   tooltip: $('#app-tooltip'),
@@ -232,11 +268,13 @@ function init() {
   elements.ctx = elements.canvas.getContext('2d');
   bindToolbar();
   bindCanvas();
+  bindZoomControls();
   bindKeyboard();
   bindIPC();
   bindInlineText();
   bindContextMenu();
   bindRightSidebar();
+  bindStudioControls();
   bindPaste();
   bindCrop();
   bindTooltips();
@@ -1107,6 +1145,14 @@ function onWheel(e) {
   if (!state.image || (!e.ctrlKey && !e.metaKey)) return;
   e.preventDefault();
   setZoom(state.zoom * (e.deltaY > 0 ? 0.9 : 1.1));
+}
+
+function bindZoomControls() {
+  on(elements.btnZoomOut, 'click', () => setZoom(state.zoom / 1.25));
+  on(elements.btnZoomIn, 'click', () => setZoom(state.zoom * 1.25));
+  on(elements.btnZoomReset, 'click', () => {
+    if (state.image) fitToWindow();
+  });
 }
 
 // ------------------------------------------------------------------------------
@@ -2122,6 +2168,113 @@ function replaceImage(dataUrl, cb) {
 
 // (Magic Wand was removed)
 
+function getStudioFilter() {
+  return [
+    `brightness(${state.studioBrightness || 100}%)`,
+    `contrast(${state.studioContrast || 100}%)`,
+    `saturate(${state.studioSaturation || 100}%)`,
+    `hue-rotate(${state.studioHue || 0}deg)`,
+  ].join(' ');
+}
+
+function isStudioLayerEnabled(setting, layer) {
+  return setting === 'both' || setting === layer;
+}
+
+function addStudioNoise(ctx, width, height, layer = 'image') {
+  const pixelAmount = isStudioLayerEnabled(state.studioNoiseLayer || 'both', layer) ? Number(state.studioNoise || 0) : 0;
+  const filmAmount = isStudioLayerEnabled(state.studioNoiseLayer || 'both', layer) ? Number(state.studioFilmGrain || 0) : 0;
+  const amount = Math.max(pixelAmount, filmAmount);
+  if (!amount) return;
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const data = imageData.data;
+  const strength = pixelAmount * 1.6;
+  const filmStrength = filmAmount * 0.9;
+  for (let i = 0; i < data.length; i += 4) {
+    const pixelNoise = strength ? (Math.random() - 0.5) * strength : 0;
+    const filmNoise = filmStrength ? (Math.random() - 0.5) * filmStrength : 0;
+    const noise = pixelNoise + filmNoise;
+    data[i] = Math.max(0, Math.min(255, data[i] + noise));
+    data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise));
+    data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise));
+  }
+  ctx.putImageData(imageData, 0, 0);
+}
+
+function drawAsciiPattern(ctx, width, height, layer = 'image') {
+  if (!state.studioAsciiEnabled || !isStudioLayerEnabled(state.studioAsciiLayer || 'image', layer)) return;
+  const size = Math.max(8, Number(state.studioAsciiSize || 16));
+  const opacity = Math.max(0, Math.min(0.8, Number(state.studioAsciiOpacity || 25) / 100));
+  if (!opacity) return;
+  const pattern = String(state.studioAsciiPattern || '.');
+  const step = Math.max(10, size * 1.85);
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  ctx.fillStyle = state.studioAsciiColor || '#ffffff';
+  ctx.font = `${size}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for (let y = step * 0.55; y < height; y += step) {
+    for (let x = step * 0.55; x < width; x += step) {
+      ctx.fillText(pattern, x, y);
+    }
+  }
+  ctx.restore();
+}
+
+function drawStudioWatermark(ctx, canvasW, canvasH) {
+  if ((state.studioWatermarkMode || 'off') === 'off') return;
+  const text = (state.studioWatermarkText || '').trim();
+  const platformLabels = { x: 'X', gh: 'GH', ig: 'IG', in: 'IN', web: 'Web', text: '' };
+  const platform = platformLabels[state.studioWatermarkPlatform || 'x'] ?? 'X';
+  const label = state.studioWatermarkMode === 'text' || state.studioWatermarkPlatform === 'text'
+    ? (text || '@icodraw')
+    : `${platform}${text ? `  ${text}` : ''}`;
+  const fontSize = Math.max(14, Math.round(Math.min(canvasW, canvasH) * 0.022));
+  const padX = fontSize * 0.8;
+  const padY = fontSize * 0.52;
+
+  ctx.save();
+  ctx.font = `600 ${fontSize}px Inter, system-ui, -apple-system, sans-serif`;
+  const metrics = ctx.measureText(label);
+  const badgeW = metrics.width + padX * 2;
+  const badgeH = fontSize + padY * 2;
+  const x = canvasW - badgeW - Math.max(24, canvasW * 0.035);
+  const y = canvasH - badgeH - Math.max(24, canvasH * 0.035);
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.18)';
+  ctx.shadowBlur = 18;
+  ctx.shadowOffsetY = 8;
+  ctx.fillStyle = state.studioWatermarkMode === 'badge' ? 'rgba(255, 255, 255, 0.86)' : 'rgba(255, 255, 255, 0.72)';
+  ctx.beginPath();
+  roundRect(ctx, x, y, badgeW, badgeH, Math.min(18, badgeH / 2));
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
+  ctx.fillStyle = '#171717';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(label, x + padX, y + badgeH / 2 + 0.5);
+  ctx.restore();
+}
+
+function drawStudioWindow(ctx, frameCanvas, centerX, centerY, width, height) {
+  const pitch = (state.studioPitch || 0) * Math.PI / 180;
+  const yaw = (state.studioYaw || 0) * Math.PI / 180;
+  const roll = ((state.studioRotation || 0) + (state.studioRoll || 0)) * Math.PI / 180;
+  const depth = Math.max(400, Number(state.studioCameraDepth || 1200));
+  const depthInfluence = Math.max(0.76, Math.min(1.18, depth / 1200));
+  const scaleX = Math.max(0.42, Math.cos(yaw) * depthInfluence);
+  const scaleY = Math.max(0.42, Math.cos(pitch) * depthInfluence);
+  const skewX = Math.sin(yaw) * 0.22;
+  const skewY = -Math.sin(pitch) * 0.16;
+
+  ctx.save();
+  ctx.translate(centerX, centerY);
+  ctx.rotate(roll);
+  ctx.transform(scaleX, skewY, skewX, scaleY, 0, 0);
+  ctx.drawImage(frameCanvas, -width / 2, -height / 2, width, height);
+  ctx.restore();
+}
+
 function applyWindowContainer() {
   if (!state.image) return;
 
@@ -2138,11 +2291,15 @@ function applyWindowContainer() {
     return;
   }
 
-  const titleBarHeight = 48;
-  const cornerRadius = 12;
-  const padding = 40;
-  const shadowBlur = 30;
-  const shadowColor = 'rgba(82, 52, 28, 0.26)';
+  const titleBarHeight = state.studioTitlebar ? 48 : 0;
+  const cornerRadius = Math.max(0, Number(state.studioCornerRadius || 16));
+  const padding = Math.max(0, Number(state.studioPadding || 64));
+  const shadowBlur = Math.max(0, Number(state.studioShadowBlur ?? state.studioShadow ?? 45));
+  const shadowDistance = Math.max(0, Number(state.studioShadowDistance ?? state.studioShadow ?? 25));
+  const shadowOpacity = Math.max(0, Math.min(0.8, Number(state.studioShadowOpacity ?? 35) / 100));
+  const shadowOffsetX = Number(state.studioShadowOffsetX || 0);
+  const shadowOffsetY = Number(state.studioShadowOffsetY || 0);
+  const shadowColor = `rgba(24, 18, 12, ${shadowOpacity})`;
   const frameThemes = {
     dark: { titleBar: '#3a3a3c', windowBg: '#1e1e1e' },
     light: { titleBar: '#e5e5e5', windowBg: '#ffffff' },
@@ -2177,8 +2334,9 @@ function applyWindowContainer() {
 
   const compositeImg = new Image();
   compositeImg.onload = () => {
-    const imgW = compositeImg.width;
-    const imgH = compositeImg.height;
+    const imageScale = Math.max(0.4, Math.min(1.6, Number(state.studioImageScale || 100) / 100));
+    const imgW = compositeImg.width * imageScale;
+    const imgH = compositeImg.height * imageScale;
 
     const windowW = imgW;
     const windowH = imgH + titleBarHeight;
@@ -2198,6 +2356,13 @@ function applyWindowContainer() {
       }
     }
 
+    const orbitHeadroom = Math.max(
+      32,
+      shadowBlur + Math.abs(state.studioPitch || 0) * 1.2 + Math.abs(state.studioYaw || 0) * 1.2 + Math.abs((state.studioRotation || 0) + (state.studioRoll || 0)) * 2
+    );
+    canvasW += orbitHeadroom * 2;
+    canvasH += orbitHeadroom * 2;
+
     const windowX = (canvasW - windowW) / 2;
     const windowY = (canvasH - windowH) / 2;
 
@@ -2207,42 +2372,62 @@ function applyWindowContainer() {
     const ctx = tempCanvas.getContext('2d');
 
     const drawRest = () => {
+      const frameCanvas = document.createElement('canvas');
+      frameCanvas.width = Math.ceil(windowW);
+      frameCanvas.height = Math.ceil(windowH);
+      const frameCtx = frameCanvas.getContext('2d');
+
+      frameCtx.save();
+      frameCtx.beginPath();
+      roundRect(frameCtx, 0, 0, windowW, windowH, cornerRadius);
+      frameCtx.clip();
+      frameCtx.fillStyle = windowBgColor;
+      frameCtx.fillRect(0, 0, windowW, windowH);
+
+      if (state.studioTitlebar) {
+        frameCtx.fillStyle = titleBarColor;
+        frameCtx.fillRect(0, 0, windowW, titleBarHeight);
+        frameCtx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+        frameCtx.lineWidth = 1;
+        frameCtx.beginPath();
+        frameCtx.moveTo(0, titleBarHeight);
+        frameCtx.lineTo(windowW, titleBarHeight);
+        frameCtx.stroke();
+
+        const lightY = titleBarHeight / 2;
+        lights.forEach(light => {
+          frameCtx.beginPath();
+          frameCtx.arc(light.x, lightY, lightRadius, 0, Math.PI * 2);
+          frameCtx.fillStyle = light.color;
+          frameCtx.fill();
+        });
+      }
+
+      frameCtx.filter = getStudioFilter();
+      frameCtx.drawImage(compositeImg, 0, titleBarHeight, imgW, imgH);
+      frameCtx.filter = 'none';
+      addStudioNoise(frameCtx, frameCanvas.width, frameCanvas.height, 'image');
+      drawAsciiPattern(frameCtx, frameCanvas.width, frameCanvas.height, 'image');
+      frameCtx.restore();
+
+      if (state.studioBorder) {
+        frameCtx.save();
+        frameCtx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+        frameCtx.lineWidth = 1;
+        frameCtx.beginPath();
+        roundRect(frameCtx, 0.5, 0.5, windowW - 1, windowH - 1, Math.max(0, cornerRadius - 0.5));
+        frameCtx.stroke();
+        frameCtx.restore();
+      }
+
       ctx.save();
       ctx.shadowColor = shadowColor;
       ctx.shadowBlur = shadowBlur;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 8;
-      ctx.beginPath();
-      roundRect(ctx, windowX, windowY, windowW, windowH, cornerRadius);
-      ctx.fillStyle = windowBgColor;
-      ctx.fill();
+      ctx.shadowOffsetX = shadowOffsetX;
+      ctx.shadowOffsetY = shadowDistance + shadowOffsetY;
+      drawStudioWindow(ctx, frameCanvas, windowX + windowW / 2, windowY + windowH / 2, windowW, windowH);
       ctx.restore();
-
-      ctx.save();
-      ctx.beginPath();
-      roundRect(ctx, windowX, windowY, windowW, windowH, cornerRadius);
-      ctx.clip();
-
-      ctx.fillStyle = titleBarColor;
-      ctx.fillRect(windowX, windowY, windowW, titleBarHeight);
-
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(windowX, windowY + titleBarHeight);
-      ctx.lineTo(windowX + windowW, windowY + titleBarHeight);
-      ctx.stroke();
-
-      const lightY = windowY + titleBarHeight / 2;
-      lights.forEach(light => {
-        ctx.beginPath();
-        ctx.arc(windowX + light.x, lightY, lightRadius, 0, Math.PI * 2);
-        ctx.fillStyle = light.color;
-        ctx.fill();
-      });
-
-      ctx.drawImage(compositeImg, windowX, windowY + titleBarHeight, imgW, imgH);
-      ctx.restore();
+      drawStudioWatermark(ctx, canvasW, canvasH);
 
       const resultDataUrl = tempCanvas.toDataURL('image/png');
       state.annotations = [];
@@ -2272,12 +2457,16 @@ function applyWindowContainer() {
         }
         ctx.drawImage(bgImg, drawX, drawY, drawW, drawH);
         ctx.restore();
+        addStudioNoise(ctx, tempCanvas.width, tempCanvas.height, 'canvas');
+        drawAsciiPattern(ctx, tempCanvas.width, tempCanvas.height, 'canvas');
         
         drawRest();
       };
       bgImg.onerror = () => {
         ctx.fillStyle = '#d7bea2';
-        ctx.fillRect(0, 0, canvasW, canvasH);
+        ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+        addStudioNoise(ctx, tempCanvas.width, tempCanvas.height, 'canvas');
+        drawAsciiPattern(ctx, tempCanvas.width, tempCanvas.height, 'canvas');
         drawRest();
       };
       bgImg.src = state.containerBgImage;
@@ -2291,7 +2480,9 @@ function applyWindowContainer() {
       } else {
         ctx.fillStyle = '#d7bea2';
       }
-      ctx.fillRect(0, 0, canvasW, canvasH);
+      ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+      addStudioNoise(ctx, tempCanvas.width, tempCanvas.height, 'canvas');
+      drawAsciiPattern(ctx, tempCanvas.width, tempCanvas.height, 'canvas');
       drawRest();
     }
   };
@@ -2399,6 +2590,189 @@ function bindContextMenu() {
       menu.classList.remove('visible');
     });
   });
+}
+
+function reapplyStudioContainer() {
+  if (!state.image) return;
+  if (state.windowContainerApplied && state.originalImageBeforeContainer) {
+    state.windowContainerApplied = false;
+    const originalImg = state.originalImageBeforeContainer;
+    const tempImg = new Image();
+    tempImg.onload = () => {
+      state.image = tempImg;
+      state.imageWidth = tempImg.width;
+      state.imageHeight = tempImg.height;
+      state.annotations = [];
+      state.history = [];
+      state.historyIndex = -1;
+      state.originalImageBeforeContainer = originalImg;
+      applyWindowContainer();
+    };
+    tempImg.src = originalImg;
+    return;
+  }
+  applyWindowContainer();
+}
+
+function updateStudioValueLabels() {
+  const labels = {
+    'studio-padding-value': `${state.studioPadding}px`,
+    'studio-scale-value': `${state.studioImageScale}%`,
+    'studio-rotation-value': `${state.studioRotation} deg`,
+    'studio-radius-value': `${state.studioCornerRadius}px`,
+    'studio-shadow-value': `${state.studioShadow}px`,
+    'studio-shadow-distance-value': `${state.studioShadowDistance}px`,
+    'studio-shadow-blur-value': `${state.studioShadowBlur}px`,
+    'studio-shadow-opacity-value': `${state.studioShadowOpacity}%`,
+    'studio-shadow-x-value': `${state.studioShadowOffsetX}px`,
+    'studio-shadow-y-value': `${state.studioShadowOffsetY}px`,
+    'studio-pitch-value': `${state.studioPitch} deg`,
+    'studio-yaw-value': `${state.studioYaw} deg`,
+    'studio-roll-value': `${state.studioRoll} deg`,
+    'studio-depth-value': `${state.studioCameraDepth}px`,
+    'studio-brightness-value': `${state.studioBrightness}%`,
+    'studio-contrast-value': `${state.studioContrast}%`,
+    'studio-saturation-value': `${state.studioSaturation}%`,
+    'studio-hue-value': `${state.studioHue} deg`,
+    'studio-noise-value': `${state.studioNoise}%`,
+    'studio-film-grain-value': `${state.studioFilmGrain}%`,
+    'studio-ascii-size-value': `${state.studioAsciiSize}px`,
+    'studio-ascii-opacity-value': `${state.studioAsciiOpacity}%`,
+  };
+  Object.entries(labels).forEach(([id, value]) => {
+    const node = document.getElementById(id);
+    if (node) node.textContent = value;
+  });
+}
+
+function bindStudioControls() {
+  const tabs = document.querySelectorAll('.rs-studio-tab');
+  const panels = document.querySelectorAll('.rs-studio-panel');
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.studioTab;
+      tabs.forEach((item) => item.classList.toggle('active', item === tab));
+      panels.forEach((panel) => panel.classList.toggle('active', panel.dataset.studioPanel === target));
+      document.getElementById('right-sidebar')?.classList.add('expanded');
+    });
+  });
+
+  document.querySelectorAll('.studio-input').forEach((input) => {
+    input.addEventListener('input', () => {
+      const key = input.dataset.stateKey;
+      if (!key) return;
+      state[key] = input.type === 'checkbox' ? input.checked : Number(input.value);
+      updateStudioValueLabels();
+      if (state.windowContainerApplied) reapplyStudioContainer();
+    });
+    input.addEventListener('change', () => {
+      const key = input.dataset.stateKey;
+      if (!key) return;
+      state[key] = input.type === 'checkbox' ? input.checked : Number(input.value);
+      updateStudioValueLabels();
+      if (state.image) reapplyStudioContainer();
+    });
+  });
+
+  const presets = {
+    flat: { studioPitch: 0, studioYaw: 0, studioRoll: 0 },
+    left: { studioPitch: 8, studioYaw: -28, studioRoll: -4 },
+    right: { studioPitch: 8, studioYaw: 28, studioRoll: 4 },
+    top: { studioPitch: 36, studioYaw: 0, studioRoll: 0 },
+    hero: { studioPitch: 18, studioYaw: -24, studioRoll: -8 },
+  };
+  document.querySelectorAll('[data-angle-preset]').forEach((button) => {
+    button.addEventListener('click', () => {
+      Object.assign(state, presets[button.dataset.anglePreset] || presets.flat);
+      ['studio-pitch', 'studio-yaw', 'studio-roll'].forEach((id) => {
+        const input = document.getElementById(id);
+        const key = input?.dataset?.stateKey;
+        if (input && key) input.value = state[key];
+      });
+      updateStudioValueLabels();
+      if (state.image) reapplyStudioContainer();
+    });
+  });
+
+  const shadowDefaults = {
+    studioShadowDistance: 25,
+    studioShadowBlur: 45,
+    studioShadowOpacity: 35,
+    studioShadowOffsetX: 0,
+    studioShadowOffsetY: 0,
+  };
+  document.getElementById('studio-shadow-reset')?.addEventListener('click', () => {
+    Object.assign(state, shadowDefaults);
+    Object.entries(shadowDefaults).forEach(([key, value]) => {
+      const input = document.querySelector(`.studio-input[data-state-key="${key}"]`);
+      if (input) input.value = value;
+    });
+    updateStudioValueLabels();
+    if (state.image) reapplyStudioContainer();
+  });
+
+  document.querySelectorAll('[data-window-chrome]').forEach((button) => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('[data-window-chrome]').forEach((item) => item.classList.toggle('active', item === button));
+      state.windowFrameTheme = button.dataset.windowChrome;
+      document.querySelectorAll('.rs-frame-swatch').forEach((swatch) => {
+        swatch.classList.toggle('active', swatch.dataset.theme === state.windowFrameTheme);
+      });
+      if (state.image) reapplyStudioContainer();
+    });
+  });
+
+  document.querySelectorAll('[data-watermark-mode]').forEach((button) => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('[data-watermark-mode]').forEach((item) => item.classList.toggle('active', item === button));
+      state.studioWatermarkMode = button.dataset.watermarkMode;
+      if (state.image) reapplyStudioContainer();
+    });
+  });
+
+  document.querySelectorAll('[data-watermark-platform]').forEach((button) => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('[data-watermark-platform]').forEach((item) => item.classList.toggle('active', item === button));
+      state.studioWatermarkPlatform = button.dataset.watermarkPlatform;
+      if (state.image) reapplyStudioContainer();
+    });
+  });
+
+  document.getElementById('studio-watermark-text')?.addEventListener('input', (event) => {
+    state.studioWatermarkText = event.target.value;
+    if (state.windowContainerApplied) reapplyStudioContainer();
+  });
+
+  document.querySelectorAll('[data-noise-layer]').forEach((button) => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('[data-noise-layer]').forEach((item) => item.classList.toggle('active', item === button));
+      state.studioNoiseLayer = button.dataset.noiseLayer;
+      if (state.image) reapplyStudioContainer();
+    });
+  });
+
+  document.querySelectorAll('[data-ascii-pattern]').forEach((button) => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('[data-ascii-pattern]').forEach((item) => item.classList.toggle('active', item === button));
+      state.studioAsciiPattern = button.dataset.asciiPattern;
+      if (state.image) reapplyStudioContainer();
+    });
+  });
+
+  document.querySelectorAll('[data-ascii-layer]').forEach((button) => {
+    button.addEventListener('click', () => {
+      document.querySelectorAll('[data-ascii-layer]').forEach((item) => item.classList.toggle('active', item === button));
+      state.studioAsciiLayer = button.dataset.asciiLayer;
+      if (state.image) reapplyStudioContainer();
+    });
+  });
+
+  document.getElementById('studio-ascii-color')?.addEventListener('input', (event) => {
+    state.studioAsciiColor = event.target.value;
+    if (state.windowContainerApplied) reapplyStudioContainer();
+  });
+
+  updateStudioValueLabels();
 }
 
 function bindRightSidebar() {
@@ -2552,6 +2926,9 @@ function bindRightSidebar() {
       rsFrameSwatches.forEach(s => s.classList.remove('active'));
       swatch.classList.add('active');
       state.windowFrameTheme = swatch.dataset.theme;
+      document.querySelectorAll('[data-window-chrome]').forEach((button) => {
+        button.classList.toggle('active', button.dataset.windowChrome === state.windowFrameTheme);
+      });
 
       if (state.windowContainerApplied) {
         state.windowContainerApplied = false;
