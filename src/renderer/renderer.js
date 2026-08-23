@@ -178,6 +178,8 @@ const state = {
   studioWatermarkBlur: 20,
   originalImageBeforeContainer: null,
   baseOriginalImage: null,
+  studioContentBounds: null,
+  pendingStudioDisplaySize: null,
   // Crop state
   cropActive: false,
   cropX: 0,
@@ -1015,6 +1017,8 @@ function clearCanvas() {
   // Reset container background settings
   state.windowContainerApplied = false;
   state.originalImageBeforeContainer = null;
+  state.studioContentBounds = null;
+  state.pendingStudioDisplaySize = null;
   state.containerGradient = 'none';
   state.containerBgBlur = 0;
   state.containerColorPreset = 'normal';
@@ -1090,6 +1094,14 @@ async function loadCaptureData(captureData, options = {}) {
 }
 
 function loadImage(dataUrl, options = {}) {
+  const previousZoom = Number.isFinite(state.zoom) ? state.zoom : INITIAL_IMAGE_ZOOM;
+  const previousDisplaySize = {
+    width: state.imageWidth > 0 ? state.imageWidth * previousZoom : 0,
+    height: state.imageHeight > 0 ? state.imageHeight * previousZoom : 0,
+  };
+  const preserveDisplaySize = options.preserveDisplaySize ?? options.isInternal;
+  const displaySizeSource = options.displaySizeSource || null;
+  const preserveZoom = options.preserveZoom ?? false;
   const img = new Image();
   img.onload = () => {
     state.image = img;
@@ -1099,6 +1111,8 @@ function loadImage(dataUrl, options = {}) {
       state.baseOriginalImage = dataUrl;
       state.originalImageBeforeContainer = null;
       state.windowContainerApplied = false;
+      state.studioContentBounds = null;
+      state.pendingStudioDisplaySize = null;
     } else {
       if (!state.windowContainerApplied) state.originalImageBeforeContainer = null;
     }
@@ -1116,7 +1130,17 @@ function loadImage(dataUrl, options = {}) {
     resetFloatingToolbar();
     setAppWindowMode('editor');
     elements.statusTool?.parentElement?.classList.add('visible');
-    setInitialImageZoom();
+    if (preserveDisplaySize) {
+      setLoadedImageDisplaySize(
+        typeof preserveDisplaySize === 'object' ? preserveDisplaySize : previousDisplaySize,
+        previousZoom,
+        displaySizeSource
+      );
+    } else if (preserveZoom) {
+      setLoadedImageZoom(previousZoom);
+    } else {
+      setInitialImageZoom();
+    }
     render();
     updateStatus();
     updateToolbarState();
@@ -1211,6 +1235,28 @@ function centerCanvasInWorkspace() {
   applyCanvasPosition();
 }
 
+function setLoadedImageZoom(zoom) {
+  const workspace = getVisualWorkspaceRect();
+  if (workspace.width <= 0 || workspace.height <= 0) {
+    requestAnimationFrame(() => setLoadedImageZoom(zoom));
+    return;
+  }
+
+  state.zoom = Math.max(0.1, Math.min(10, zoom));
+  applyZoom();
+  centerCanvasInWorkspace();
+  updateStatus();
+}
+
+function setLoadedImageDisplaySize(displaySize, fallbackZoom = INITIAL_IMAGE_ZOOM, sourceSize = null) {
+  const sourceWidth = sourceSize?.width > 0 ? sourceSize.width : state.imageWidth;
+  const sourceHeight = sourceSize?.height > 0 ? sourceSize.height : state.imageHeight;
+  const widthRatio = displaySize.width > 0 && sourceWidth > 0 ? displaySize.width / sourceWidth : fallbackZoom;
+  const heightRatio = displaySize.height > 0 && sourceHeight > 0 ? displaySize.height / sourceHeight : fallbackZoom;
+  const zoom = Math.min(widthRatio, heightRatio);
+  setLoadedImageZoom(Number.isFinite(zoom) && zoom > 0 ? zoom : fallbackZoom);
+}
+
 function setInitialImageZoom() {
   const workspace = getVisualWorkspaceRect();
   if (workspace.width <= 0 || workspace.height <= 0) {
@@ -1218,10 +1264,10 @@ function setInitialImageZoom() {
     return;
   }
 
-  state.zoom = INITIAL_IMAGE_ZOOM;
-  applyZoom();
-  centerCanvasInWorkspace();
-  updateStatus();
+  const availableWidth = Math.max(120, workspace.width - 56);
+  const availableHeight = Math.max(120, workspace.height - 56);
+  const fitZoom = Math.min(availableWidth / state.imageWidth, availableHeight / state.imageHeight, 1);
+  setLoadedImageZoom(Number.isFinite(fitZoom) && fitZoom > 0 ? fitZoom : INITIAL_IMAGE_ZOOM);
 }
 
 function fitToWindow() {
@@ -2778,6 +2824,48 @@ function drawStudioWindow(ctx, frameCanvas, centerX, centerY, width, height) {
   ctx.restore();
 }
 
+function getStudioWindowTransformBounds(width, height) {
+  const forceFlat = state.windowFrameTheme === 'glass';
+  const pitch = (forceFlat ? 0 : (state.studioPitch || 0)) * Math.PI / 180;
+  const yaw = (forceFlat ? 0 : (state.studioYaw || 0)) * Math.PI / 180;
+  const roll = ((state.studioRotation || 0) + (forceFlat ? 0 : (state.studioRoll || 0))) * Math.PI / 180;
+  const depth = Math.max(400, Number(state.studioCameraDepth || 1200));
+  const depthInfluence = Math.max(0.76, Math.min(1.18, depth / 1200));
+  const scaleX = Math.max(0.42, Math.cos(yaw) * depthInfluence);
+  const scaleY = Math.max(0.42, Math.cos(pitch) * depthInfluence);
+  const skewX = Math.sin(yaw) * 0.22;
+  const skewY = -Math.sin(pitch) * 0.16;
+  const cos = Math.cos(roll);
+  const sin = Math.sin(roll);
+  const points = [
+    [-width / 2, -height / 2],
+    [width / 2, -height / 2],
+    [width / 2, height / 2],
+    [-width / 2, height / 2],
+  ].map(([x, y]) => {
+    const transformedX = x * scaleX + y * skewX;
+    const transformedY = x * skewY + y * scaleY;
+    return {
+      x: transformedX * cos - transformedY * sin,
+      y: transformedX * sin + transformedY * cos,
+    };
+  });
+  const xs = points.map(point => point.x);
+  const ys = points.map(point => point.y);
+  return {
+    width: Math.max(1, Math.max(...xs) - Math.min(...xs)),
+    height: Math.max(1, Math.max(...ys) - Math.min(...ys)),
+  };
+}
+
+function getCurrentStudioDisplaySize() {
+  const bounds = state.studioContentBounds || { width: state.imageWidth, height: state.imageHeight };
+  return {
+    width: bounds.width * state.zoom,
+    height: bounds.height * state.zoom,
+  };
+}
+
 function applyWindowContainer() {
   if (!state.image) return;
 
@@ -2844,6 +2932,8 @@ function applyWindowContainer() {
 
   const compositeDataUrl = getCompositeImage();
   state.originalImageBeforeContainer = compositeDataUrl;
+  const targetDisplaySize = state.pendingStudioDisplaySize;
+  state.pendingStudioDisplaySize = null;
 
   const compositeImg = new Image();
   compositeImg.onload = () => {
@@ -2878,6 +2968,7 @@ function applyWindowContainer() {
 
     const windowX = (canvasW - windowW) / 2;
     const windowY = (canvasH - windowH) / 2;
+    const contentBounds = getStudioWindowTransformBounds(windowW, windowH);
 
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvasW;
@@ -3027,9 +3118,14 @@ function applyWindowContainer() {
       state.historyIndex = -1;
       state.selectedAnnotationIndex = -1;
       state.windowContainerApplied = true;
+      state.studioContentBounds = contentBounds;
       const btn = document.getElementById('btn-window-container');
       if (btn) btn.classList.add('active');
-      loadImage(resultDataUrl, { isInternal: true });
+      loadImage(resultDataUrl, {
+        isInternal: true,
+        preserveDisplaySize: targetDisplaySize || undefined,
+        displaySizeSource: contentBounds,
+      });
       showToast('Window container applied', 'success');
     };
 
@@ -3196,6 +3292,7 @@ function bindContextMenu() {
 function reapplyStudioContainer() {
   if (!state.image) return;
   if (state.windowContainerApplied && state.originalImageBeforeContainer) {
+    state.pendingStudioDisplaySize = getCurrentStudioDisplaySize();
     state.windowContainerApplied = false;
     const originalImg = state.originalImageBeforeContainer;
     const tempImg = new Image();
