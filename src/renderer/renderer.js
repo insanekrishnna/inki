@@ -95,6 +95,8 @@ const state = {
   imageWidth: 0,
   imageHeight: 0,
   zoom: 1,
+  renderScaleX: 1,
+  renderScaleY: 1,
   currentTool: null,
   currentColor: '#111111',
   strokeWidth: 4,
@@ -178,7 +180,6 @@ const state = {
   studioWatermarkBlur: 20,
   originalImageBeforeContainer: null,
   baseOriginalImage: null,
-  studioContentBounds: null,
   pendingStudioDisplaySize: null,
   // Crop state
   cropActive: false,
@@ -1017,7 +1018,6 @@ function clearCanvas() {
   // Reset container background settings
   state.windowContainerApplied = false;
   state.originalImageBeforeContainer = null;
-  state.studioContentBounds = null;
   state.pendingStudioDisplaySize = null;
   state.containerGradient = 'none';
   state.containerBgBlur = 0;
@@ -1096,11 +1096,10 @@ async function loadCaptureData(captureData, options = {}) {
 function loadImage(dataUrl, options = {}) {
   const previousZoom = Number.isFinite(state.zoom) ? state.zoom : INITIAL_IMAGE_ZOOM;
   const previousDisplaySize = {
-    width: state.imageWidth > 0 ? state.imageWidth * previousZoom : 0,
-    height: state.imageHeight > 0 ? state.imageHeight * previousZoom : 0,
+    width: state.imageWidth > 0 ? state.imageWidth * state.renderScaleX : 0,
+    height: state.imageHeight > 0 ? state.imageHeight * state.renderScaleY : 0,
   };
   const preserveDisplaySize = options.preserveDisplaySize ?? options.isInternal;
-  const displaySizeSource = options.displaySizeSource || null;
   const preserveZoom = options.preserveZoom ?? false;
   const img = new Image();
   img.onload = () => {
@@ -1111,7 +1110,6 @@ function loadImage(dataUrl, options = {}) {
       state.baseOriginalImage = dataUrl;
       state.originalImageBeforeContainer = null;
       state.windowContainerApplied = false;
-      state.studioContentBounds = null;
       state.pendingStudioDisplaySize = null;
     } else {
       if (!state.windowContainerApplied) state.originalImageBeforeContainer = null;
@@ -1133,8 +1131,7 @@ function loadImage(dataUrl, options = {}) {
     if (preserveDisplaySize) {
       setLoadedImageDisplaySize(
         typeof preserveDisplaySize === 'object' ? preserveDisplaySize : previousDisplaySize,
-        previousZoom,
-        displaySizeSource
+        previousZoom
       );
     } else if (preserveZoom) {
       setLoadedImageZoom(previousZoom);
@@ -1153,7 +1150,11 @@ function loadImage(dataUrl, options = {}) {
 // ------------------------------------------------------------------------------
 
 function setZoom(newZoom) {
+  const previousZoom = Math.max(0.1, state.zoom || 1);
   state.zoom = Math.max(0.1, Math.min(10, newZoom));
+  const ratio = state.zoom / previousZoom;
+  state.renderScaleX = Math.max(0.1, Math.min(10, state.renderScaleX * ratio));
+  state.renderScaleY = Math.max(0.1, Math.min(10, state.renderScaleY * ratio));
   applyZoom();
   updateStatus();
   if (state.cropActive) updateCropUI();
@@ -1169,9 +1170,13 @@ function setZoomPercent(percent) {
 }
 
 function applyZoom() {
-  elements.canvas.style.width = (state.imageWidth * state.zoom) + 'px';
-  elements.canvas.style.height = (state.imageHeight * state.zoom) + 'px';
+  elements.canvas.style.width = (state.imageWidth * state.renderScaleX) + 'px';
+  elements.canvas.style.height = (state.imageHeight * state.renderScaleY) + 'px';
   applyCanvasPosition();
+}
+
+function getRenderScale() {
+  return Math.min(state.renderScaleX, state.renderScaleY);
 }
 
 function applyCanvasPosition() {
@@ -1227,8 +1232,8 @@ function centerCanvasInWorkspace() {
   if (!state.image) return;
   const workspace = getVisualWorkspaceRect();
   const containerRect = elements.container.getBoundingClientRect();
-  const displayW = state.imageWidth * state.zoom;
-  const displayH = state.imageHeight * state.zoom;
+  const displayW = state.imageWidth * state.renderScaleX;
+  const displayH = state.imageHeight * state.renderScaleY;
 
   state.imageOffsetX = workspace.left - containerRect.left + elements.container.scrollLeft + (workspace.width - displayW) / 2;
   state.imageOffsetY = workspace.top - containerRect.top + elements.container.scrollTop + (workspace.height - displayH) / 2;
@@ -1243,18 +1248,22 @@ function setLoadedImageZoom(zoom) {
   }
 
   state.zoom = Math.max(0.1, Math.min(10, zoom));
+  state.renderScaleX = state.zoom;
+  state.renderScaleY = state.zoom;
   applyZoom();
   centerCanvasInWorkspace();
   updateStatus();
 }
 
-function setLoadedImageDisplaySize(displaySize, fallbackZoom = INITIAL_IMAGE_ZOOM, sourceSize = null) {
-  const sourceWidth = sourceSize?.width > 0 ? sourceSize.width : state.imageWidth;
-  const sourceHeight = sourceSize?.height > 0 ? sourceSize.height : state.imageHeight;
-  const widthRatio = displaySize.width > 0 && sourceWidth > 0 ? displaySize.width / sourceWidth : fallbackZoom;
-  const heightRatio = displaySize.height > 0 && sourceHeight > 0 ? displaySize.height / sourceHeight : fallbackZoom;
-  const zoom = Math.min(widthRatio, heightRatio);
-  setLoadedImageZoom(Number.isFinite(zoom) && zoom > 0 ? zoom : fallbackZoom);
+function setLoadedImageDisplaySize(displaySize, fallbackZoom = INITIAL_IMAGE_ZOOM) {
+  const sourceWidth = state.imageWidth;
+  const sourceHeight = state.imageHeight;
+  const scaleX = displaySize.width > 0 && sourceWidth > 0 ? displaySize.width / sourceWidth : fallbackZoom;
+  const scaleY = displaySize.height > 0 && sourceHeight > 0 ? displaySize.height / sourceHeight : fallbackZoom;
+  state.renderScaleX = Math.max(0.1, Math.min(10, Number.isFinite(scaleX) && scaleX > 0 ? scaleX : fallbackZoom));
+  state.renderScaleY = Math.max(0.1, Math.min(10, Number.isFinite(scaleY) && scaleY > 0 ? scaleY : fallbackZoom));
+  applyZoom();
+  centerCanvasInWorkspace();
 }
 
 function setInitialImageZoom() {
@@ -1286,10 +1295,7 @@ function fitToWindow() {
 
   const scaleX = safeAvailW / state.imageWidth;
   const scaleY = safeAvailH / state.imageHeight;
-  state.zoom = Math.min(scaleX, scaleY, 1);
-  applyZoom();
-  centerCanvasInWorkspace();
-  updateStatus();
+  setLoadedImageZoom(Math.min(scaleX, scaleY, 1));
 }
 
 function onWheel(e) {
@@ -1473,7 +1479,7 @@ function selectTextFontSize(size) {
     }
   }
   if (state.isEditingText) {
-    elements.textInput.style.fontSize = Math.round(size * state.zoom) + 'px';
+    elements.textInput.style.fontSize = Math.round(size * getRenderScale()) + 'px';
     autoResizeTextInput();
   }
 }
@@ -1970,7 +1976,7 @@ function openInlineText(coords) {
   const input = elements.textInput;
   input.value = '';
   input.style.color = state.currentColor;
-  input.style.fontSize = Math.round(state.textFontSize * state.zoom) + 'px';
+  input.style.fontSize = Math.round(state.textFontSize * getRenderScale()) + 'px';
   input.style.fontFamily = state.textFontFamily;
   input.style.fontWeight = state.textBold ? 'bold' : 'normal';
   input.style.fontStyle = state.textItalic ? 'italic' : 'normal';
@@ -2331,7 +2337,7 @@ function getImageResizeHandles() {
 
 function findImageResizeHandleAt(coords) {
   if (!state.selectedImage || state.selectedAnnotationIndex >= 0) return null;
-  const size = Math.max(10, 12 / Math.max(state.zoom, 0.1));
+  const size = Math.max(10, 12 / Math.max(getRenderScale(), 0.1));
   return getImageResizeHandles().find(h => Math.abs(coords.x - h.x) <= size && Math.abs(coords.y - h.y) <= size) || null;
 }
 
@@ -2454,7 +2460,7 @@ function drawImageSelectionHandles() {
   ctx.save();
   ctx.strokeStyle = '#3b82f6';
   ctx.fillStyle = '#ffffff';
-  ctx.lineWidth = Math.max(2, 2 / Math.max(state.zoom, 0.1));
+  ctx.lineWidth = Math.max(2, 2 / Math.max(getRenderScale(), 0.1));
   ctx.setLineDash([6, 5]);
   ctx.strokeRect(0, 0, state.imageWidth, state.imageHeight);
   ctx.setLineDash([]);
@@ -2465,7 +2471,7 @@ function drawImageSelectionHandles() {
   ctx.restore();
 
   function drawHandle(x, y) {
-    const s = Math.max(8, 8 / Math.max(state.zoom, 0.1));
+    const s = Math.max(8, 8 / Math.max(getRenderScale(), 0.1));
     const hx = Math.max(s / 2, Math.min(state.imageWidth - s / 2, x));
     const hy = Math.max(s / 2, Math.min(state.imageHeight - s / 2, y));
     ctx.beginPath();
@@ -2824,45 +2830,13 @@ function drawStudioWindow(ctx, frameCanvas, centerX, centerY, width, height) {
   ctx.restore();
 }
 
-function getStudioWindowTransformBounds(width, height) {
-  const forceFlat = state.windowFrameTheme === 'glass';
-  const pitch = (forceFlat ? 0 : (state.studioPitch || 0)) * Math.PI / 180;
-  const yaw = (forceFlat ? 0 : (state.studioYaw || 0)) * Math.PI / 180;
-  const roll = ((state.studioRotation || 0) + (forceFlat ? 0 : (state.studioRoll || 0))) * Math.PI / 180;
-  const depth = Math.max(400, Number(state.studioCameraDepth || 1200));
-  const depthInfluence = Math.max(0.76, Math.min(1.18, depth / 1200));
-  const scaleX = Math.max(0.42, Math.cos(yaw) * depthInfluence);
-  const scaleY = Math.max(0.42, Math.cos(pitch) * depthInfluence);
-  const skewX = Math.sin(yaw) * 0.22;
-  const skewY = -Math.sin(pitch) * 0.16;
-  const cos = Math.cos(roll);
-  const sin = Math.sin(roll);
-  const points = [
-    [-width / 2, -height / 2],
-    [width / 2, -height / 2],
-    [width / 2, height / 2],
-    [-width / 2, height / 2],
-  ].map(([x, y]) => {
-    const transformedX = x * scaleX + y * skewX;
-    const transformedY = x * skewY + y * scaleY;
-    return {
-      x: transformedX * cos - transformedY * sin,
-      y: transformedX * sin + transformedY * cos,
-    };
-  });
-  const xs = points.map(point => point.x);
-  const ys = points.map(point => point.y);
-  return {
-    width: Math.max(1, Math.max(...xs) - Math.min(...xs)),
-    height: Math.max(1, Math.max(...ys) - Math.min(...ys)),
-  };
-}
-
 function getCurrentStudioDisplaySize() {
-  const bounds = state.studioContentBounds || { width: state.imageWidth, height: state.imageHeight };
+  // Preserve the full editor canvas. Padding, shadows, backdrops, and camera
+  // headroom all belong to this surface and must not change its on-screen size.
+  const bounds = { width: state.imageWidth, height: state.imageHeight };
   return {
-    width: bounds.width * state.zoom,
-    height: bounds.height * state.zoom,
+    width: bounds.width * state.renderScaleX,
+    height: bounds.height * state.renderScaleY,
   };
 }
 
@@ -2968,7 +2942,6 @@ function applyWindowContainer() {
 
     const windowX = (canvasW - windowW) / 2;
     const windowY = (canvasH - windowH) / 2;
-    const contentBounds = getStudioWindowTransformBounds(windowW, windowH);
 
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvasW;
@@ -3118,13 +3091,11 @@ function applyWindowContainer() {
       state.historyIndex = -1;
       state.selectedAnnotationIndex = -1;
       state.windowContainerApplied = true;
-      state.studioContentBounds = contentBounds;
       const btn = document.getElementById('btn-window-container');
       if (btn) btn.classList.add('active');
       loadImage(resultDataUrl, {
         isInternal: true,
         preserveDisplaySize: targetDisplaySize || undefined,
-        displaySizeSource: contentBounds,
       });
       showToast('Window container applied', 'success');
     };
@@ -3438,7 +3409,6 @@ function bindStudioControls() {
       state[key] = input.type === 'checkbox' ? input.checked : Number(input.value);
       updateStudioValueLabels();
       if (input.classList.contains('rs-range')) updateRangeProgress(input);
-      if (state.windowContainerApplied) reapplyStudioContainer();
     });
     input.addEventListener('change', () => {
       const key = input.dataset.stateKey;
@@ -3669,21 +3639,7 @@ function bindRightSidebar() {
 
         state.containerAspectRatio = option.dataset.value;
         if (state.windowContainerApplied) {
-          // re-apply to see new aspect ratio
-          state.windowContainerApplied = false;
-          const originalImg = state.originalImageBeforeContainer;
-          const tempImg = new Image();
-          tempImg.onload = () => {
-            state.image = tempImg;
-            state.imageWidth = tempImg.width;
-            state.imageHeight = tempImg.height;
-            state.annotations = [];
-            state.history = [];
-            state.historyIndex = -1;
-            state.originalImageBeforeContainer = originalImg;
-            applyWindowContainer();
-          };
-          tempImg.src = originalImg;
+          reapplyStudioContainer();
         }
       });
     });
@@ -3702,20 +3658,7 @@ function bindRightSidebar() {
       });
 
       if (state.windowContainerApplied) {
-        state.windowContainerApplied = false;
-        const originalImg = state.originalImageBeforeContainer;
-        const tempImg = new Image();
-        tempImg.onload = () => {
-          state.image = tempImg;
-          state.imageWidth = tempImg.width;
-          state.imageHeight = tempImg.height;
-          state.annotations = [];
-          state.history = [];
-          state.historyIndex = -1;
-          state.originalImageBeforeContainer = originalImg;
-          applyWindowContainer();
-        };
-        tempImg.src = originalImg;
+        reapplyStudioContainer();
       } else if (state.image) {
         // Auto-apply window container when frame theme is clicked without prior activation
         applyWindowContainer();
@@ -3745,21 +3688,7 @@ function bindRightSidebar() {
       swatch.classList.add('active');
 
       if (state.windowContainerApplied && state.originalImageBeforeContainer) {
-        // Re-apply with new background
-        state.windowContainerApplied = false;
-        const originalImg = state.originalImageBeforeContainer;
-        const tempImg = new Image();
-        tempImg.onload = () => {
-          state.image = tempImg;
-          state.imageWidth = tempImg.width;
-          state.imageHeight = tempImg.height;
-          state.annotations = [];
-          state.history = [];
-          state.historyIndex = -1;
-          state.originalImageBeforeContainer = originalImg;
-          applyWindowContainer();
-        };
-        tempImg.src = originalImg;
+        reapplyStudioContainer();
       } else if (!state.windowContainerApplied && state.image) {
         // Auto-apply window container when background is clicked without prior activation
         applyWindowContainer();
@@ -3774,20 +3703,7 @@ function bindRightSidebar() {
       rsColorPresets.forEach((item) => item.classList.toggle('active', item === button));
 
       if (state.windowContainerApplied && state.originalImageBeforeContainer) {
-        state.windowContainerApplied = false;
-        const originalImg = state.originalImageBeforeContainer;
-        const tempImg = new Image();
-        tempImg.onload = () => {
-          state.image = tempImg;
-          state.imageWidth = tempImg.width;
-          state.imageHeight = tempImg.height;
-          state.annotations = [];
-          state.history = [];
-          state.historyIndex = -1;
-          state.originalImageBeforeContainer = originalImg;
-          applyWindowContainer();
-        };
-        tempImg.src = originalImg;
+        reapplyStudioContainer();
       } else if (!state.windowContainerApplied && state.image) {
         applyWindowContainer();
         rsContainer.classList.toggle('active', state.windowContainerApplied);
