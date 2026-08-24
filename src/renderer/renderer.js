@@ -183,6 +183,10 @@ const state = {
   originalImageBeforeContainer: null,
   baseOriginalImage: null,
   pendingStudioDisplaySize: null,
+  studioDisplaySizeLock: null,
+  studioReapplyTimer: null,
+  studioReapplyInFlight: false,
+  studioReapplyQueued: false,
   // Crop state
   cropActive: false,
   cropX: 0,
@@ -568,9 +572,15 @@ function bindCanvas() {
   elements.container.addEventListener('wheel', onWheel, { passive: false });
 }
 
+function isEditableTarget(target) {
+  return target instanceof HTMLElement && (
+    target.matches('input, textarea, select, [contenteditable="true"]') || target.isContentEditable
+  );
+}
+
 function bindKeyboard() {
   document.addEventListener('keydown', (e) => {
-    if (state.isEditingText) return;
+    if (state.isEditingText || isEditableTarget(e.target)) return;
     const isMac = window.projectApi.platform === 'darwin';
     const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
 
@@ -585,7 +595,6 @@ function bindKeyboard() {
     if (cmdOrCtrl && e.key.toLowerCase() === 'o') { e.preventDefault(); openFile(); return; }
     if (cmdOrCtrl && e.key.toLowerCase() === 'e') { e.preventDefault(); saveFile(); return; }
     if (cmdOrCtrl && e.key.toLowerCase() === 'c' && state.image) { e.preventDefault(); copyToClipboard(); return; }
-    if (cmdOrCtrl && e.key.toLowerCase() === 'v') { e.preventDefault(); pasteFromClipboard(); return; }
     if (cmdOrCtrl && e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); redo(); return; }
     if (cmdOrCtrl && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); return; }
     
@@ -605,6 +614,7 @@ function bindKeyboard() {
   });
 
   document.addEventListener('keydown', (e) => {
+    if (isEditableTarget(e.target)) return;
     if (e.key === 'Delete' || e.key === 'Backspace' || e.key === 'Del' || e.key === 'Suppr') {
       const selected = state.annotations[state.selectedAnnotationIndex];
       const canDelete = state.selectedAnnotationIndex >= 0 && (state.currentTool === 'select' || selected?.type === 'text');
@@ -682,12 +692,12 @@ function bindInlineText() {
 }
 
 function bindPaste() {
-  document.addEventListener('paste', async (e) => {
+  document.addEventListener('paste', (e) => {
     if (state.isEditingText) return;
-    
+
     const items = e.clipboardData?.items;
     if (!items) return;
-    
+
     for (const item of items) {
       if (item.type.startsWith('image/')) {
         e.preventDefault();
@@ -695,6 +705,7 @@ function bindPaste() {
         if (blob) {
           const reader = new FileReader();
           reader.onload = () => {
+            if (state.cropActive) cancelCrop();
             loadImage(reader.result);
             showToast('Image pasted from clipboard', 'success');
           };
@@ -1021,6 +1032,7 @@ function clearCanvas() {
   state.windowContainerApplied = false;
   state.originalImageBeforeContainer = null;
   state.pendingStudioDisplaySize = null;
+  state.studioDisplaySizeLock = null;
   state.containerGradient = 'none';
   state.containerBgBlur = 0;
   state.containerColorPreset = 'normal';
@@ -1113,6 +1125,7 @@ function loadImage(dataUrl, options = {}) {
       state.originalImageBeforeContainer = null;
       state.windowContainerApplied = false;
       state.pendingStudioDisplaySize = null;
+      state.studioDisplaySizeLock = null;
     } else {
       if (!state.windowContainerApplied) state.originalImageBeforeContainer = null;
     }
@@ -1143,6 +1156,7 @@ function loadImage(dataUrl, options = {}) {
     render();
     updateStatus();
     updateToolbarState();
+    options.onLoaded?.();
   };
   img.src = dataUrl;
 }
@@ -2892,7 +2906,7 @@ function getCurrentStudioDisplaySize() {
   };
 }
 
-function applyWindowContainer() {
+function applyWindowContainer(options = {}) {
   if (!state.image) return;
 
   if (state.windowContainerApplied && state.originalImageBeforeContainer) {
@@ -2903,7 +2917,7 @@ function applyWindowContainer() {
     state.selectedAnnotationIndex = -1;
     const btn = document.getElementById('btn-window-container');
     if (btn) btn.classList.remove('active');
-    loadImage(state.originalImageBeforeContainer, { isInternal: true });
+    loadImage(state.originalImageBeforeContainer, { isInternal: true, onLoaded: options.onComplete });
     showToast('Window container removed', 'success');
     return;
   }
@@ -3148,6 +3162,7 @@ function applyWindowContainer() {
       loadImage(resultDataUrl, {
         isInternal: true,
         preserveDisplaySize: targetDisplaySize || undefined,
+        onLoaded: options.onComplete,
       });
       showToast('Window container applied', 'success');
     };
@@ -3314,8 +3329,38 @@ function bindContextMenu() {
 
 function reapplyStudioContainer() {
   if (!state.image) return;
+
+  if (!state.studioDisplaySizeLock) {
+    state.studioDisplaySizeLock = getCurrentStudioDisplaySize();
+  }
+  state.studioReapplyQueued = true;
+
+  if (state.studioReapplyTimer !== null) {
+    clearTimeout(state.studioReapplyTimer);
+  }
+  if (state.studioReapplyInFlight) return;
+
+  state.studioReapplyTimer = setTimeout(runStudioReapply, 40);
+}
+
+function runStudioReapply() {
+  state.studioReapplyTimer = null;
+  if (!state.studioReapplyQueued || state.studioReapplyInFlight || !state.image) return;
+
+  state.studioReapplyQueued = false;
+  state.studioReapplyInFlight = true;
+  state.pendingStudioDisplaySize = state.studioDisplaySizeLock;
+  const complete = () => {
+    state.studioReapplyInFlight = false;
+    if (state.studioReapplyQueued) {
+      state.studioReapplyTimer = setTimeout(runStudioReapply, 0);
+    } else {
+      state.pendingStudioDisplaySize = null;
+      state.studioDisplaySizeLock = null;
+    }
+  };
+
   if (state.windowContainerApplied && state.originalImageBeforeContainer) {
-    state.pendingStudioDisplaySize = getCurrentStudioDisplaySize();
     state.windowContainerApplied = false;
     const originalImg = state.originalImageBeforeContainer;
     const tempImg = new Image();
@@ -3327,12 +3372,12 @@ function reapplyStudioContainer() {
       state.history = [];
       state.historyIndex = -1;
       state.originalImageBeforeContainer = originalImg;
-      applyWindowContainer();
+      applyWindowContainer({ onComplete: complete });
     };
     tempImg.src = originalImg;
     return;
   }
-  applyWindowContainer();
+  applyWindowContainer({ onComplete: complete });
 }
 
 function updateStudioValueLabels() {
@@ -3526,7 +3571,13 @@ function bindStudioControls() {
   const browserUrlInput = document.getElementById('studio-browser-url');
   browserUrlInput?.addEventListener('input', (event) => {
     state.studioBrowserUrl = event.target.value;
+  });
+  browserUrlInput?.addEventListener('change', (event) => {
+    state.studioBrowserUrl = event.target.value;
     if (state.windowContainerApplied) reapplyStudioContainer();
+  });
+  browserUrlInput?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') event.currentTarget.blur();
   });
   updateBrowserUrlVisibility();
 
@@ -3570,9 +3621,16 @@ function bindStudioControls() {
     });
   });
 
-  document.getElementById('studio-watermark-text')?.addEventListener('input', (event) => {
+  const watermarkTextInput = document.getElementById('studio-watermark-text');
+  watermarkTextInput?.addEventListener('input', (event) => {
+    state.studioWatermarkText = event.target.value;
+  });
+  watermarkTextInput?.addEventListener('change', (event) => {
     state.studioWatermarkText = event.target.value;
     if (state.windowContainerApplied) reapplyStudioContainer();
+  });
+  watermarkTextInput?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') event.currentTarget.blur();
   });
 
   document.querySelectorAll('[data-noise-layer]').forEach((button) => {
