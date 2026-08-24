@@ -988,6 +988,7 @@ body.has-content .toolbar.editor-sidebar .toolbar-group.capture-modes + .toolbar
 #canvas {
   display: none;
   image-rendering: auto;
+  touch-action: none;
   position: absolute;
   z-index: 1;
   left: 0;

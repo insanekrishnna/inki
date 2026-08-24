@@ -133,6 +133,8 @@ const state = {
   isResizingImage: false,
   imageResizeHandle: null,
   imageResizeOrig: null,
+  imageResizeFrame: null,
+  pendingImageResizeEvent: null,
   isResizingAnnotation: false,
   resizeHandle: null,
   windowContainerApplied: false,
@@ -559,10 +561,10 @@ function bindTooltips() {
 }
 
 function bindCanvas() {
-  elements.canvas.addEventListener('mousedown', onCanvasMouseDown);
-  document.addEventListener('mousemove', onCanvasMouseMove);
-  document.addEventListener('mouseup', onCanvasMouseUp);
-  elements.canvas.addEventListener('mouseleave', onCanvasMouseUp);
+  elements.canvas.addEventListener('pointerdown', onCanvasPointerDown);
+  elements.canvas.addEventListener('pointermove', onCanvasMouseMove);
+  elements.canvas.addEventListener('pointerup', onCanvasPointerUp);
+  elements.canvas.addEventListener('pointercancel', onCanvasPointerUp);
   elements.container.addEventListener('wheel', onWheel, { passive: false });
 }
 
@@ -1706,6 +1708,19 @@ function moveAnnotation(annotation, dx, dy) {
   if ('y1' in annotation) { annotation.y1 += dy; annotation.y2 += dy; }
 }
 
+function onCanvasPointerDown(e) {
+  if (e.button !== 0) return;
+  elements.canvas.setPointerCapture(e.pointerId);
+  onCanvasMouseDown(e);
+}
+
+function onCanvasPointerUp(e) {
+  onCanvasMouseUp(e);
+  if (elements.canvas.hasPointerCapture(e.pointerId)) {
+    elements.canvas.releasePointerCapture(e.pointerId);
+  }
+}
+
 function onCanvasMouseDown(e) {
   if (!state.image || state.cropActive) return;
   if (state.isEditingText) { commitInlineText(); return; }
@@ -1724,10 +1739,14 @@ function onCanvasMouseDown(e) {
       state.selectedImage = true;
       state.selectedAnnotationIndex = -1;
       state.imageResizeOrig = {
-        x: coords.x,
-        y: coords.y,
+        clientX: e.clientX,
+        clientY: e.clientY,
         width: state.imageWidth,
         height: state.imageHeight,
+        offsetX: state.imageOffsetX,
+        offsetY: state.imageOffsetY,
+        scaleX: state.renderScaleX,
+        scaleY: state.renderScaleY,
         image: getImageDataUrl(),
         annotations: cloneAnnotations(),
       };
@@ -1823,9 +1842,7 @@ function onCanvasMouseMove(e) {
   if (!state.image || state.cropActive) return;
   
   if (state.isResizingImage) {
-    const coords = getCanvasCoords(e);
-    resizeSelectedImage(coords);
-    render();
+    scheduleImageResize(e);
     return;
   }
 
@@ -1879,6 +1896,7 @@ function onCanvasMouseMove(e) {
 
 function onCanvasMouseUp(e) {
   if (state.isResizingImage) {
+    flushImageResize(e);
     const changed = state.imageResizeOrig &&
       (state.imageWidth !== state.imageResizeOrig.width || state.imageHeight !== state.imageResizeOrig.height);
     if (changed) {
@@ -2355,13 +2373,13 @@ function scaleAnnotation(annotation, scaleX, scaleY) {
   }
 }
 
-function resizeSelectedImage(coords) {
+function resizeSelectedImage(event) {
   const orig = state.imageResizeOrig;
   const handle = state.imageResizeHandle?.kind;
   if (!orig || !handle) return;
 
-  const dx = coords.x - orig.x;
-  const dy = coords.y - orig.y;
+  const dx = (event.clientX - orig.clientX) / Math.max(orig.scaleX, 0.1);
+  const dy = (event.clientY - orig.clientY) / Math.max(orig.scaleY, 0.1);
   let width = orig.width;
   let height = orig.height;
 
@@ -2372,6 +2390,14 @@ function resizeSelectedImage(coords) {
 
   width = Math.max(20, width);
   height = Math.max(20, height);
+
+  // Keep the edge opposite the dragged handle fixed in place.
+  state.imageOffsetX = handle.includes('w')
+    ? orig.offsetX + (orig.width - width) * orig.scaleX
+    : orig.offsetX;
+  state.imageOffsetY = handle.includes('n')
+    ? orig.offsetY + (orig.height - height) * orig.scaleY
+    : orig.offsetY;
 
   setImageCanvasSize(width, height);
 
@@ -2634,6 +2660,32 @@ function drawAsciiPattern(ctx, width, height, layer = 'image') {
     }
   }
   ctx.restore();
+}
+
+function scheduleImageResize(event) {
+  state.pendingImageResizeEvent = {
+    clientX: event.clientX,
+    clientY: event.clientY,
+  };
+  if (state.imageResizeFrame !== null) return;
+
+  state.imageResizeFrame = requestAnimationFrame(() => {
+    state.imageResizeFrame = null;
+    const nextEvent = state.pendingImageResizeEvent;
+    state.pendingImageResizeEvent = null;
+    if (!state.isResizingImage || !nextEvent) return;
+    resizeSelectedImage(nextEvent);
+    render();
+  });
+}
+
+function flushImageResize(event) {
+  if (state.imageResizeFrame !== null) {
+    cancelAnimationFrame(state.imageResizeFrame);
+    state.imageResizeFrame = null;
+  }
+  state.pendingImageResizeEvent = null;
+  resizeSelectedImage(event);
 }
 
 function measureLetterSpacedText(ctx, text, spacing = 0) {
