@@ -3777,13 +3777,17 @@ function bindRightSidebar() {
     });
   });
 
-  rsCopy.addEventListener('click', () => {
-    copyToClipboard();
-  });
+  if (rsCopy) {
+    rsCopy.addEventListener('click', () => {
+      copyToClipboard();
+    });
+  }
 
-  rsSavePng.addEventListener('click', () => {
-    saveFile();
-  });
+  if (rsSavePng) {
+    rsSavePng.addEventListener('click', () => {
+      saveFile();
+    });
+  }
 
   rsGradientSwatches.forEach(swatch => {
     swatch.addEventListener('click', () => {

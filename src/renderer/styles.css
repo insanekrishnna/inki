@@ -2854,11 +2854,27 @@ body.theme-dark .rs-section-title {
   display: none;
 }
 
-.right-sidebar:not(.expanded) .rs-gradient-swatch[data-gradient="ocean"],
+.right-sidebar:not(.expanded) .rs-gradient-swatch[data-gradient="none"],
 .right-sidebar:not(.expanded) .rs-gradient-swatch[data-bg="f1.png"],
 .right-sidebar:not(.expanded) .rs-gradient-swatch[data-bg="g1.png"],
 .right-sidebar:not(.expanded) .rs-gradient-swatch[data-bg="Mac1.png"] {
   display: flex;
+}
+
+.right-sidebar:not(.expanded) .rs-gradient-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.right-sidebar:not(.expanded) .rs-gradient-swatch span {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+}
+
+.right-sidebar:not(.expanded) .rs-gradient-swatch.active {
+  padding: 3px;
 }
 
 .rs-gradient-swatch span {
@@ -2945,6 +2961,8 @@ body.theme-dark .rs-section-title {
 
 .right-sidebar.expanded .rs-aspect-ratio-wrapper {
   display: flex;
+  position: relative;
+  z-index: 201;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
@@ -3190,6 +3208,21 @@ body.theme-dark .rs-frame-swatch span {
 
 .right-sidebar.expanded .rs-studio-panel.active {
   display: block;
+}
+
+.right-sidebar:not(.expanded) .rs-studio-panel[data-studio-panel="backdrop"] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.right-sidebar:not(.expanded) .rs-studio-panel[data-studio-panel="backdrop"] > * {
+  display: none;
+}
+
+.right-sidebar:not(.expanded) .rs-studio-panel[data-studio-panel="backdrop"] > .rs-gradients {
+  display: flex;
 }
 
 .rs-control-row,
