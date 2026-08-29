@@ -3335,10 +3335,11 @@ function reapplyStudioContainer() {
   }
   state.studioReapplyQueued = true;
 
-  if (state.studioReapplyTimer !== null) {
-    clearTimeout(state.studioReapplyTimer);
-  }
-  if (state.studioReapplyInFlight) return;
+  // Throttle, not debounce: a held slider fires 'input' every few ms, and
+  // restarting the timer on each one would postpone the render until the drag
+  // paused. Let the pending timer run so the canvas refreshes every ~40ms while
+  // dragging; runStudioReapply() always picks up the latest state.
+  if (state.studioReapplyInFlight || state.studioReapplyTimer !== null) return;
 
   state.studioReapplyTimer = setTimeout(runStudioReapply, 40);
 }
@@ -3499,22 +3500,21 @@ function bindStudioControls() {
 
   ensureRangeResetButtons();
 
+  const commitStudioInput = (input) => {
+    const key = input.dataset.stateKey;
+    if (!key) return;
+    state[key] = input.type === 'checkbox' ? input.checked : Number(input.value);
+    updateStudioValueLabels();
+    if (input.classList.contains('rs-range')) updateRangeProgress(input);
+    // Live preview: reapplyStudioContainer() self-coalesces (40ms debounce +
+    // in-flight queue), so firing it on every 'input' tick keeps the canvas in
+    // sync while the handle is still held instead of waiting for release.
+    if (state.image) reapplyStudioContainer();
+  };
+
   document.querySelectorAll('.studio-input').forEach((input) => {
-    input.addEventListener('input', () => {
-      const key = input.dataset.stateKey;
-      if (!key) return;
-      state[key] = input.type === 'checkbox' ? input.checked : Number(input.value);
-      updateStudioValueLabels();
-      if (input.classList.contains('rs-range')) updateRangeProgress(input);
-    });
-    input.addEventListener('change', () => {
-      const key = input.dataset.stateKey;
-      if (!key) return;
-      state[key] = input.type === 'checkbox' ? input.checked : Number(input.value);
-      updateStudioValueLabels();
-      if (input.classList.contains('rs-range')) updateRangeProgress(input);
-      if (state.image) reapplyStudioContainer();
-    });
+    input.addEventListener('input', () => commitStudioInput(input));
+    input.addEventListener('change', () => commitStudioInput(input));
   });
   updateStudioValueLabels();
 
