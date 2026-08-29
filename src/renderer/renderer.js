@@ -2706,11 +2706,21 @@ function replaceImage(dataUrl, cb) {
 // (Magic Wand was removed)
 
 function getStudioFilter() {
+  const brightness = state.studioBrightness || 100;
+  const contrast = state.studioContrast || 100;
+  const saturation = state.studioSaturation || 100;
+  const hue = state.studioHue || 0;
+  // An identity filter is not free: setting ctx.filter to anything but 'none'
+  // routes the draw through the filter pipeline, costing an extra full-size
+  // composite and softening the result for no visible gain.
+  if (brightness === 100 && contrast === 100 && saturation === 100 && hue === 0) {
+    return 'none';
+  }
   return [
-    `brightness(${state.studioBrightness || 100}%)`,
-    `contrast(${state.studioContrast || 100}%)`,
-    `saturate(${state.studioSaturation || 100}%)`,
-    `hue-rotate(${state.studioHue || 0}deg)`,
+    `brightness(${brightness}%)`,
+    `contrast(${contrast}%)`,
+    `saturate(${saturation}%)`,
+    `hue-rotate(${hue}deg)`,
   ].join(' ');
 }
 
@@ -2785,34 +2795,59 @@ function flushImageResize(event) {
   resizeSelectedImage(event);
 }
 
+// Chrome supports ctx.letterSpacing, which keeps the string shaped as one run
+// instead of being positioned glyph by glyph. Kept behind a capability check so
+// the per-character fallback still works anywhere it is missing.
+const SUPPORTS_LETTER_SPACING = typeof CanvasRenderingContext2D !== 'undefined'
+  && 'letterSpacing' in CanvasRenderingContext2D.prototype;
+
 function measureLetterSpacedText(ctx, text, spacing = 0) {
-  const chars = Array.from(String(text || ''));
-  if (!chars.length) return 0;
+  const value = String(text || '');
+  if (!value) return 0;
+  if (SUPPORTS_LETTER_SPACING) {
+    const previous = ctx.letterSpacing;
+    ctx.letterSpacing = `${spacing}px`;
+    const width = ctx.measureText(value).width;
+    ctx.letterSpacing = previous;
+    return width;
+  }
+  const chars = Array.from(value);
   return chars.reduce((width, char) => width + ctx.measureText(char).width, 0) + spacing * (chars.length - 1);
 }
 
 function drawLetterSpacedText(ctx, text, x, y, spacing = 0, maxWidth = Infinity) {
-  const chars = Array.from(String(text || ''));
+  const value = String(text || '');
+  const chars = Array.from(value);
   if (!chars.length) return;
 
   let effectiveSpacing = spacing;
-  let totalWidth = measureLetterSpacedText(ctx, text, effectiveSpacing);
+  let totalWidth = measureLetterSpacedText(ctx, value, effectiveSpacing);
   if (Number.isFinite(maxWidth) && totalWidth > maxWidth && chars.length > 1) {
-    effectiveSpacing = Math.min(spacing, Math.max(0, (maxWidth - measureLetterSpacedText(ctx, text, 0)) / (chars.length - 1)));
-    totalWidth = measureLetterSpacedText(ctx, text, effectiveSpacing);
+    effectiveSpacing = Math.min(spacing, Math.max(0, (maxWidth - measureLetterSpacedText(ctx, value, 0)) / (chars.length - 1)));
+    totalWidth = measureLetterSpacedText(ctx, value, effectiveSpacing);
   }
 
   const align = ctx.textAlign;
   let drawX = x;
   if (align === 'center') drawX = x - totalWidth / 2;
   if (align === 'right' || align === 'end') drawX = x - totalWidth;
+  // Snap the run to a whole pixel: a half-pixel origin makes every glyph land on
+  // its own subpixel phase, which is what turns small labels to mush.
+  drawX = Math.round(drawX);
 
   const previousAlign = ctx.textAlign;
   ctx.textAlign = 'left';
-  chars.forEach((char) => {
-    ctx.fillText(char, drawX, y);
-    drawX += ctx.measureText(char).width + effectiveSpacing;
-  });
+  if (SUPPORTS_LETTER_SPACING) {
+    const previousSpacing = ctx.letterSpacing;
+    ctx.letterSpacing = `${effectiveSpacing}px`;
+    ctx.fillText(value, drawX, y);
+    ctx.letterSpacing = previousSpacing;
+  } else {
+    chars.forEach((char) => {
+      ctx.fillText(char, drawX, y);
+      drawX += ctx.measureText(char).width + effectiveSpacing;
+    });
+  }
   ctx.textAlign = previousAlign;
 }
 
@@ -2832,8 +2867,10 @@ function drawStudioWatermark(ctx, canvasW, canvasH, options = {}) {
   const padY = fontSize * (state.studioWatermarkSize === 'small' ? 0.4 : state.studioWatermarkSize === 'large' ? 0.64 : 0.52);
 
   ctx.save();
-  const textSpacing = Math.max(0.25, fontSize * 0.025);
-  ctx.font = `700 ${fontSize}px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif`;
+  // Thin, unspaced and full contrast. The old 700 weight with per-glyph spacing
+  // over a 66%-opaque pill let the backdrop bleed through the strokes.
+  const textSpacing = 0;
+  ctx.font = `500 ${fontSize}px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif`;
   const badgeW = measureLetterSpacedText(ctx, label, textSpacing) + padX * 2;
   const badgeH = fontSize + padY * 2;
   const margin = Math.max(10, Math.min(area.width, area.height) * 0.035);
@@ -2843,15 +2880,15 @@ function drawStudioWatermark(ctx, canvasW, canvasH, options = {}) {
   if (position.includes('left')) x = area.x + margin;
   if (position.includes('center')) x = area.x + (area.width - badgeW) / 2;
   if (position.includes('top')) y = area.y + margin;
-  x = Math.max(area.x + margin, Math.min(area.x + area.width - badgeW - margin, x));
-  y = Math.max(area.y + margin, Math.min(area.y + area.height - badgeH - margin, y));
+  x = Math.round(Math.max(area.x + margin, Math.min(area.x + area.width - badgeW - margin, x)));
+  y = Math.round(Math.max(area.y + margin, Math.min(area.y + area.height - badgeH - margin, y)));
   ctx.shadowColor = 'rgba(0, 0, 0, 0.18)';
   ctx.shadowBlur = Math.max(8, 18 * sizeScale);
   ctx.shadowOffsetY = Math.max(4, 8 * sizeScale);
   const radius = Math.min(18 * sizeScale, badgeH / 2);
   const blur = Math.max(0, Number(state.studioWatermarkBlur || 0));
   drawFrostedWatermarkPill(ctx, x, y, badgeW, badgeH, radius, blur);
-  ctx.fillStyle = state.studioWatermarkMode === 'badge' ? 'rgba(255, 255, 255, 0.84)' : 'rgba(255, 255, 255, 0.66)';
+  ctx.fillStyle = state.studioWatermarkMode === 'badge' ? 'rgba(255, 255, 255, 0.94)' : 'rgba(255, 255, 255, 0.86)';
   ctx.beginPath();
   roundRect(ctx, x, y, badgeW, badgeH, radius);
   ctx.fill();
@@ -2860,7 +2897,7 @@ function drawStudioWatermark(ctx, canvasW, canvasH, options = {}) {
   ctx.fillStyle = '#0b0b0b';
   ctx.textBaseline = 'middle';
   ctx.textAlign = 'left';
-  drawLetterSpacedText(ctx, label, x + padX, y + badgeH / 2 + 0.5, textSpacing);
+  drawLetterSpacedText(ctx, label, Math.round(x + padX), Math.round(y + badgeH / 2), textSpacing);
   ctx.restore();
 }
 
@@ -2971,6 +3008,22 @@ function drawStudioWindow(ctx, frameCanvas, centerX, centerY, width, height) {
   const skewX = Math.sin(yaw) * 0.22;
   const skewY = -Math.sin(pitch) * 0.16;
 
+  // With the camera at rest this matrix is the identity, but going through it
+  // anyway resamples every pixel of the screenshot through a fractional
+  // translate. Blit on whole pixels instead and the capture stays 1:1 sharp.
+  const isFlat = roll === 0 && skewX === 0 && skewY === 0
+    && Math.abs(scaleX - 1) < 1e-6 && Math.abs(scaleY - 1) < 1e-6;
+  if (isFlat) {
+    ctx.drawImage(
+      frameCanvas,
+      Math.round(centerX - width / 2),
+      Math.round(centerY - height / 2),
+      width,
+      height,
+    );
+    return;
+  }
+
   ctx.save();
   ctx.translate(centerX, centerY);
   ctx.rotate(roll);
@@ -3020,7 +3073,7 @@ function applyWindowContainer(options = {}) {
   const isBrowserChrome = windowChrome === 'browser';
   const isFramelessChrome = windowChrome === 'frameless';
   const isGlassChrome = windowChrome === 'glass';
-  const titleBarHeight = !isFramelessChrome && state.studioTitlebar ? 48 : 0;
+  const titleBarBase = !isFramelessChrome && state.studioTitlebar ? 48 : 0;
   const cornerRadius = Math.max(0, Number(state.studioCornerRadius || 16));
   const padding = Math.max(0, Number(state.studioPadding || 64));
   const shadowBlur = Math.max(0, Number(state.studioShadowBlur ?? state.studioShadow ?? 45));
@@ -3057,12 +3110,14 @@ function applyWindowContainer(options = {}) {
     coral: ['#fb7185', '#facc15'],
   };
 
+  // Authored against a 1200px-wide window; every chrome measurement below is a
+  // multiple of chromeScale so the bar keeps the same proportions on a 900px
+  // capture and a 3000px Retina one.
   const lights = [
     { color: '#ff5f57', x: 20 },
     { color: '#febc2e', x: 40 },
     { color: '#28c840', x: 60 },
   ];
-  const lightRadius = 6;
 
   // Frame the bare screenshot, never a composite of it with the annotations.
   // Baking them in here is what used to destroy them: the next restyle rebuilt
@@ -3077,8 +3132,15 @@ function applyWindowContainer(options = {}) {
   const compositeImg = new Image();
   compositeImg.onload = () => {
     const imageScale = Math.max(0.4, Math.min(1.6, Number(state.studioImageScale || 100) / 100));
-    const imgW = compositeImg.width * imageScale;
-    const imgH = compositeImg.height * imageScale;
+    // Whole pixels throughout. A fractional window size or offset forces the
+    // browser to resample the screenshot on every draw, which is what made
+    // exports look softer than the capture they came from.
+    const imgW = Math.round(compositeImg.width * imageScale);
+    const imgH = Math.round(compositeImg.height * imageScale);
+
+    const chromeScale = Math.max(0.85, Math.min(3, imgW / 1200));
+    const titleBarHeight = Math.round(titleBarBase * chromeScale);
+    const lightRadius = 6 * chromeScale;
 
     const windowW = imgW;
     const windowH = imgH + titleBarHeight;
@@ -3102,11 +3164,11 @@ function applyWindowContainer(options = {}) {
       32,
       shadowBlur + Math.abs(state.studioPitch || 0) * 1.2 + Math.abs(state.studioYaw || 0) * 1.2 + Math.abs((state.studioRotation || 0) + (state.studioRoll || 0)) * 2
     );
-    canvasW += orbitHeadroom * 2;
-    canvasH += orbitHeadroom * 2;
+    canvasW = Math.round(canvasW + orbitHeadroom * 2);
+    canvasH = Math.round(canvasH + orbitHeadroom * 2);
 
-    const windowX = (canvasW - windowW) / 2;
-    const windowY = (canvasH - windowH) / 2;
+    const windowX = Math.round((canvasW - windowW) / 2);
+    const windowY = Math.round((canvasH - windowH) / 2);
 
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvasW;
@@ -3115,8 +3177,8 @@ function applyWindowContainer(options = {}) {
 
     const drawRest = () => {
       const frameCanvas = document.createElement('canvas');
-      frameCanvas.width = Math.ceil(windowW);
-      frameCanvas.height = Math.ceil(windowH);
+      frameCanvas.width = windowW;
+      frameCanvas.height = windowH;
       const frameCtx = frameCanvas.getContext('2d');
 
       frameCtx.save();
@@ -3139,46 +3201,48 @@ function applyWindowContainer(options = {}) {
         const lightY = titleBarHeight / 2;
         lights.forEach(light => {
           frameCtx.beginPath();
-          frameCtx.arc(light.x, lightY, lightRadius, 0, Math.PI * 2);
+          frameCtx.arc(light.x * chromeScale, lightY, lightRadius, 0, Math.PI * 2);
           frameCtx.fillStyle = light.color;
           frameCtx.fill();
         });
 
         if (isBrowserChrome) {
           const urlText = normalizeBrowserUrlLabel(state.studioBrowserUrl);
-          const pillW = Math.min(Math.max(190, windowW * 0.46), Math.max(120, windowW - 120));
-          const pillH = 28;
-          const pillX = Math.max(76, (windowW - pillW) / 2);
-          const pillY = (titleBarHeight - pillH) / 2;
-          const urlFontSize = 15;
-          const urlLetterSpacing = 0.32;
-          const urlMaxWidth = pillW - 48;
+          const pillW = Math.round(Math.min(
+            Math.max(190 * chromeScale, windowW * 0.46),
+            Math.max(120 * chromeScale, windowW - 120 * chromeScale),
+          ));
+          const pillH = Math.round(28 * chromeScale);
+          const pillX = Math.round(Math.max(76 * chromeScale, (windowW - pillW) / 2));
+          const pillY = Math.round((titleBarHeight - pillH) / 2);
+          const urlFontSize = Math.max(11, Math.round(15 * chromeScale));
+          const urlLetterSpacing = 0;
+          const urlMaxWidth = pillW - 48 * chromeScale;
           frameCtx.save();
           frameCtx.fillStyle = 'rgba(255, 255, 255, 0.13)';
           frameCtx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
-          frameCtx.lineWidth = 1;
+          frameCtx.lineWidth = Math.max(1, chromeScale);
           frameCtx.beginPath();
-          roundRect(frameCtx, pillX, pillY, pillW, pillH, 5);
+          roundRect(frameCtx, pillX, pillY, pillW, pillH, 5 * chromeScale);
           frameCtx.fill();
           frameCtx.stroke();
-          frameCtx.fillStyle = 'rgba(255, 255, 255, 0.92)';
-          frameCtx.font = `500 ${urlFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif`;
+          // No text shadow. A 1.5px blur under a label this size smears it far
+          // more than it lifts it off the bar, and the bar is already dark.
+          frameCtx.fillStyle = 'rgba(255, 255, 255, 0.96)';
+          frameCtx.font = `400 ${urlFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif`;
           frameCtx.textAlign = 'center';
           frameCtx.textBaseline = 'middle';
-          frameCtx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-          frameCtx.shadowBlur = 1.5;
-          frameCtx.shadowOffsetY = 0.5;
-          drawLetterSpacedText(frameCtx, urlText, pillX + pillW / 2 + 8, pillY + pillH / 2, urlLetterSpacing, urlMaxWidth);
-          frameCtx.shadowBlur = 0;
-          frameCtx.shadowOffsetY = 0;
+          const urlBaseline = Math.round(pillY + pillH / 2);
+          drawLetterSpacedText(frameCtx, urlText, pillX + pillW / 2 + 8 * chromeScale, urlBaseline, urlLetterSpacing, urlMaxWidth);
           frameCtx.strokeStyle = 'rgba(255, 255, 255, 0.82)';
-          frameCtx.lineWidth = 1.5;
+          frameCtx.lineWidth = Math.max(1, 1.5 * chromeScale);
           const urlWidth = Math.min(measureLetterSpacedText(frameCtx, urlText, urlLetterSpacing), urlMaxWidth);
-          const lockX = pillX + Math.max(14, pillW / 2 - urlWidth / 2 - 12);
-          const lockY = pillY + pillH / 2;
-          frameCtx.strokeRect(lockX - 3.5, lockY - 1, 7, 6);
+          const lockX = Math.round(pillX + Math.max(14 * chromeScale, pillW / 2 - urlWidth / 2 - 12 * chromeScale));
+          const lockY = urlBaseline;
+          const lockUnit = 3.5 * chromeScale;
+          frameCtx.strokeRect(lockX - lockUnit, lockY - chromeScale, lockUnit * 2, 6 * chromeScale);
           frameCtx.beginPath();
-          frameCtx.arc(lockX, lockY - 1, 3.5, Math.PI, 0);
+          frameCtx.arc(lockX, lockY - chromeScale, lockUnit, Math.PI, 0);
           frameCtx.stroke();
           frameCtx.restore();
         }
