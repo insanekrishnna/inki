@@ -1,6 +1,6 @@
 {
   "name": "your-project",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Lightweight screen-capture & annotation tool for Windows, Linux, and experimental macOS builds",
   "main": "src/main.js",
   "author": "Your Name",
