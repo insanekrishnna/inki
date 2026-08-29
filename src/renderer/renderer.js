@@ -181,6 +181,12 @@ const state = {
   studioWatermarkSize: 'default',
   studioWatermarkBlur: 20,
   originalImageBeforeContainer: null,
+  // The bare screenshot the studio frame is rebuilt from, plus where that
+  // screenshot currently sits inside the framed canvas. Annotations live in
+  // canvas coordinates and are remapped between successive content rects, so
+  // restyling the frame never rasterizes or discards them.
+  studioSourceImage: null,
+  studioContentRect: null,
   baseOriginalImage: null,
   pendingStudioDisplaySize: null,
   studioDisplaySizeLock: null,
@@ -819,6 +825,8 @@ function applyCrop() {
     state.selectedImage = false;
     state.windowContainerApplied = false;
     state.originalImageBeforeContainer = null;
+    state.studioSourceImage = null;
+    state.studioContentRect = null;
     cancelCrop();
     loadImage(croppedDataUrl);
     showToast('Image cropped', 'success');
@@ -1031,6 +1039,8 @@ function clearCanvas() {
   // Reset container background settings
   state.windowContainerApplied = false;
   state.originalImageBeforeContainer = null;
+  state.studioSourceImage = null;
+  state.studioContentRect = null;
   state.pendingStudioDisplaySize = null;
   state.studioDisplaySizeLock = null;
   state.containerGradient = 'none';
@@ -1113,8 +1123,18 @@ function loadImage(dataUrl, options = {}) {
     width: state.imageWidth > 0 ? state.imageWidth * state.renderScaleX : 0,
     height: state.imageHeight > 0 ? state.imageHeight * state.renderScaleY : 0,
   };
+  // Where the canvas sits right now. An internal re-render swaps in a bitmap of a
+  // different size, and anchoring its centre here keeps it under the same point
+  // instead of snapping back to the middle of the workspace.
+  const previousCenter = state.image && previousDisplaySize.width > 0
+    ? {
+        x: state.imageOffsetX + previousDisplaySize.width / 2,
+        y: state.imageOffsetY + previousDisplaySize.height / 2,
+      }
+    : null;
   const preserveDisplaySize = options.preserveDisplaySize ?? options.isInternal;
   const preserveZoom = options.preserveZoom ?? false;
+  const keepAnnotations = options.keepAnnotations ?? false;
   const img = new Image();
   img.onload = () => {
     state.image = img;
@@ -1123,17 +1143,21 @@ function loadImage(dataUrl, options = {}) {
     if (!options.isInternal) {
       state.baseOriginalImage = dataUrl;
       state.originalImageBeforeContainer = null;
+      state.studioSourceImage = null;
+      state.studioContentRect = null;
       state.windowContainerApplied = false;
       state.pendingStudioDisplaySize = null;
       state.studioDisplaySizeLock = null;
     } else {
       if (!state.windowContainerApplied) state.originalImageBeforeContainer = null;
     }
-    state.annotations = [];
-    state.history = [];
-    state.historyIndex = -1;
-    state.selectedAnnotationIndex = -1;
-    clearToolSelection();
+    if (!keepAnnotations) {
+      state.annotations = [];
+      state.history = [];
+      state.historyIndex = -1;
+      state.selectedAnnotationIndex = -1;
+      clearToolSelection();
+    }
     elements.canvas.width = img.width;
     elements.canvas.height = img.height;
     elements.canvas.classList.add('visible');
@@ -1146,13 +1170,15 @@ function loadImage(dataUrl, options = {}) {
     if (preserveDisplaySize) {
       setLoadedImageDisplaySize(
         typeof preserveDisplaySize === 'object' ? preserveDisplaySize : previousDisplaySize,
-        previousZoom
+        previousZoom,
+        options.anchorCenter === false ? null : previousCenter
       );
     } else if (preserveZoom) {
       setLoadedImageZoom(previousZoom);
     } else {
       setInitialImageZoom();
     }
+    options.beforeRender?.();
     render();
     updateStatus();
     updateToolbarState();
@@ -1271,7 +1297,7 @@ function setLoadedImageZoom(zoom) {
   updateStatus();
 }
 
-function setLoadedImageDisplaySize(displaySize, fallbackZoom = INITIAL_IMAGE_ZOOM) {
+function setLoadedImageDisplaySize(displaySize, fallbackZoom = INITIAL_IMAGE_ZOOM, anchorCenter = null) {
   const sourceWidth = state.imageWidth;
   const sourceHeight = state.imageHeight;
   const scaleX = displaySize.width > 0 && sourceWidth > 0 ? displaySize.width / sourceWidth : fallbackZoom;
@@ -1279,7 +1305,16 @@ function setLoadedImageDisplaySize(displaySize, fallbackZoom = INITIAL_IMAGE_ZOO
   state.renderScaleX = Math.max(0.1, Math.min(10, Number.isFinite(scaleX) && scaleX > 0 ? scaleX : fallbackZoom));
   state.renderScaleY = Math.max(0.1, Math.min(10, Number.isFinite(scaleY) && scaleY > 0 ? scaleY : fallbackZoom));
   applyZoom();
-  centerCanvasInWorkspace();
+  if (anchorCenter) {
+    // Keep the surface exactly where the user left it. The studio frame grows and
+    // shrinks symmetrically around its centre, so pinning the centre means only a
+    // manual drag ever moves the image.
+    state.imageOffsetX = anchorCenter.x - (state.imageWidth * state.renderScaleX) / 2;
+    state.imageOffsetY = anchorCenter.y - (state.imageHeight * state.renderScaleY) / 2;
+    applyCanvasPosition();
+  } else {
+    centerCanvasInWorkspace();
+  }
 }
 
 function setInitialImageZoom() {
@@ -1763,6 +1798,7 @@ function onCanvasMouseDown(e) {
         scaleY: state.renderScaleY,
         image: getImageDataUrl(),
         annotations: cloneAnnotations(),
+        contentRect: state.studioContentRect ? { ...state.studioContentRect } : null,
       };
       elements.canvas.style.cursor = imageHandle.cursor;
       render();
@@ -2373,6 +2409,42 @@ function findImageResizeHandleAt(coords) {
   return getImageResizeHandles().find(h => Math.abs(coords.x - h.x) <= size && Math.abs(coords.y - h.y) <= size) || null;
 }
 
+function getStudioContentRect() {
+  const rect = state.studioContentRect;
+  if (rect && rect.width > 0 && rect.height > 0) return rect;
+  // No frame yet: the canvas is the screenshot.
+  return { x: 0, y: 0, width: state.imageWidth, height: state.imageHeight };
+}
+
+// Move every annotation from one content box to another, so a shape stays glued
+// to the same pixels of the screenshot when the frame around it is rebuilt at a
+// different size or offset.
+function remapAnnotations(from, to) {
+  if (!from || !to) return;
+  if (!(from.width > 0) || !(from.height > 0) || !(to.width > 0) || !(to.height > 0)) return;
+  const scaleX = to.width / from.width;
+  const scaleY = to.height / from.height;
+  if (scaleX === 1 && scaleY === 1 && from.x === to.x && from.y === to.y) return;
+  const strokeScale = Math.max(scaleX, scaleY);
+  const mapX = (value) => to.x + (value - from.x) * scaleX;
+  const mapY = (value) => to.y + (value - from.y) * scaleY;
+
+  state.annotations.forEach((annotation) => {
+    if ('x' in annotation) annotation.x = mapX(annotation.x);
+    if ('y' in annotation) annotation.y = mapY(annotation.y);
+    if ('x1' in annotation) annotation.x1 = mapX(annotation.x1);
+    if ('y1' in annotation) annotation.y1 = mapY(annotation.y1);
+    if ('x2' in annotation) annotation.x2 = mapX(annotation.x2);
+    if ('y2' in annotation) annotation.y2 = mapY(annotation.y2);
+    if ('width' in annotation) annotation.width *= scaleX;
+    if ('height' in annotation) annotation.height *= scaleY;
+    if (annotation.strokeWidth) annotation.strokeWidth *= strokeScale;
+    if (annotation.type === 'text' && annotation.fontSize) {
+      annotation.fontSize = Math.max(8, Math.round(annotation.fontSize * strokeScale));
+    }
+  });
+}
+
 function scaleAnnotation(annotation, scaleX, scaleY) {
   if ('x' in annotation) annotation.x *= scaleX;
   if ('y' in annotation) annotation.y *= scaleY;
@@ -2422,6 +2494,17 @@ function resizeSelectedImage(event) {
     scaleAnnotation(scaled, scaleX, scaleY);
     return scaled;
   });
+
+  // The screenshot inside the frame stretches with the canvas, so the box the
+  // next studio rebuild remaps annotations out of has to stretch with it too.
+  state.studioContentRect = orig.contentRect
+    ? {
+        x: orig.contentRect.x * scaleX,
+        y: orig.contentRect.y * scaleY,
+        width: orig.contentRect.width * scaleX,
+        height: orig.contentRect.height * scaleY,
+      }
+    : null;
 }
 
 function resizeSelectedAnnotation(coords) {
@@ -2909,15 +2992,26 @@ function getCurrentStudioDisplaySize() {
 function applyWindowContainer(options = {}) {
   if (!state.image) return;
 
-  if (state.windowContainerApplied && state.originalImageBeforeContainer) {
+  // Toggling the frame off. Annotations survive it: they are mapped from where
+  // they sit on the framed canvas back onto the bare screenshot. A restyle passes
+  // reapply:true so it is never mistaken for this toggle.
+  if (!options.reapply && state.windowContainerApplied && state.studioSourceImage) {
+    const fromRect = getStudioContentRect();
     state.windowContainerApplied = false;
-    state.annotations = [];
-    state.history = [];
-    state.historyIndex = -1;
-    state.selectedAnnotationIndex = -1;
     const btn = document.getElementById('btn-window-container');
     if (btn) btn.classList.remove('active');
-    loadImage(state.originalImageBeforeContainer, { isInternal: true, onLoaded: options.onComplete });
+    loadImage(state.studioSourceImage, {
+      isInternal: true,
+      keepAnnotations: true,
+      beforeRender: () => {
+        state.studioContentRect = null;
+        state.studioSourceImage = null;
+        remapAnnotations(fromRect, { x: 0, y: 0, width: state.imageWidth, height: state.imageHeight });
+        state.history = [];
+        state.historyIndex = -1;
+      },
+      onLoaded: options.onComplete,
+    });
     showToast('Window container removed', 'success');
     return;
   }
@@ -2970,7 +3064,12 @@ function applyWindowContainer(options = {}) {
   ];
   const lightRadius = 6;
 
-  const compositeDataUrl = getCompositeImage();
+  // Frame the bare screenshot, never a composite of it with the annotations.
+  // Baking them in here is what used to destroy them: the next restyle rebuilt
+  // from a flattened image and cleared the annotation list.
+  const sourceRect = getStudioContentRect();
+  const compositeDataUrl = state.studioSourceImage || getImageDataUrl();
+  state.studioSourceImage = compositeDataUrl;
   state.originalImageBeforeContainer = compositeDataUrl;
   const targetDisplaySize = state.pendingStudioDisplaySize;
   state.pendingStudioDisplaySize = null;
@@ -3152,16 +3251,23 @@ function applyWindowContainer(options = {}) {
       applyBackdropColorPreset(ctx, tempCanvas.width, tempCanvas.height);
 
       const resultDataUrl = tempCanvas.toDataURL('image/png');
-      state.annotations = [];
-      state.history = [];
-      state.historyIndex = -1;
-      state.selectedAnnotationIndex = -1;
+      // Where the screenshot itself landed inside the framed canvas.
+      const contentRect = { x: windowX, y: windowY + titleBarHeight, width: imgW, height: imgH };
       state.windowContainerApplied = true;
       const btn = document.getElementById('btn-window-container');
       if (btn) btn.classList.add('active');
       loadImage(resultDataUrl, {
         isInternal: true,
+        keepAnnotations: true,
         preserveDisplaySize: targetDisplaySize || undefined,
+        beforeRender: () => {
+          remapAnnotations(sourceRect, contentRect);
+          state.studioContentRect = contentRect;
+          // Undo entries still point at the previous geometry, so they cannot be
+          // replayed onto this one; the annotations themselves carry over.
+          state.history = [];
+          state.historyIndex = -1;
+        },
         onLoaded: options.onComplete,
       });
       showToast('Window container applied', 'success');
@@ -3303,22 +3409,9 @@ function bindContextMenu() {
       gradientSwatches.forEach(s => s.classList.remove('active'));
       swatch.classList.add('active');
 
-      if (state.windowContainerApplied && state.originalImageBeforeContainer) {
-        state.windowContainerApplied = false;
-        const originalImg = state.originalImageBeforeContainer;
-        const tempImg = new Image();
-        tempImg.onload = () => {
-          state.image = tempImg;
-          state.imageWidth = tempImg.width;
-          state.imageHeight = tempImg.height;
-          state.annotations = [];
-          state.history = [];
-          state.historyIndex = -1;
-          state.originalImageBeforeContainer = originalImg;
-          applyWindowContainer();
-        };
-        tempImg.src = originalImg;
-      } else if (!state.windowContainerApplied && state.image) {
+      if (state.windowContainerApplied) {
+        reapplyStudioContainer();
+      } else if (state.image) {
         // Auto-apply window container when background is clicked without prior activation
         applyWindowContainer();
       }
@@ -3361,24 +3454,9 @@ function runStudioReapply() {
     }
   };
 
-  if (state.windowContainerApplied && state.originalImageBeforeContainer) {
-    state.windowContainerApplied = false;
-    const originalImg = state.originalImageBeforeContainer;
-    const tempImg = new Image();
-    tempImg.onload = () => {
-      state.image = tempImg;
-      state.imageWidth = tempImg.width;
-      state.imageHeight = tempImg.height;
-      state.annotations = [];
-      state.history = [];
-      state.historyIndex = -1;
-      state.originalImageBeforeContainer = originalImg;
-      applyWindowContainer({ onComplete: complete });
-    };
-    tempImg.src = originalImg;
-    return;
-  }
-  applyWindowContainer({ onComplete: complete });
+  // The frame is always rebuilt from state.studioSourceImage, so there is no
+  // longer an unframe/reframe image round-trip to perform first.
+  applyWindowContainer({ onComplete: complete, reapply: true });
 }
 
 function updateStudioValueLabels() {
